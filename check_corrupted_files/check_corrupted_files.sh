@@ -10,8 +10,12 @@
 #SBATCH --mail-type=ALL
 
 echo 'Running corrupted_files_check_NEMO_Ensemble.py'
+
+echo "The current working directory is: $(pwd)"
+conda activate nemo-ensemble
+# conda activate nemo-ensemble
 # cd ${HOME}/3DModelling_SouthAtlantic/
 
-python3 corrupted_files_check_NEMO_Ensemble.py
+python corrupted_files_check_NEMO_Ensemble.py
 
 echo 'Finished computation.'

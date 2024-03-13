@@ -31,16 +31,7 @@ for member in range(1, 51):
                     missing_files.append(file)
 
 missing_files = [x.replace("/storage/shared/oceanparcels/input_data/NEMO_Ensemble/", "") for x in missing_files]
-# %% Test missing files actually don't exist
-existing_files = 0
-not_existing_files = 0
 
-for f in tqdm(missing_files):
-    if not os.path.isfile(f):
-        print(f"File {f} does not exist")
-        not_existing_files += 1
-    else:
-        existing_files += 1
 # %% export missing files to .txt file with each element in new row
 with open("missing_files_NEMO_Ensemble.txt", "w") as f:
     for item in missing_files:

@@ -28,7 +28,7 @@ variables = ['U', 'V', 'W']
 for member in range(1, 51):
     print(f"Member {member:03d}")
 
-    for year in range(2010, 2016):
+    for year in range(2010, 2011):
         print(f"Year {year}")
         fname_general = f"/storage/shared/oceanparcels/input_data/NEMO_Ensemble/NATL025-CJMCYC3.{member:03d}-S/1d/{year}/NATL025-CJMCYC3.{member:03d}_y{year}m*.1d_gridU.nc"
 
