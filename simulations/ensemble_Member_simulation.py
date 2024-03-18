@@ -3,11 +3,17 @@ from parcels import FieldSet, ParticleSet, AdvectionRK4_3D, AdvectionRK4, Partic
 import numpy as np
 from glob import glob
 from datetime import timedelta as delta
+from argparse import ArgumentParser
 
-member = 1
+p = ArgumentParser()
+p.add_argument('-m', '--member', type=int, default=1, help='Member number')
+args = p.parse_args()
+
+member = args.member
+year = 2011
 
 data_path = '/storage/shared/oceanparcels/input_data/NEMO_Ensemble/'
-ufiles = sorted(glob(f"{data_path}NATL025-CJMCYC3.{member:03d}-S/1d/2011/NATL025*U.nc"))
+ufiles = sorted(glob(f"{data_path}NATL025-CJMCYC3.{member:03d}-S/1d/{year}/NATL025*U.nc"))
 vfiles = [f.replace('U.nc', 'V.nc') for f in ufiles]
 wfiles = [f.replace('U.nc', 'W.nc') for f in ufiles]
 mesh_mask = f"{data_path}GRID/coordinates_NATL025_v2.nc"
@@ -25,39 +31,34 @@ dimensions = {'U': {'lon': 'glamf', 'lat': 'gphif', 'depth': 'depthw', 'time': '
 
 fieldset = FieldSet.from_nemo(filenames, variables, dimensions, netcdf_decodewarning=False)
 
-dx, dz = 0.05, 20
+step=1/32.
+min_lon = -74
+max_lon = -72
+min_lat = 35
+max_lat = 37
+min_depth = 0
+max_depth = 1600
+z_step = 100
+X, Y, Z = np.meshgrid(np.arange(min_lon, max_lon, step), 
+                         np.arange(min_lat, max_lat, step),
+                         np.arange(min_depth, max_depth, z_step))
+n_particles = len(X.flatten())
+start_times = [np.datetime64(f'{year}-01-02')]*n_particles
 
-X = np.arange(-81.5, -78.5, dx)
-Y = 26.7*np.ones(X.shape)
-Z = np.ones(X.shape)
-pset = ParticleSet(fieldset, JITParticle, lon=X, lat=Y, depth=Z*dz/2)
+pset = ParticleSet(fieldset, JITParticle, lon=X, lat=Y, depth=Z, time=start_times)
 
-# for z in np.arange(dz*1.5, 5000+dz/2, dz):
-#     pset.add(ParticleSet(fieldset, JITParticle, lon=X, lat=Y, depth=z*Z))
-
-def RemoveLandPoints(particle, fieldset, time):
-    m = fieldset.mask[0, particle.depth, particle.lat, particle.lon]
-    if math.fabs(m) < 0.9:
-        particle.delete()
-
-pset.execute(RemoveLandPoints, dt=0)
-
-times = np.arange(np.datetime64('2011-01-02'), np.datetime64('2011-01-31'), np.timedelta64(6, 'h'))
-
-lonp = [p.lon for p in pset]
-latp = [p.lat for p in pset]
-depp = [p.depth for p in pset]
-
-pset = ParticleSet(fieldset, JITParticle, lon=lonp, lat=latp, depth=depp, time=times[0])
-for t in times[1:]:
-    pset.add(ParticleSet(fieldset, JITParticle, lon=lonp, lat=latp, depth=depp, time=t))
+# def RemoveLandPoints(particle, fieldset, time):
+#     m = fieldset.mask[0, particle.depth, particle.lat, particle.lon]
+#     if math.fabs(m) < 0.9:
+#         particle.delete()
+# pset.execute(RemoveLandPoints, dt=0)
 
 def KeepInOcean(particle, fieldset, time):
     if particle.state == StatusCode.ErrorThroughSurface:
         particle_ddepth = 0.0
         particle.state = StatusCode.Success
 
-outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/2011/PGS_spacetime_{member:03d}.zarr"
+outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{year}/PGS_{year}_{member:03d}.zarr"
 pfile = ParticleFile(outfile, pset, outputdt=delta(days=1), chunks=(len(pset), 1))
 
 pset.execute([AdvectionRK4_3D, KeepInOcean], 
