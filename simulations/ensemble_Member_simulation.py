@@ -7,10 +7,14 @@ from argparse import ArgumentParser
 
 p = ArgumentParser()
 p.add_argument('-m', '--member', type=int, default=1, help='Member number')
+p.add_argument('-y', '--year', type=int, default=2010, help='Year')
+
 args = p.parse_args()
 
 member = args.member
-year = 2011
+year = args.year
+
+print(year, member)
 
 data_path = '/storage/shared/oceanparcels/input_data/NEMO_Ensemble/'
 ufiles = sorted(glob(f"{data_path}NATL025-CJMCYC3.{member:03d}-S/1d/{year}/NATL025*U.nc"))
@@ -46,12 +50,6 @@ n_particles = len(X.flatten())
 start_times = [np.datetime64(f'{year}-01-02')]*n_particles
 
 pset = ParticleSet(fieldset, JITParticle, lon=X, lat=Y, depth=Z, time=start_times)
-
-# def RemoveLandPoints(particle, fieldset, time):
-#     m = fieldset.mask[0, particle.depth, particle.lat, particle.lon]
-#     if math.fabs(m) < 0.9:
-#         particle.delete()
-# pset.execute(RemoveLandPoints, dt=0)
 
 def KeepInOcean(particle, fieldset, time):
     if particle.state == StatusCode.ErrorThroughSurface:
