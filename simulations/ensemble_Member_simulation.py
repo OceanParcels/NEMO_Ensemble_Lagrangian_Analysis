@@ -53,7 +53,7 @@ pset = ParticleSet(fieldset, JITParticle, lon=X, lat=Y, depth=Z, time=start_time
 
 def KeepInOcean(particle, fieldset, time):
     if particle.state == StatusCode.ErrorThroughSurface:
-        particle_ddepth = 0.0
+        particle_ddepth = 1.0
         particle.state = StatusCode.Success
 
 outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{year}/PGS_{year}_{member:03d}.zarr"
