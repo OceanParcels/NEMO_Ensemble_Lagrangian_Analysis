@@ -43,8 +43,8 @@ min_lon = -74
 max_lon = -72
 min_lat = 35
 max_lat = 37
-min_depth = 0
-max_depth = 1600
+min_depth = 1
+max_depth = 1601
 z_step = 100
 X, Y, Z = np.meshgrid(np.arange(min_lon, max_lon, step), 
                          np.arange(min_lat, max_lat, step),
@@ -76,10 +76,11 @@ def SampleField(particle, fieldset, time):
     Sample the fieldset at the particle location and store it in the
     particle variable.
     """
-    (u1, v1, w1) = fieldset.UVW.eval(time, particle.depth, particle.lat, particle.lon, applyConversion=False)
-    particle.u = u1
-    particle.v = v1
-    particle.w = w1
+    (ui, vi, wi) = fieldset.UVW.eval(time, particle.depth, particle.lat, particle.lon, 
+                                     particle=particle, applyConversion=False)
+    particle.u = ui
+    particle.v = vi
+    particle.w = wi
 
     
 
