@@ -4,6 +4,7 @@ import numpy as np
 from glob import glob
 from datetime import timedelta as delta
 from argparse import ArgumentParser
+import pandas as pd
 
 p = ArgumentParser()
 p.add_argument('-m', '--member', type=int, default=1, help='Member number')
@@ -38,19 +39,28 @@ dimensions = {'U': {'lon': 'glamf', 'lat': 'gphif', 'depth': 'depthw', 'time': '
 fieldset = FieldSet.from_nemo(filenames, variables, dimensions, netcdf_decodewarning=False)
 
 # Declare the ParticleSet
-step=1/32.
-min_lon = -74
-max_lon = -72
-min_lat = 35
-max_lat = 37
-min_depth = 1
-max_depth = 1601
-z_step = 100
-X, Y, Z = np.meshgrid(np.arange(min_lon, max_lon, step), 
-                         np.arange(min_lat, max_lat, step),
-                         np.arange(min_depth, max_depth, z_step))
-n_particles = len(X.flatten())
+
+grid_release = pd.read_csv('../data/grid_release_std01.csv')
+
+# step=1/32.
+# min_lon = -74
+# max_lon = -72
+# min_lat = 35
+# max_lat = 37
+# min_depth = 1
+# max_depth = 1601
+# z_step = 100
+# X, Y, Z = np.meshgrid(np.arange(min_lon, max_lon, step), 
+#                          np.arange(min_lat, max_lat, step),
+#                          np.arange(min_depth, max_depth, z_step))
+
+n_particles = len(grid_release['hexagons'].values)
 start_times = [np.datetime64(f'{year}-01-02')]*n_particles
+hex_ids = grid_release['hexagons'].values
+depths = np.zeros(n_particles) + 1
+longitudes = grid_release['lons'].values
+latitudes = grid_release['lats'].values
+
 
 class EnsembleParticle(JITParticle):
     """
@@ -61,9 +71,11 @@ class EnsembleParticle(JITParticle):
     v = Variable('v', dtype=np.float32, initial=0)
     w = Variable('w', dtype=np.float32, initial=0)
     
+    hexbin_id = Variable('hexbin_id', dtype=str, initial=0)
+    
     # distance_from_x0 = Variable('distance', dtype= np.float32, initial=0)
 
-pset = ParticleSet(fieldset, EnsembleParticle, lon=X, lat=Y, depth=Z, time=start_times)
+pset = ParticleSet(fieldset, EnsembleParticle, lon=longitudes, lat=latitudes, depth=depths, time=start_times)
 
 # Declare
 def KeepInOcean(particle, fieldset, time):
@@ -85,7 +97,7 @@ def SampleField(particle, fieldset, time):
     
 
 # outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{year}/PGS_{year}_{member:03d}.zarr"
-outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/test_{year}_{member:03d}.zarr"
+outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/Hexgrid_test/Hexgrid_std01_{year}_{member:03d}.zarr"
 pfile = ParticleFile(outfile, pset, outputdt=delta(days=1), chunks=(len(pset), 1))
 
 pset.execute([AdvectionRK4_3D, KeepInOcean, SampleField], 
