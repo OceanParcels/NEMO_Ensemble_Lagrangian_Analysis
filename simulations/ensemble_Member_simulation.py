@@ -71,11 +71,12 @@ class EnsembleParticle(JITParticle):
     v = Variable('v', dtype=np.float32, initial=0)
     w = Variable('w', dtype=np.float32, initial=0)
     
-    hexbin_id = Variable('hexbin_id', dtype=str, initial=0)
+    hexbin_id = Variable('hexbin_id', dtype=np.int16, initial=0)
     
     # distance_from_x0 = Variable('distance', dtype= np.float32, initial=0)
 
-pset = ParticleSet(fieldset, EnsembleParticle, lon=longitudes, lat=latitudes, depth=depths, time=start_times)
+pset = ParticleSet(fieldset, EnsembleParticle, lon=longitudes, lat=latitudes, 
+                   depth=depths, time=start_times, hexbin_id=hex_ids)
 
 # Declare
 def KeepInOcean(particle, fieldset, time):
