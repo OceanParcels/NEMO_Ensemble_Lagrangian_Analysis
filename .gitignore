@@ -1,3 +1,8 @@
 *.mp4
 *.o
 *.e
+*.pkl
+*.npz
+*.npy
+*.pdf
+.DS_Store

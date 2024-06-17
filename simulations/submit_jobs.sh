@@ -14,7 +14,7 @@ conda activate nemo-ensemble
 for i in {1..2}
 do
    echo "Member: $i"
-   python ensemble_Member_simulation.py -m $i -y 2010
+   python ensemble_Member_simulation.py -m $i -s 0.01
 
 done
 

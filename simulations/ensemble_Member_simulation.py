@@ -5,22 +5,30 @@ from glob import glob
 from datetime import timedelta as delta
 from argparse import ArgumentParser
 import pandas as pd
+import pickle
 
 p = ArgumentParser()
 p.add_argument('-m', '--member', type=int, default=1, help='Member number')
-p.add_argument('-y', '--year', type=int, default=2010, help='Year')
+# p.add_argument('-y', '--year', type=int, default=2010, help='Year')
+p.add_argument('-s', '--std', type=float, help='STD')
 
 args = p.parse_args()
 
 member = args.member
-year = args.year
+std = args.std
 
-print(year, member)
+#END SIMULATION parameter
 
-# Import Fieldset
+location = 'Cape_Hatteras'
+# member = 1
+# std = 0.01
+
+outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/std_{std*100:03.0f}/{location}_std{std*100:03.0f}_m{member:03d}.zarr"
+print("Output file: ", outfile)
+#%% Import Fieldset
 
 data_path = '/storage/shared/oceanparcels/input_data/NEMO_Ensemble/'
-ufiles = sorted(glob(f"{data_path}NATL025-CJMCYC3.{member:03d}-S/1d/{year}/NATL025*U.nc"))
+ufiles = sorted(glob(f"{data_path}NATL025-CJMCYC3.{member:03d}-S/1d/*/NATL025*U.nc")) #Load all years
 vfiles = [f.replace('U.nc', 'V.nc') for f in ufiles]
 wfiles = [f.replace('U.nc', 'W.nc') for f in ufiles]
 mesh_mask = f"{data_path}GRID/coordinates_NATL025_v2.nc"
@@ -38,28 +46,18 @@ dimensions = {'U': {'lon': 'glamf', 'lat': 'gphif', 'depth': 'depthw', 'time': '
 
 fieldset = FieldSet.from_nemo(filenames, variables, dimensions, netcdf_decodewarning=False)
 
-# Declare the ParticleSet
+#%% Declare the ParticleSet
 
-grid_release = pd.read_csv('../data/grid_release_std01.csv')
+with open(f'../data/release_points_{location}.pkl', 'rb') as f:
+    initial_conditions= pickle.load(f)
 
-# step=1/32.
-# min_lon = -74
-# max_lon = -72
-# min_lat = 35
-# max_lat = 37
-# min_depth = 1
-# max_depth = 1601
-# z_step = 100
-# X, Y, Z = np.meshgrid(np.arange(min_lon, max_lon, step), 
-#                          np.arange(min_lat, max_lat, step),
-#                          np.arange(min_depth, max_depth, z_step))
 
-n_particles = len(grid_release['hexagons'].values)
-start_times = [np.datetime64(f'{year}-01-02')]*n_particles
-hex_ids = grid_release['hexagons'].values
+start_times = initial_conditions[std]['dates']
+n_particles = len(start_times)
+hex_ids = initial_conditions[std]['hexagons']
 depths = np.zeros(n_particles) + 1
-longitudes = grid_release['lons'].values
-latitudes = grid_release['lats'].values
+longitudes = initial_conditions[std]['lons']
+latitudes = initial_conditions[std]['lats']
 
 
 class EnsembleParticle(JITParticle):
@@ -73,12 +71,11 @@ class EnsembleParticle(JITParticle):
     
     hexbin_id = Variable('hexbin_id', dtype=np.int16, initial=0)
     
-    # distance_from_x0 = Variable('distance', dtype= np.float32, initial=0)
 
 pset = ParticleSet(fieldset, EnsembleParticle, lon=longitudes, lat=latitudes, 
                    depth=depths, time=start_times, hexbin_id=hex_ids)
 
-# Declare
+# %%Declare Kernels
 def KeepInOcean(particle, fieldset, time):
     if particle.state == StatusCode.ErrorThroughSurface:
         particle_ddepth = 1.0
@@ -96,12 +93,13 @@ def SampleField(particle, fieldset, time):
     particle.w = wi
 
     
-
 # outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{year}/PGS_{year}_{member:03d}.zarr"
-outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/Hexgrid_test/Hexgrid_std01_{year}_{member:03d}.zarr"
-pfile = ParticleFile(outfile, pset, outputdt=delta(days=1), chunks=(len(pset), 1))
+outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/std_{std*100:03.0f}/{location}_std{std*100:03.0f}_m{member:03d}.zarr"
+pfile = ParticleFile(outfile, pset, outputdt=delta(days=1), chunks=(len(pset), 10))
 
 pset.execute([AdvectionRK4_3D, KeepInOcean, SampleField], 
              dt=delta(hours=1), 
              output_file=pfile)
 
+
+# %%
