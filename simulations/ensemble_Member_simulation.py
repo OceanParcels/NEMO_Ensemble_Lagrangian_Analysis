@@ -8,22 +8,22 @@ import pandas as pd
 import pickle
 from datetime import datetime
 
-# p = ArgumentParser()
-# p.add_argument('-m', '--member', type=int, default=1, help='Member number')
-# # p.add_argument('-y', '--year', type=int, default=2010, help='Year')
-# p.add_argument('-s', '--std', type=float, help='STD')
+p = ArgumentParser()
+p.add_argument('-m', '--member', type=int, default=1, help='Member number')
+# p.add_argument('-y', '--year', type=int, default=2010, help='Year')
+p.add_argument('-s', '--std', type=float, help='STD')
 
-# args = p.parse_args()
+args = p.parse_args()
 
-# member = args.member
-# std = args.std
+member = args.member
+std = args.std
 
 #END SIMULATION parameter
 
 location = 'Cape_Hatteras'
 end_time = datetime.strptime('2013-11-20 12:00:00', '%Y-%m-%d %H:%M:%S')
-member = 1
-std = 0.01
+# member = 1
+# std = 0.01
 
 outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/std_{std*100:03.0f}/{location}_std{std*100:03.0f}_m{member:03d}.zarr"
 print("Output file: ", outfile)
@@ -103,7 +103,8 @@ def SampleField(particle, fieldset, time):
 
 pfile = ParticleFile(outfile, pset, outputdt=delta(days=1), chunks=(len(pset), 100))
 
-pset.execute([AdvectionRK4_3D, KeepInOcean, SampleField, CheckOutOfBounds], 
+# Error handling kernels go at the end of the kernel list
+pset.execute([AdvectionRK4_3D, SampleField, KeepInOcean, CheckOutOfBounds], 
              dt=delta(hours=1), endtime=end_time,
              output_file=pfile)
 
