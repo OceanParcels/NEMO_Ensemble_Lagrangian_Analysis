@@ -11,10 +11,13 @@
 
 conda activate nemo-ensemble
 
-for i in {1..50}
+# for i in {1..50}
+for i in $(seq 0.01 0.01 0.2)
 do
-   echo "Member: $i"
-   python ensemble_Member_simulation.py -m $i -s 0.01
+   # echo "Member: $i"
+   # python ensemble_Member_simulation.py -m $i -s 0.01
+   echo "MEMEMber 50 -- STD: $i"
+   python ensemble_Member_simulation.py -m 50 -s $i
 
 done
 
