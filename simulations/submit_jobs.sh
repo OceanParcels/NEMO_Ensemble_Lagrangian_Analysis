@@ -11,14 +11,25 @@
 
 conda activate nemo-ensemble
 
-# for i in {1..50}
-for i in $(seq 0.01 0.01 0.2)
+# for i in {41..48}
+# # for i in $(seq 0.01 0.01 0.2)
+# do
+#    echo "Member: $i"
+#    python ensemble_Member_simulation.py -m $i -s 0.1
+#    # echo "MEMEMber 50 -- STD: $i"
+#    # python ensemble_Member_simulation.py -m 49 -s $i
+
+# done
+for j in {47..48}
 do
-   # echo "Member: $i"
-   # python ensemble_Member_simulation.py -m $i -s 0.01
-   echo "MEMEMber 50 -- STD: $i"
-   python ensemble_Member_simulation.py -m 50 -s $i
-
+   for i in $(seq 0.01 0.01 0.2)
+   do
+      # Skip the iterations where i equals 0.05 or 0.15
+      if [ $(echo "$i == 0.01" | bc) -eq 1 ] || [ $(echo "$i == 0.1" | bc) -eq 1 ]; then
+         continue
+      fi
+      echo "MEMEMber $j -- STD: $i"
+      python ensemble_Member_simulation.py -m $j -s $i
+   done
 done
-
 echo 'Finished computation.'
