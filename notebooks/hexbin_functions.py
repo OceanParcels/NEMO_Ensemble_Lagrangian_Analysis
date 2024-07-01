@@ -21,31 +21,30 @@ class countGrid:
      - Differentiate between 2D and 3D [low]
     """
 
-    def __init__(self, polygon, level_bounds=[0, np.inf], h3_res=3):
+    def __init__(self, hexagons, level_bounds=[0, np.inf], h3_res=3):
         """
         Initialize the grid.
 
         Parameters
         ----------
-        polygon : dict
-            Polygon defining the region of interest.
+        hexagons : set
+            The hexagons of the region of interest
         level_bounds : list
             List of floats defining the vertical level boundaries of the grid.
         h3_res : int
             Resolution of the H3 grid.
         """
-        # Polygon needs to be specified in lat-lon pairs, NOT lon-lat!
-        self.polygon = polygon
+        
         self.level_bounds = level_bounds
         self.h3_res = h3_res
-        self.hexagons = list(h3.polyfill(polygon, h3_res))
+        self.hexagons = list(hexagons)
         self.hexint = np.array([int(a, 16) for a in self.hexagons])
-        self.n_levels = len(level_bounds) - 1
-        self.levels = np.arange(self.n_levels)
-        self.n_hex = len(self.hexagons)
-        self.n = self.n_levels * self.n_hex
-        self.edges = dict()
-        self.matidx = np.arange(0, self.n, dtype=np.uint(64))
+        self.n_levels = len(level_bounds) - 1 # Number of vertical levels
+        self.levels = np.arange(self.n_levels) # Levels of the grid
+        self.n_hex = len(self.hexagons) # Number of hexagons
+        self.n = self.n_levels * self.n_hex # Total number of bins
+        self.edges = dict() # Edges of the grid
+        self.matidx = np.arange(0, self.n, dtype=np.uint(64)) # Matrix index
 
         # These series can be used to quickly convert between hexagon and matrix index
         self.map_to_mat_nodepth = pd.Series(index=self.hexagons, data=self.matidx[:self.n_hex])
@@ -79,21 +78,21 @@ class countGrid:
             Array of counts per bin.
         """
 
-        interpolated_hexes_as_int = vect.geo_to_h3(lat, lon, self.h3_res)
-        count = np.zeros(self.n_hex, dtype=np.uint(64))
+        interpolated_hexes_as_int = vect.geo_to_h3(lat, lon, self.h3_res) # Interpolated hexes as integers
+        count = np.zeros(self.n_hex, dtype=np.uint(64)) # Initialize count array
 
-        counted_unique_int, counted_unique_int_occurences = np.unique(interpolated_hexes_as_int, return_counts=True)
-        counted_unique_hexes = [hex(hexagon)[2:] for hexagon in counted_unique_int]
-        self.miscount = 0
+        counted_unique_int, counted_unique_int_occurences = np.unique(interpolated_hexes_as_int, return_counts=True) # Count unique hexes
+        counted_unique_hexes = [hex(hexagon)[2:] for hexagon in counted_unique_int] # Convert to hex strings
+        self.miscount = 0 # Initialize miscount
 
-        for hexagon_idx, hexagon in enumerate(counted_unique_hexes):
+        for hexagon_idx, hexagon in enumerate(counted_unique_hexes): # Count particles
             try:
-                count_idx = self.hexagons.index(hexagon)
-                count[count_idx] = counted_unique_int_occurences[hexagon_idx]
-            except ValueError:
-                pass
+                count_idx = self.hexagons.index(hexagon) # Get index of hexagon
+                count[count_idx] = counted_unique_int_occurences[hexagon_idx] # Count particles
+            except ValueError: # If the hexagon is not in the region of interest
+                pass # Do nothing
 
-        if self.miscount > 0:
+        if self.miscount > 0: # Print miscount
             print(f"{self.miscount} particles were not counted because they were outside the region of interest.")
         return count
 
