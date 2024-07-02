@@ -10,7 +10,9 @@ import pandas as pd
 import h3
 from h3.unstable import vect  # used for hexgrid vectorization
 
-class countGrid:
+
+# change name to somethig more descriptive (hexGrid, hexDomain, hexGridDomain)
+class hexGrid:
     """
     'Reference object' for creating transition matrices. This acts as a sort of template
     to form transition matrices with, as well as a dictionary to convert between integer
@@ -61,7 +63,7 @@ class countGrid:
         print(f"Levels: {self.n_levels}")
         print(f"Total number of bins:", self.n)
 
-    def count_2d(self, lon, lat):
+    def count_2d(self, lon, lat, normalize=False):
         """
         Count particles in a 2D grid.
 
@@ -71,28 +73,35 @@ class countGrid:
             Array of longitudes
         lat : np.array
             Array of latitudes
+        normalize : bool, optional
+            If True, normalize the counts. Default is False.
 
         Returns
         -------
         np.array
-            Array of counts per bin.
+            Array of counts per bin, normalized if specified.
         """
 
-        interpolated_hexes_as_int = vect.geo_to_h3(lat, lon, self.h3_res) # Interpolated hexes as integers
-        count = np.zeros(self.n_hex, dtype=np.uint(64)) # Initialize count array
+        interpolated_hexes_as_int = vect.geo_to_h3(lat, lon, self.h3_res)  # Interpolated hexes as integers
+        count = np.zeros(self.n_hex, dtype=np.uint(64))  # Initialize count array
 
-        counted_unique_int, counted_unique_int_occurences = np.unique(interpolated_hexes_as_int, return_counts=True) # Count unique hexes
-        counted_unique_hexes = [hex(hexagon)[2:] for hexagon in counted_unique_int] # Convert to hex strings
-        self.miscount = 0 # Initialize miscount
+        counted_unique_int, counted_unique_int_occurences = np.unique(interpolated_hexes_as_int, return_counts=True)  # Count unique hexes
+        counted_unique_hexes = [hex(hexagon)[2:] for hexagon in counted_unique_int]  # Convert to hex strings
+        self.miscount = 0  # Initialize miscount
 
-        for hexagon_idx, hexagon in enumerate(counted_unique_hexes): # Count particles
+        for hexagon_idx, hexagon in enumerate(counted_unique_hexes):  # Count particles
             try:
-                count_idx = self.hexagons.index(hexagon) # Get index of hexagon
-                count[count_idx] = counted_unique_int_occurences[hexagon_idx] # Count particles
-            except ValueError: # If the hexagon is not in the region of interest
-                pass # Do nothing
+                count_idx = self.hexagons.index(hexagon)  # Get index of hexagon
+                count[count_idx] = counted_unique_int_occurences[hexagon_idx]  # Count particles
+            except ValueError:  # If the hexagon is not in the region of interest
+                self.miscount += 1  # Increment miscount
 
-        if self.miscount > 0: # Print miscount
+        if normalize:
+            total_count = np.sum(count)
+            if total_count > 0:  # Avoid division by zero
+                count = count / total_count  # Normalize counts
+
+        if self.miscount > 0:  # Print miscount
             print(f"{self.miscount} particles were not counted because they were outside the region of interest.")
         return count
 
@@ -258,7 +267,7 @@ def get_colors(inp, colormap, vmin=None, vmax=None, center=None, linthresh=None,
     return colormap(norm(inp))
 
 
-def plot_hex_hist(counts, grid, title=None, maxnorm=None, extent=(-85, -30, 20, 50), label='Particles per bin', ax=None, return_fig=False):
+def plot_hex_hist(counts, grid, maxnorm=None, ax=None):
     """
     Plot a histogram of particle counts in a hexagonal grid
 
@@ -280,42 +289,27 @@ def plot_hex_hist(counts, grid, title=None, maxnorm=None, extent=(-85, -30, 20, 
         Axes to plot to, by default None
     return_fig : bool, optional
         Whether to return the figure, by default False
+    fig : matplotlib.figure.Figure, optional
+        Figure to plot to, by default None. Only needed if ax is not None.
     """
     if not maxnorm:
         maxnorm = counts.max()
 
     if ax is None:
-        fig, ax = plt.subplots(1, 1, subplot_kw={'projection': cart.crs.PlateCarree()})
-    else:
-        fig = ax.figure
-        # ax.set_projection(cart.crs.PlateCarree())
+        fig, ax = plt.subplots(1, 1, subplot_kw={'projection': cart.crs.PlateCarree()}, cmap=plt.cm.viridis)
+    # No need to create a new fig if ax is provided, fig should be derived from ax
 
     # Creating the histogram
-    pcolorhex(ax, grid.hexagons, get_colors(counts, plt.cm.viridis, 0,
+    pcolorhex(ax, grid.hexagons, get_colors(counts, cmap, 0,
                                             maxnorm), draw_edges=False, alpha=1., label=' concentration')
 
-    # Cartopy stuff
-    ax.coastlines()
-    ax.gridlines(draw_labels=["left", "bottom"])
-    ax.set_extent(extent, crs=cart.crs.PlateCarree())
-
-    # Colorbar
-    divider = make_axes_locatable(ax)
-    ax_cb = divider.new_horizontal(size="5%", pad=0.1, axes_class=plt.Axes)
     cmap = plt.cm.viridis
     cmap.set_bad('w')
     sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=maxnorm))
-    cbar = plt.colorbar(sm, cax=ax_cb, label=label)
-    fig.add_axes(ax_cb)
+    
+    return sm
 
-    # Title
-    if title:
-        ax.set_title(title)
 
-    plt.tight_layout()
-
-    if return_fig:
-        return fig
 
 
 def plot_hex_hist_3d(lon,
