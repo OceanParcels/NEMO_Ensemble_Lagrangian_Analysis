@@ -1,8 +1,6 @@
-import numpy as np
 import matplotlib.pyplot as plt
 import numpy as np
-import cartopy as cart
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+import cartopy
 from matplotlib import colors
 from matplotlib import gridspec
 
@@ -10,7 +8,9 @@ import pandas as pd
 import h3
 from h3.unstable import vect  # used for hexgrid vectorization
 
-
+# Claudio: renamed the class to hexGrid to avoid confusion with other functions
+# I renamed plot_hex_hist to pcolorhex and made it a method of the hexGrid class
+# I also renamed previosly names pcolorhex to preplot_hexagons.
 class hexGrid:
     """
     'Reference object' for creating transition matrices. This acts as a sort of template
@@ -138,8 +138,8 @@ class hexGrid:
         cen_lons = [c[1] for c in centroids]
 
         fig = plt.figure()
-        ax = plt.axes(projection=cart.crs.PlateCarree())
-        ax.scatter(cen_lons, cen_lats, s=0.3, c="r", transform=cart.crs.PlateCarree())
+        ax = plt.axes(projection=cartopy.crs.PlateCarree())
+        ax.scatter(cen_lons, cen_lats, s=0.3, c="r", transform=cartopy.crs.PlateCarree())
         ax.coastlines()
         ax.gridlines(draw_labels=True, zorder=0, linestyle="--", linewidth=0.5)
         plt.show()
@@ -164,7 +164,7 @@ class hexGrid:
 
         if ax is None:
             fig, ax = plt.subplots(
-                1, 1, subplot_kw={"projection": cart.crs.PlateCarree()}
+                1, 1, subplot_kw={"projection": cartopy.crs.PlateCarree()}
             )
 
         cmap_instance = plt.cm.get_cmap(cmap)
@@ -193,7 +193,7 @@ def preplot_hexagons(
     colors=None,
     draw_edges=True,
     fill_polygons=True,
-    transform=cart.crs.PlateCarree(),
+    transform=cartopy.crs.PlateCarree(),
     **kwargs,
 ):
     """
@@ -341,7 +341,7 @@ def pcolorhex(counts, grid, cmap="viridis", maxnorm=None, ax=None):
 
     if ax is None:
         fig, ax = plt.subplots(
-            1, 1, subplot_kw={"projection": cart.crs.PlateCarree()}, cmap=plt.cm.viridis
+            1, 1, subplot_kw={"projection": cartopy.crs.PlateCarree()}, cmap=plt.cm.viridis
         )
 
     preplot_hexagons(
@@ -399,10 +399,10 @@ def plot_hex_hist_3d(
     gs = gridspec.GridSpec(2, 4, width_ratios=[2, 0.7, 0.05, 0.1], height_ratios=[2, 1])
 
     # Create a GeoAxes in the left part of the plot
-    ax = plt.subplot(gs[0, 0], projection=cart.crs.PlateCarree())
+    ax = plt.subplot(gs[0, 0], projection=cartopy.crs.PlateCarree())
     preplot_hexagons(ax, horiz_grid.hexagons, colors, draw_edges=False, alpha=1.0)
-    ax.add_feature(cart.feature.LAND, edgecolor="black", zorder=100)
-    ax.set_extent(extent, crs=cart.crs.PlateCarree())
+    ax.add_feature(cartopy.feature.LAND, edgecolor="black", zorder=100)
+    ax.set_extent(extent, crs=cartopy.crs.PlateCarree())
     cmap = plt.cm.viridis
     cmap.set_bad("w")
 
@@ -423,7 +423,7 @@ def plot_hex_hist_3d(
         left=False, labelleft=False, right=True, labelright=True
     )  # Hide y-axis labels
     ax_depth_lat.yaxis.set_major_formatter(
-        cart.mpl.gridliner.LATITUDE_FORMATTER
+        cartopy.mpl.gridliner.LATITUDE_FORMATTER
     )  # Set x-axis labels to degree format
     ax_depth_lat.set_xlabel("Depth (m)")
     ax_depth_lat.xaxis.set_ticks_position("top")
@@ -442,7 +442,7 @@ def plot_hex_hist_3d(
     )
     ax_lon_depth.tick_params(top=False, labeltop=False)  # Hide x-axis labels
     ax_lon_depth.xaxis.set_major_formatter(
-        cart.mpl.gridliner.LONGITUDE_FORMATTER
+        cartopy.mpl.gridliner.LONGITUDE_FORMATTER
     )  # Set y-axis labels to degree format
     ax_lon_depth.invert_yaxis()
     ax_lon_depth.set_ylabel("Depth (m)")
