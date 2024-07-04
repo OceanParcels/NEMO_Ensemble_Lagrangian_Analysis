@@ -117,10 +117,10 @@ class hexGrid:
             if total_count > 0:  # Avoid division by zero
                 count = count / total_count  # Normalize counts
 
-        if self.miscount > 0:  # Print miscount
-            print(
-                f"{self.miscount} particles were not counted because they were outside the region of interest."
-            )
+        # if self.miscount > 0:  # Print miscount
+            # print(
+            #     f"{self.miscount} particles were not counted because they were outside the region of interest."
+            # )
         return count
 
     def count_3d(self, lat, lon, depth):
@@ -144,7 +144,7 @@ class hexGrid:
         ax.gridlines(draw_labels=True, zorder=0, linestyle="--", linewidth=0.5)
         plt.show()
 
-    def pcolorhex(self, counts, cmap="viridis", maxnorm=None, ax=None):
+    def pcolorhex(self, counts, cmap="viridis", maxnorm=None, ax=None, draw_edges=False, alpha=1.0):
         """
         Plot a histogram of particle counts in a hexagonal grid
 
@@ -174,8 +174,8 @@ class hexGrid:
             ax,
             self.hexagons,
             color_values,
-            draw_edges=False,
-            alpha=1.0,
+            draw_edges=draw_edges,
+            alpha=alpha,
             label="concentration",
         )
 
