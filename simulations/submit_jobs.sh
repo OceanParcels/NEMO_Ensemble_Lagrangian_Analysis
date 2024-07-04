@@ -21,7 +21,7 @@ conda activate nemo-ensemble
 
 # done
 
-for j in {47..48}
+for j in {46..46}
 do
    for i in $(seq 0.01 0.01 0.2)
    do
@@ -30,7 +30,7 @@ do
          continue
       fi
       echo "MEMEMber $j -- STD: $i"
-      # python ensemble_Member_simulation.py -m $j -s $i
+      python ensemble_Member_simulation.py -m $j -s $i
    done
 done
 echo 'Finished computation.'
