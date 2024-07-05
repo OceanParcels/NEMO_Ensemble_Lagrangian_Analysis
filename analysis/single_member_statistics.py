@@ -158,18 +158,18 @@ hexbin_grid = hexfunc.hexGrid(hexbin_grid, h3_res=3)
 ###### Calculate for all memebers and STDs ####
 std_ranges = np.linspace(1, 20, 20)/100
 location = 'Cape_Hatteras'
-member = 1 # memeber
+# member = 1 # memeber
 # std = 0.01 # Standard deviation od initial dispersion
 
 for member in tqdm([1, 2, 47, 48, 49, 50]):
     for std in std_ranges:
-        print(f"\U0001F914 Member: {member:03d},  std: {std:03.0f}")
+        print(f"\U0001F914 Member: {member:03d},  std: {std}")
         path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/std_{std*100:03.0f}/{location}_std{std*100:03.0f}_m{member:03d}.zarr"
 
         pset = xr.open_zarr(path)
         P_m, Ent_m = calculate_probability_and_entropy(pset, hexbin_grid, subgroups, entropy)
         DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint)
-        save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}/P_std{std*100:03.0f}_m{member:03d}"
+        save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}/P_std{std*100:03.0f}_m{member:03d}.zarr"
         DF_m.to_zarr(save_path)
         # print(f"Member {member:03d} saved at ../{location}/P_std{std*100:03.0f}_m{member:03d}")
         
