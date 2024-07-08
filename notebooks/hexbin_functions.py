@@ -461,3 +461,39 @@ def plot_hex_hist_3d(
 
     return fig
     # plt.show()
+
+
+# function to convert hexint to hex
+def int_to_hex(hexint):
+    """
+    Convert a list of integers to a list of hex strings.
+    
+    Parameters
+    ----------
+    hexint : list
+        A list of integers.
+        
+    Returns
+    -------
+    list
+        A list of hex strings.
+    """
+    return [hex(hexagon)[2:] for hexagon in hexint]
+
+# function to convert hex to hexint
+def hex_to_int(hex):
+    """
+    Convert a list of hex strings to a list of integers.
+    
+    Parameters
+    ----------
+    hex : list
+        A list of hex strings.
+        
+    Returns
+    -------
+    list
+        A list of integers.
+
+    """
+    return [int(a, 16) for a in hex]
