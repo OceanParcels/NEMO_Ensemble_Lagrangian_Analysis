@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "/var/spool/slurm/slurmd/job42655/slurm_script", line 7, in <module>
-    import hexbin_functions as hexfunc
-ModuleNotFoundError: No module named 'hexbin_functions'
