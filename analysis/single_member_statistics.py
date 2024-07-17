@@ -4,6 +4,8 @@ import numpy as np
 import xarray as xr
 from tqdm import tqdm
 import pickle
+import sys
+sys.path.append('../functions')
 import hexbin_functions as hexfunc
 
 def entropy(Pdf):

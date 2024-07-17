@@ -10,7 +10,7 @@ from h3.unstable import vect  # used for hexgrid vectorization
 
 # Claudio: renamed the class to hexGrid to avoid confusion with other functions
 # I renamed plot_hex_hist to pcolorhex and made it a method of the hexGrid class
-# I also renamed previosly names pcolorhex to preplot_hexagons.
+# I also renamed previosly names pcolorhex to plot_hexagons.
 class hexGrid:
     """
     'Reference object' for creating transition matrices. This acts as a sort of template
@@ -122,16 +122,7 @@ class hexGrid:
             #     f"{self.miscount} particles were not counted because they were outside the region of interest."
             # )
         return count
-
-    def count_3d(self, lat, lon, depth):
-        pass
-
-    def map_to_mat(self):
-        pass
-
-    def map_from_mat(self):
-        pass
-
+    
     def plot_my_centroids(self, domain):
         centroids = [h3.h3_to_geo(hex) for hex in self.hexagons]
         cen_lats = [c[0] for c in centroids]
@@ -170,7 +161,7 @@ class hexGrid:
         cmap_instance = plt.cm.get_cmap(cmap)
         cmap_instance.set_bad("w")
         color_values = get_colors(counts, cmap_instance, 0, maxnorm)
-        preplot_hexagons(
+        plot_hexagons(
             ax,
             self.hexagons,
             color_values,
@@ -187,7 +178,7 @@ class hexGrid:
 
 
 # Aditional Functions
-def preplot_hexagons(
+def plot_hexagons(
     ax,
     hexagons,
     colors=None,
@@ -344,7 +335,7 @@ def pcolorhex(counts, grid, cmap="viridis", maxnorm=None, ax=None):
             1, 1, subplot_kw={"projection": cartopy.crs.PlateCarree()}, cmap=plt.cm.viridis
         )
 
-    preplot_hexagons(
+    plot_hexagons(
         ax,
         grid.hexagons,
         get_colors(counts, plt.cm.viridis, 0, maxnorm),
@@ -400,7 +391,7 @@ def plot_hex_hist_3d(
 
     # Create a GeoAxes in the left part of the plot
     ax = plt.subplot(gs[0, 0], projection=cartopy.crs.PlateCarree())
-    preplot_hexagons(ax, horiz_grid.hexagons, colors, draw_edges=False, alpha=1.0)
+    plot_hexagons(ax, horiz_grid.hexagons, colors, draw_edges=False, alpha=1.0)
     ax.add_feature(cartopy.feature.LAND, edgecolor="black", zorder=100)
     ax.set_extent(extent, crs=cartopy.crs.PlateCarree())
     cmap = plt.cm.viridis
