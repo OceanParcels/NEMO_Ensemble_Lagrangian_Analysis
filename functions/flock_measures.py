@@ -1,5 +1,5 @@
 import numpy as np
-from .mapping_functions import dist_meter, haversine
+from mapping_functions import dist_meter, haversine
 
 def mediod(X, Y, spherical=False, robust=True):
     """ calculate which trajectory with least disagreement with all others
@@ -183,8 +183,9 @@ def relative_dispersion(X, Y, X_ref=None, Y_ref=None, leader_id=None,
         D = dist_meter(X_ref, X, Y_ref, Y) # distance from target
     else:
         D = np.sqrt(np.power(X - X_ref, 2) + np.power(Y - Y_ref, 2))
-    D = np.mean(D, axis=0)
-    return D
+    D_mean = np.mean(D, axis=0)
+    std = np.std(D, axis=0)
+    return D, D_mean, std
 
 def mean_cumulative_separation_distance(X, Y, X_ref=None, Y_ref=None,
                                         leader_id=None, spherical=True):

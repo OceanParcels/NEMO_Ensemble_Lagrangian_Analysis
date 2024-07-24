@@ -487,4 +487,4 @@ def hex_to_int(hex):
         A list of integers.
 
     """
-    return [int(a, 16) for a in hex]
+    return int(hex, 16)
