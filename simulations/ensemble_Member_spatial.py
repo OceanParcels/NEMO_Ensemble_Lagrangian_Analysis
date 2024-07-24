@@ -14,7 +14,6 @@ p.add_argument('-m', '--member', type=int, default=1, help='Member number')
 p.add_argument('-dr', '--delta_r', type=float, help='delta r')
 
 args = p.parse_args()
-
 member = args.member
 delta_r = args.delta_r
 
@@ -23,9 +22,9 @@ location = 'Cape_Hatteras'
 end_time = start_time = np.datetime64('2012-01-02')
 start_time = np.datetime64('2010-01-02')
 # member = 1
-# delta_r = 0.01
+# delta_r = 0.1
 
-outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
+outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
 print("Output file: ", outfile)
 #%% Import Fieldset
 
