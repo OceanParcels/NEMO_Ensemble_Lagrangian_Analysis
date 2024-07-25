@@ -11,7 +11,7 @@
 
 conda activate nemo-ensemble
 
-for j in {6..7}
+for j in {14..20}
 do
    for i in $(seq 0.1 0.1 1.0)
    do

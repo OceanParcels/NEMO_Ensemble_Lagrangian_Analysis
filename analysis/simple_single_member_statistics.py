@@ -16,7 +16,7 @@ def entropy(Pdf):
     return -np.nansum(Pdf_safe * np.log2(Pdf_safe))
 
 
-def calculate_probability_and_entropy(pset, hexbin_grid, subgroups, entropy_function):
+def calculate_probability_and_entropy(pset, hexbin_grid, entropy_function):
     """
     Calculates probability and entropy for particle sets over a hexagonal grid.
 
@@ -40,31 +40,21 @@ def calculate_probability_and_entropy(pset, hexbin_grid, subgroups, entropy_func
     """
     obs_length = len(pset.obs)
     n_hex = hexbin_grid.n_hex
-    probability_sets = {}
-    entropy_sets = {}
 
-    for t_gap in subgroups.keys():
-        if t_gap == 0:
-            sub_pset = pset
-        else:
-            sub_pset = pset.isel(trajectory=subgroups[t_gap])
+    probability_set = np.zeros((n_hex, obs_length))
+    entropy_set = np.zeros(obs_length)
 
-        probability_subset = np.zeros((n_hex, obs_length))
-        entropy_subset = np.zeros(obs_length)
+    lons, lats = pset['lon'][:, :].values, pset['lat'][:, :].values
 
-        lons, lats = sub_pset['lon'][:, :].values, sub_pset['lat'][:, :].values
-
-        for t in range(obs_length):
-            probability_subset[:, t] = hexbin_grid.count_2d(lons[:, t], lats[:, t], normalize=True)
-            entropy_subset[t] = entropy_function(probability_subset[:, t])
-
-        probability_sets[t_gap] = probability_subset
-        entropy_sets[t_gap] = entropy_subset
-
-    return probability_sets, entropy_sets
+    for t in range(obs_length):
+        probability_set[:, t] = hexbin_grid.count_2d(lons[:, t], lats[:, t], normalize=True)
+        entropy_set[t] = entropy_function(probability_set[:, t])
 
 
-def create_dataframe(probability_sets, entropy_sets, hexints, delta_t_range, time_range):
+    return probability_set, entropy_set
+
+
+def create_dataframe(probability_set, entropy_set, hexints, time_range):
     """
     Creates xarray Dataframe containing the probability and entropy data.
 
@@ -90,10 +80,9 @@ def create_dataframe(probability_sets, entropy_sets, hexints, delta_t_range, tim
     ds = xr.Dataset(
         {
             'probability': xr.DataArray(
-                np.array([probability_sets[i] for i in delta_t_range]),
-                dims=['delta_t', 'hexint', 'time'],
+                probability_set,
+                dims=['hexint', 'time'],
                 coords={
-                    'delta_t': delta_t_range,
                     'hexint': hexints,
                     'time': time_range
                 },
@@ -103,15 +92,14 @@ def create_dataframe(probability_sets, entropy_sets, hexints, delta_t_range, tim
                 }
             ),
             'entropy': xr.DataArray(
-                np.array([entropy_sets[i] for i in delta_t_range]),
-                dims=['delta_t', 'time'],
+                entropy_set,
+                dims=['time'],
                 coords={
-                    'delta_t': delta_t_range,
                     'time': time_range
                 },
                 attrs={
                     'description': 'Entropy values for each time step and observation time',
-                    'units': 'nats'
+                    'units': 'bits'
                 }
             )
         }
@@ -121,33 +109,13 @@ def create_dataframe(probability_sets, entropy_sets, hexints, delta_t_range, tim
 
 
 location = 'Cape_Hatteras'
-member = 50 # memeber
-std = 0.1 # Standard deviation od initial dispersion
+member = 1 # memeber
+delta_r = 0.1 # Standard deviation od initial dispersion
 
-file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/std_{std*100:03.0f}/{location}_std{std*100:03.0f}_m{member:03d}.zarr"
-pset = xr.open_zarr(file_path)
+path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
+pset = xr.open_zarr(path)
 
-obs_range = range(len(pset.obs)) # Number of time steps in the observation period
-
-# Create subgroups of particles released at different times
-subgroups = {}
-
-max_gap = 60
-
-timesteps = np.linspace(1, 745, 745, dtype=int)
-max_releases = timesteps[0::max_gap].shape[0]
-
-set = np.linspace(0, 100, 100, dtype=int)
-delta_t_range = [24, 36, 48, 60]
-
-for i in delta_t_range: #range(1,max_gap,12):
-    set_start = timesteps[0::i][:max_releases]*100
-    indexes = []
-    
-    for j in set_start:
-        indexes = indexes + list(j+set)
-    
-    subgroups[i] = np.array(indexes)
+obs_range = pset.obs.values # Number of time steps in the observation period
 
 
 # Load the hexbin_grid for the domain
@@ -157,21 +125,21 @@ with open('../data/hexgrid_no_coast.pkl', 'rb') as f:
 hexbin_grid = hexfunc.hexGrid(hexbin_grid, h3_res=3)
 
 
-###### Calculate for all memebers and STDs ####
-std_ranges = np.linspace(1, 20, 20)/100
+###### Calculate for all memebers and delta_rs ####
+delta_r_ranges = np.linspace(0.1, 1, 10)
 location = 'Cape_Hatteras'
-# member = 1 # memeber
-# std = 0.01 # Standard deviation od initial dispersion
 
-for member in tqdm([44, 46, 47, 48, 49, 50]):
-    for std in std_ranges:
-        print(f"\U0001F914 Member: {member:03d},  std: {std}")
-        path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/std_{std*100:03.0f}/{location}_std{std*100:03.0f}_m{member:03d}.zarr"
+members = np.arange(1, 8)
 
+for member in tqdm(members):
+    for delta_r in delta_r_ranges:
+        print(f"\U0001F914 Member: {member:03d},  delta_r: {delta_r}")
+        
+        path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
         pset = xr.open_zarr(path)
-        P_m, Ent_m = calculate_probability_and_entropy(pset, hexbin_grid, subgroups, entropy)
-        DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, delta_t_range, obs_range)
-        save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_coarse/P_std{std*100:03.0f}_m{member:03d}.zarr"
+        P_m, Ent_m = calculate_probability_and_entropy(pset, hexbin_grid, entropy)
+        DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
+        save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_spatial/P_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
         DF_m.to_zarr(save_path)
-        # print(f"Member {member:03d} saved at ../{location}/P_std{std*100:03.0f}_m{member:03d}")
+   
         
