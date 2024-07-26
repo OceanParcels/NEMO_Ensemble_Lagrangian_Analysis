@@ -75,6 +75,9 @@ def compute_correlation_function(x_components, y_components, max_lag):
 
     return correlations
 
+list_locations = {'Cape_Hatteras': (-74.0, 35.5),
+                  'Canary_Current': (-15, 31.5)}
+
 
 with open('../data/hexgrid_no_coast.pkl', 'rb') as f:
     hexagons_grid = pickle.load(f)
@@ -84,14 +87,14 @@ grid = hexfunc.hexGrid(hexagons_grid)
 max_lag = 60
 start_time = np.datetime64('2010-01-02')
 end_time = np.datetime64('2010-04-02')
-location = "Cape_Hatteras"
+location = "Canary_Current"
 N_particles = 1
 
 # define time range with 1 day intervals
 time_range = np.arange(start_time, end_time, delta(days=1))
 
-loc1_lon = -74.0
-loc1_lat = 35.5
+loc1_lon = list_locations[location][0] # -74.0
+loc1_lat = list_locations[location][1] # 35.5
 
 # Find the hexagon containing the location
 loc1_hex = h3.geo_to_h3(loc1_lat, loc1_lon, 3)
