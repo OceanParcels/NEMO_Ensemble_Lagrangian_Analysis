@@ -9,3 +9,5 @@
 *.gif
 *.nc
 *.mp4
+notebooks/__pycache__
+analysis/__pycache__
