@@ -11,6 +11,7 @@
 
 conda activate nemo-ensemble
 
-python temporal_correlations.py
+# python simple_single_member_statistics.py
+python simple_single_member_statistics_temp.py
 
 echo 'Finished computation.'

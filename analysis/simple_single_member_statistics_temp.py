@@ -110,9 +110,11 @@ def create_dataframe(probability_set, entropy_set, hexints, time_range):
 
 location = 'Cape_Hatteras'
 member = 1 # memeber
-delta_r = 0.1 # Standard deviation od initial dispersion
 
-path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
+week = 1 # Number of weeks
+
+path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/temporal/W_{week:01d}/{location}_W{week:01d}_m{member:03d}.zarr"
+
 pset = xr.open_zarr(path)
 
 obs_range = pset.obs.values # Number of time steps in the observation period
@@ -126,20 +128,18 @@ hexbin_grid = hexfunc.hexGrid(hexbin_grid, h3_res=3)
 
 
 ###### Calculate for all memebers and delta_rs ####
-delta_r_ranges = np.linspace(0.1, 1, 10)
+week_ranges = np.arange(1, 7)
 location = 'Cape_Hatteras'
 
-members = np.arange(8, 51)
+members = np.arange(1, 51)
 
 for member in tqdm(members):
-    for delta_r in delta_r_ranges:
-        print(f"\U0001F914 Member: {member:03d},  delta_r: {delta_r}")
+    for week in week_ranges:
+        print(f"\U0001F914 Member: {member:03d},  Week: {week}")
         
-        path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
+        path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/temporal/W_{week:01d}/{location}_W{week:01d}_m{member:03d}.zarr"
         pset = xr.open_zarr(path)
         P_m, Ent_m = calculate_probability_and_entropy(pset, hexbin_grid, entropy)
         DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
-        save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_spatial/P_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
+        save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_temporal/P_W{week:01d}_m{member:03d}.zarr"
         DF_m.to_zarr(save_path)
-   
-        
