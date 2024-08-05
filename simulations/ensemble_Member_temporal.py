@@ -20,7 +20,7 @@ weeks = args.weeks
 #Some SIMULATION parameter
 location = 'Cape_Hatteras'
 start_time = np.datetime64('2010-01-02')
-end_time = start_time + np.timedelta64(1, 'W')
+end_time = start_time + np.timedelta64(weeks, 'W')
 time_range = np.arange(start_time, end_time, delta(hours=1))
 N_particles = len(time_range)
 

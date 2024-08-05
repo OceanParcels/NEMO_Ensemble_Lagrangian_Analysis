@@ -117,7 +117,6 @@ pset = xr.open_zarr(path)
 
 obs_range = pset.obs.values # Number of time steps in the observation period
 
-
 # Load the hexbin_grid for the domain
 with open('../data/hexgrid_no_coast.pkl', 'rb') as f:
     hexbin_grid = pickle.load(f)
@@ -129,7 +128,7 @@ hexbin_grid = hexfunc.hexGrid(hexbin_grid, h3_res=3)
 delta_r_ranges = np.linspace(0.1, 1, 10)
 location = 'Cape_Hatteras'
 
-members = np.arange(8, 51)
+members = np.arange(1, 51)
 
 for member in tqdm(members):
     for delta_r in delta_r_ranges:
@@ -141,5 +140,3 @@ for member in tqdm(members):
         DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
         save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_spatial/P_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
         DF_m.to_zarr(save_path)
-   
-        
