@@ -131,7 +131,7 @@ hexbin_grid = hexfunc.hexGrid(hexbin_grid, h3_res=3)
 week_ranges = np.arange(1, 7)
 location = 'Cape_Hatteras'
 
-members = np.arange(1, 51)
+members = np.arange(42, 45)
 
 for member in tqdm(members):
     for week in week_ranges:
@@ -142,4 +142,4 @@ for member in tqdm(members):
         P_m, Ent_m = calculate_probability_and_entropy(pset, hexbin_grid, entropy)
         DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
         save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_temporal/P_W{week:01d}_m{member:03d}.zarr"
-        DF_m.to_zarr(save_path)
+        DF_m.to_zarr(save_path, mode='w')

@@ -107,7 +107,7 @@ def create_dataframe(probability_set, entropy_set, hexints, time_range):
     
     return ds
 
-np.random.seed(42)
+np.random.seed(43)
 Subset = 20
 
 
@@ -120,40 +120,38 @@ hexbin_grid = hexfunc.hexGrid(hexbin_grid, h3_res=3)
 ###### Calculate for all memebers and delta_rs ####
 # delta_r_ranges = np.linspace(0.1, 1, 10)
 members = np.arange(2, 51)
-
+N_subsets = 50
 
 location = 'Cape_Hatteras'
 
-member = 1
-delta_r = 0.1
-path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
 
-
-pset_members = xr.open_zarr(path)
-obs_range = range(len(pset_members.obs)) # Number of time steps in the observation period
-
-pset_members = pset_members.isel(trajectory=np.random.choice(pset_members.trajectory, 20, replace=False))
-
-print(f"\U0001F914 delta_r: {delta_r}")
-
-for member in tqdm(members):
-
+for k in range(2, N_subsets+1):
+    member = 1
+    delta_r = 0.1
     path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
-    pset = xr.open_zarr(path)
-    
-    
-    pset = pset.isel(trajectory=np.random.choice(pset.trajectory, Subset, replace=False))
-    
-    pset_members = xr.concat([pset_members, pset], dim='trajectory')
+    pset_members = xr.open_zarr(path)
+    obs_range = range(len(pset_members.obs)) # Number of time steps in the observation period
+
+    pset_members = pset_members.isel(trajectory=np.random.choice(pset_members.trajectory, 20, replace=False))
+
+    print(f"Subset:{k} delta_r: {delta_r}")
+
+    for member in tqdm(members):
+
+        path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
+        pset = xr.open_zarr(path)
+        
+        
+        pset = pset.isel(trajectory=np.random.choice(pset.trajectory, Subset, replace=False))
+        
+        pset_members = xr.concat([pset_members, pset], dim='trajectory')
 
 
-print("length pset_members: ", len(pset_members.trajectory))
+    print("length pset_members: ", len(pset_members.trajectory))
 
 
-P_m, Ent_m = calculate_probability_and_entropy(pset_members, hexbin_grid, entropy)
-DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
-save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all/P_dr{delta_r*100:03.0f}_all_{Subset*50}.zarr"
-DF_m.to_zarr(save_path, mode='w')
+    P_m, Ent_m = calculate_probability_and_entropy(pset_members, hexbin_grid, entropy)
+    DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
+    save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all/P_dr{delta_r*100:03.0f}_all_s{k}.nc"
+    DF_m.to_netcdf(save_path)
 
-# pset_members = pset_members.compute()
-# pset_members.to_zarr(f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/all/{location}_dr{delta_r*100:03.0f}_all_{Subset*50}.zarr")
