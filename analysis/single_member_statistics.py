@@ -138,5 +138,5 @@ for member in tqdm(members):
         pset = xr.open_zarr(path)
         P_m, Ent_m = calculate_probability_and_entropy(pset, hexbin_grid, entropy)
         DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
-        save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_spatial/P_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
-        DF_m.to_zarr(save_path)
+        save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_spatial/P_dr{delta_r*100:03.0f}_m{member:03d}.nc"
+        DF_m.to_netcdf(save_path)
