@@ -11,9 +11,9 @@
 
 conda activate nemo-ensemble
 
-for j in {5..8}
+for j in {41..50}
 do
-   for i in $(seq 2 1 6)
+   for i in $(seq 8 4 12)
    do
       echo "Member $j -- Week span: $i"
       python ensemble_Member_temporal.py -m $j -w $i
