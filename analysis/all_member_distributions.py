@@ -125,7 +125,7 @@ N_subsets = 50
 location = 'Cape_Hatteras'
 delta_r = 0.1
 
-for delta_r in [0.1, 0.5, 1]:
+for delta_r in [0.1, 1]:
     for k in range(1, N_subsets+1):
         member = 1
         
