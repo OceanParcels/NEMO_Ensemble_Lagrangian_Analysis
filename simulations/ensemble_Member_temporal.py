@@ -1,12 +1,8 @@
-#%%
-from parcels import FieldSet, ParticleSet, AdvectionRK4_3D, AdvectionRK4, ParticleFile, JITParticle, StatusCode, Variable
+from parcels import FieldSet, ParticleSet, AdvectionRK4_3D, ParticleFile, JITParticle, StatusCode, Variable
 import numpy as np
 from glob import glob
 from datetime import timedelta as delta
 from argparse import ArgumentParser
-import pandas as pd
-import pickle
-from datetime import datetime
 
 p = ArgumentParser()
 p.add_argument('-m', '--member', type=int, default=1, help='Member number')
@@ -21,8 +17,10 @@ weeks = args.weeks
 location = 'Cape_Hatteras'
 start_time = np.datetime64('2010-01-02')
 end_time = start_time + np.timedelta64(weeks, 'W')
-time_range = np.arange(start_time, end_time, delta(hours=1))
-N_particles = len(time_range)
+time_range = np.arange(start_time, end_time, delta(days=1))
+N_particles = 1020
+
+subset = int(N_particles/len(time_range))
 
 sim_end_time = start_time + np.timedelta64(730, 'D')
 
@@ -50,12 +48,19 @@ dimensions = {'U': {'lon': 'glamf', 'lat': 'gphif', 'depth': 'depthw', 'time': '
 fieldset = FieldSet.from_nemo(filenames, variables, dimensions, netcdf_decodewarning=False)
 
 #%% Declare the ParticleSet
+times = []
+
+for t in time_range:
+    times += [t]*subset
+
+times = np.array(times)
+
+N_particles = len(times)
 
 lon_0, lat_0 = (-73.61184289610455, 35.60913368957989)
-lonp = [lon_0]*N_particles
-latp = [lat_0]*N_particles
+lonp = [lon_0]*N_particles + np.random.normal(loc=0, scale=0.01, size=N_particles)
+latp = [lat_0]*N_particles + np.random.normal(loc=0, scale=0.01, size=N_particles)
 
-times = time_range
 depp = np.ones(len(lonp))
 hex_ids = [590726022320619519]*N_particles
 

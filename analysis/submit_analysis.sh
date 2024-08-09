@@ -12,6 +12,6 @@
 conda activate nemo-ensemble
 
 # python simple_single_member_statistics.py
-python single_member_statistics.py
+python all_member_statistics.py
 
 echo 'Finished computation.'
