@@ -112,14 +112,11 @@ def create_dataframe(probability_set, entropy_set, hexints, time_range):
 location = 'Cape_Hatteras'
 member = 1 # memeber
 
-week = 1 # Number of weeks
+week = 4 # Number of weeks
 
 path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/temporal/W_{week:01d}/{location}_W{week:01d}_m{member:03d}.zarr"
-
 pset = xr.open_zarr(path)
-
 obs_range = pset.obs.values # Number of time steps in the observation period
-
 
 # Load the hexbin_grid for the domain
 with open('../data/hexgrid_no_coast.pkl', 'rb') as f:
@@ -127,9 +124,8 @@ with open('../data/hexgrid_no_coast.pkl', 'rb') as f:
     
 hexbin_grid = hexfunc.hexGrid(hexbin_grid, h3_res=3)
 
-
 ###### Calculate for all memebers and delta_rs ####
-week_ranges = [ 1,  2,  3,  4,  5,  6, 8, 12] # np.arange(1, 7)
+week_ranges = [16] #[4, 8, 12] # np.arange(1, 7)
 location = 'Cape_Hatteras'
 
 members = np.arange(1, 51)

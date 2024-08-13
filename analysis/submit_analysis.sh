@@ -11,7 +11,7 @@
 
 conda activate nemo-ensemble
 
-# python simple_single_member_statistics.py
-python all_member_distributions.py
+python single_member_statistics_temp.py
+# python all_member_distributions.py
 
 echo 'Finished computation.'
