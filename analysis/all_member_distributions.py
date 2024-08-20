@@ -108,7 +108,6 @@ def create_dataframe(probability_set, entropy_set, hexints, time_range):
     return ds
 
 np.random.seed(43)
-Subset = 20
 
 
 # Load the hexbin_grid for the domain
@@ -124,6 +123,7 @@ N_subsets = 50
 
 location = 'Cape_Hatteras'
 delta_r = 0.1
+subset_particles = 20
 
 for delta_r in [0.1, 1]:
     for k in range(1, N_subsets+1):
@@ -133,7 +133,7 @@ for delta_r in [0.1, 1]:
         pset_members = xr.open_zarr(path)
         obs_range = range(len(pset_members.obs)) # Number of time steps in the observation period
 
-        pset_members = pset_members.isel(trajectory=np.random.choice(pset_members.trajectory, 20, replace=False))
+        pset_members = pset_members.isel(trajectory=np.random.choice(pset_members.trajectory, subset_particles, replace=False))
 
         print(f"Subset:{k} delta_r: {delta_r}")
 
@@ -143,13 +143,12 @@ for delta_r in [0.1, 1]:
             pset = xr.open_zarr(path)
             
             
-            pset = pset.isel(trajectory=np.random.choice(pset.trajectory, Subset, replace=False))
+            pset = pset.isel(trajectory=np.random.choice(pset.trajectory, subset_particles, replace=False))
             
             pset_members = xr.concat([pset_members, pset], dim='trajectory')
 
 
         print("length pset_members: ", len(pset_members.trajectory))
-
 
         P_m, Ent_m = calculate_probability_and_entropy(pset_members, hexbin_grid, entropy)
         DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
