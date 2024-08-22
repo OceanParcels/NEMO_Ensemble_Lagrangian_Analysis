@@ -126,7 +126,7 @@ delta_r = 0.1
 
 # subset_particles = 1
 member = 1
-for subset_particles in range(1, 21):
+for subset_particles in [1000]:#range(1, 21):
     print(f"Calculating for {subset_particles} particles")
     path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
     pset_members = xr.open_zarr(path)

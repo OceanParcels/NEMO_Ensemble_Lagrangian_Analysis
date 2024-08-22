@@ -11,7 +11,7 @@
 
 conda activate nemo-ensemble
 
-for j in {1..10}
+for j in {41..50}
 do
    echo "MEMEMber $j"
    python ensemble_Member_cluster.py -m $j -c 0
