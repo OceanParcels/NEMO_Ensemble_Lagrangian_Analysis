@@ -108,13 +108,13 @@ def create_dataframe(probability_set, entropy_set, hexints, time_range):
     return ds
 
 np.random.seed(43)
-
+hex_res = 4
 
 #%% Load the hexbin_grid for the domain
-with open('../data/hexgrid_no_coast.pkl', 'rb') as f:
+with open(f'../data/hexgrid_no_coast_h{hex_res}.pkl', 'rb') as f:
     hexbin_grid = pickle.load(f)
-    
-hexbin_grid = hexfunc.hexGrid(hexbin_grid, h3_res=3)
+
+hexbin_grid = hexfunc.hexGrid(hexbin_grid, h3_res=hex_res)
 
 ###### Calculate for all memebers and delta_rs ####
 # delta_r_ranges = np.linspace(0.1, 1, 10)
@@ -126,7 +126,7 @@ delta_r = 0.1
 
 # subset_particles = 1
 member = 1
-for subset_particles in [1000]:#range(1, 21):
+for subset_particles in np.logspace(1.5, 3, 10, dtype=int): #range(18, 21):
     print(f"Calculating for {subset_particles} particles")
     path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
     pset_members = xr.open_zarr(path)
@@ -156,7 +156,7 @@ for subset_particles in [1000]:#range(1, 21):
     
     P_m, Ent_m = calculate_probability_and_entropy(pset_members, hexbin_grid, entropy)
     DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
-    save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_Nparticles/P_all_p{subset_particles}.nc"
+    save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_Nparticles_h{hex_res}/P_all_p{subset_particles}_h{hex_res}.nc"
     DF_m.to_netcdf(save_path)
 
 
