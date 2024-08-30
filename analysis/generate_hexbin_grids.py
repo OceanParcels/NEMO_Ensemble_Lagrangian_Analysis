@@ -1,3 +1,4 @@
+#%%
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
@@ -10,7 +11,7 @@ from argparse import ArgumentParser
 import sys
 # sys.path.append('../functions')
 # import hexbin_functions as hexfunc
-
+#%%
 p = ArgumentParser()
 p.add_argument('-hr', '--hex_res', type=int, default=3, help='hexagon resolution')
 

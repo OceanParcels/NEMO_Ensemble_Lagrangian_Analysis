@@ -7,35 +7,54 @@ from argparse import ArgumentParser
 # Parse command line arguments
 p = ArgumentParser()
 p.add_argument('-m', '--member', type=int, default=1, help='Member number')
-p.add_argument('-w', '--weeks', type=int, help='Weeks span')
+p.add_argument('-d', '--depth', type=int, default=1, help='Days span')
+p.add_argument('-dr', '--delta_r', type=float, help='delta r')
 args = p.parse_args()
 
 # Extract member and weeks from command line arguments
 member = args.member
-weeks = args.weeks
-
+depth = args.depth
+delta_r = args.delta_r
 # Set simulation parameters
 location = 'Cape_Hatteras'
 start_time = np.datetime64('2010-01-02')
-end_time = start_time + np.timedelta64(weeks, 'W')
 time_range = np.arange(start_time, end_time, delta(days=1))
-N_particles = 1020
+N_particles = 10000
 subset = int(N_particles/len(time_range)) # Number of particles to release at dt = 1 day
 
-# If start_time = 2010-01-02, sim_end_time = 2012-01-01
-sim_end_time = start_time + np.timedelta64(730, 'D')
+# If start_time = 2010-01-02, sim_end_time = 2015-12-31
+sim_end_time = start_time + np.timedelta64(2189, 'D')
 
-outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/temporal/W_{weeks:01d}/{location}_W{weeks:01d}_m{member:03d}.zarr"
+outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial_connectivity/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
+
+outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/temporal_connectivity/dep_{depth:01d}/{location}_dep{depth:01d}_m{member:03d}.zarr"
 print("Output file: ", outfile)
-#%% Import Fieldset
 
+p = ArgumentParser()
+p.add_argument('-m', '--member', type=int, default=1, help='Member number')
+# p.add_argument('-y', '--year', type=int, default=2010, help='Year')
+
+
+args = p.parse_args()
+member = args.member
+
+
+#Some SIMULATION parameter
+location = 'Cape_Hatteras'
+end_time = start_time = np.datetime64('2012-01-02')
+start_time = np.datetime64('2010-01-02')
+# member = 1
+# delta_r = 0.1
+
+
+
+#%% Import Fieldset
 data_path = '/storage/shared/oceanparcels/input_data/NEMO_Ensemble/'
 ufiles = sorted(glob(f"{data_path}NATL025-CJMCYC3.{member:03d}-S/1d/*/NATL025*U.nc")) #Load all years
 vfiles = [f.replace('U.nc', 'V.nc') for f in ufiles]
 wfiles = [f.replace('U.nc', 'W.nc') for f in ufiles]
 mesh_mask = f"{data_path}GRID/coordinates_NATL025_v2.nc"
 maskfile = f"{data_path}GRID/NATL025-CJMenobs01_byte_mask.nc"
-
 filenames = {'U': {'lon': mesh_mask, 'lat': mesh_mask, 'depth': wfiles[0], 'data': ufiles},
                 'V': {'lon': mesh_mask, 'lat': mesh_mask, 'depth': wfiles[0], 'data': vfiles},
                 'W': {'lon': mesh_mask, 'lat': mesh_mask, 'depth': wfiles[0], 'data': wfiles},
@@ -59,8 +78,8 @@ times = np.array(times)
 N_particles = len(times)
 
 lon_0, lat_0 = (-73.61184289610455, 35.60913368957989)
-lonp = [lon_0]*N_particles + np.random.normal(loc=0, scale=0.01, size=N_particles)
-latp = [lat_0]*N_particles + np.random.normal(loc=0, scale=0.01, size=N_particles)
+lonp = [lon_0]*N_particles + np.random.normal(loc=0, scale=0.1, size=N_particles)
+latp = [lat_0]*N_particles + np.random.normal(loc=0, scale=0.1, size=N_particles)
 
 depp = np.ones(len(lonp))*depth
 hex_ids = [590726022320619519]*N_particles

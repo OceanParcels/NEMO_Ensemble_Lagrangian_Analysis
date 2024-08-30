@@ -126,7 +126,7 @@ delta_r = 0.1
 
 # subset_particles = 1
 member = 1
-for subset_particles in np.logspace(1.5, 3, 10, dtype=int): #range(18, 21):
+for subset_particles in np.logspace(1.5, 3, 20, dtype=int): #range(18, 21):
     print(f"Calculating for {subset_particles} particles")
     path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
     pset_members = xr.open_zarr(path)
@@ -156,7 +156,7 @@ for subset_particles in np.logspace(1.5, 3, 10, dtype=int): #range(18, 21):
     
     P_m, Ent_m = calculate_probability_and_entropy(pset_members, hexbin_grid, entropy)
     DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
-    save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_Nparticles_h{hex_res}/P_all_p{subset_particles}_h{hex_res}.nc"
+    save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_Nparticles_h{hex_res}/P_all_p{subset_particles:04d}_h{hex_res}.nc"
     DF_m.to_netcdf(save_path)
 
 
