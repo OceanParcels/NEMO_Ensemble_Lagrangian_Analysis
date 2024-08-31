@@ -1,3 +1,4 @@
+#%%
 from parcels import FieldSet, ParticleSet, AdvectionRK4_3D, ParticleFile, JITParticle, StatusCode, Variable
 import numpy as np
 from glob import glob
@@ -7,46 +8,32 @@ from argparse import ArgumentParser
 # Parse command line arguments
 p = ArgumentParser()
 p.add_argument('-m', '--member', type=int, default=1, help='Member number')
-p.add_argument('-d', '--depth', type=int, default=1, help='Days span')
+p.add_argument('-d', '--depth', type=int, default=1, help='Initialization depth')
 p.add_argument('-dr', '--delta_r', type=float, help='delta r')
+p.add_argument('-w', '--weeks', type=int, help='Weeks span')
 args = p.parse_args()
 
 # Extract member and weeks from command line arguments
 member = args.member
 depth = args.depth
 delta_r = args.delta_r
+weeks = args.weeks
+# member = 1
+# depth = 1
+# delta_r = 1.75
+# weeks = 12
+
 # Set simulation parameters
 location = 'Cape_Hatteras'
 start_time = np.datetime64('2010-01-02')
-time_range = np.arange(start_time, end_time, delta(days=1))
-N_particles = 10000
-subset = int(N_particles/len(time_range)) # Number of particles to release at dt = 1 day
+end_time = start_time + np.timedelta64(weeks, 'W')
+release_time_range = np.arange(start_time, end_time, delta(days=1))
 
 # If start_time = 2010-01-02, sim_end_time = 2015-12-31
 sim_end_time = start_time + np.timedelta64(2189, 'D')
 
-outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial_connectivity/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
-
 outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/temporal_connectivity/dep_{depth:01d}/{location}_dep{depth:01d}_m{member:03d}.zarr"
 print("Output file: ", outfile)
-
-p = ArgumentParser()
-p.add_argument('-m', '--member', type=int, default=1, help='Member number')
-# p.add_argument('-y', '--year', type=int, default=2010, help='Year')
-
-
-args = p.parse_args()
-member = args.member
-
-
-#Some SIMULATION parameter
-location = 'Cape_Hatteras'
-end_time = start_time = np.datetime64('2012-01-02')
-start_time = np.datetime64('2010-01-02')
-# member = 1
-# delta_r = 0.1
-
-
 
 #%% Import Fieldset
 data_path = '/storage/shared/oceanparcels/input_data/NEMO_Ensemble/'
@@ -68,22 +55,44 @@ dimensions = {'U': {'lon': 'glamf', 'lat': 'gphif', 'depth': 'depthw', 'time': '
 fieldset = FieldSet.from_nemo(filenames, variables, dimensions, netcdf_decodewarning=False)
 
 #%% Declare the ParticleSet
-times = []
+# N_particles = 10000
+# subset = int(N_particles/len(release_release_time_range)) # Number of particles to release at dt = 1 day
+span = delta_r
+L_range = np.linspace(-span, span, 25) # This L_range and theta_range makes that alway there are 1001 particles
+theta_range = np.arange(0, 2*np.pi, np.pi/20)
 
-for t in time_range:
-    times += [t]*subset
-
-times = np.array(times)
-
-N_particles = len(times)
 
 lon_0, lat_0 = (-73.61184289610455, 35.60913368957989)
-lonp = [lon_0]*N_particles + np.random.normal(loc=0, scale=0.1, size=N_particles)
-latp = [lat_0]*N_particles + np.random.normal(loc=0, scale=0.1, size=N_particles)
+lonp = [lon_0]
+latp = [lat_0]
 
-depp = np.ones(len(lonp))*depth
+
+for r in L_range:
+    for theta in theta_range:
+        lonp.append(lon_0 + np.sin(theta)*r) 
+        latp.append(lat_0 + np.cos(theta)*r)
+
+subset = len(lonp)
+print(f"Number of particles to release at each time: {subset}")
+
+times = []
+lon_release = []
+lat_release = []
+for t in release_time_range:
+    times += [t]*subset
+    lon_release += lonp
+    lat_release += latp
+
+times = np.array(times)
+lon_release = np.array(lon_release)
+lat_release = np.array(lat_release)
+
+N_particles = len(times)
+print(f"Number of particles: {N_particles}")
+
+depp = np.ones(N_particles)*depth
 hex_ids = [590726022320619519]*N_particles
-
+#%%
 class EnsembleParticle(JITParticle):
     """
     Particle class definition with additional variables
@@ -96,7 +105,7 @@ class EnsembleParticle(JITParticle):
     hexbin_id = Variable('hexbin_id', dtype=np.int16, initial=0)
     
 
-pset = ParticleSet(fieldset, EnsembleParticle, lon=lonp, lat=latp, 
+pset = ParticleSet(fieldset, EnsembleParticle, lon=lon_release, lat=lat_release, 
                    depth=depp, time=times, hexbin_id=hex_ids)
 
 # %%Declare Kernels
