@@ -11,7 +11,7 @@
 
 conda activate nemo-ensemble
 
-for j in {1..2}
+for j in {41..50}
 do 
    echo "Member $j -- Week span: 12, depth: 1, delta R: 1.75"
    python ensemble_Member_connectivity.py -m $j -d 1 -dr 1.75 -w 12
