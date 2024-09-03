@@ -110,7 +110,7 @@ def create_dataframe(probability_set, entropy_set, hexints, time_range):
 
 location = 'Cape_Hatteras'
 member = 1 # memeber
-delta_r = 0.1 # Standard deviation od initial dispersion
+delta_r = 2 # Standard deviation od initial dispersion
 
 path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
 pset = xr.open_zarr(path)
@@ -125,7 +125,7 @@ hexbin_grid = hexfunc.hexGrid(hexbin_grid, h3_res=3)
 
 
 ###### Calculate for all memebers and delta_rs ####
-delta_r_ranges = np.linspace(0.1, 1, 10)
+delta_r_ranges = [2] # np.linspace(0.1, 1, 10)
 location = 'Cape_Hatteras'
 
 members = np.arange(1, 51)
