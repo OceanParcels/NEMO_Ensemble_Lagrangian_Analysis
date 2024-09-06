@@ -95,6 +95,10 @@ ax.plot(pset_temp.lon[indexes, :t].T, pset_temp.lat[indexes, :t].T, c='r',
 ax.plot(mix_lons[:, :t].T, mix_lats[:, :t].T, c='k',
                 ls='--', alpha=0.3, label='Varying Members')
 
+# ax.annotate('', xy=(mix_lons[t, 0], mix_lats[t, 0]), xytext=(mix_lons[t-1, 0], mix_lats[t-1,0]),
+#             arrowprops=dict(arrowstyle="->", color='green', lw=1.5))
+
+
 # Add legend
 handles, labels = ax.get_legend_handles_labels()
 handles = [handles[0], handles[1], handles[-1]]

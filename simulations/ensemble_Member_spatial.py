@@ -19,12 +19,10 @@ delta_r = args.delta_r
 
 #Some SIMULATION parameter
 location = 'Cape_Hatteras'
-end_time = start_time = np.datetime64('2012-01-02')
 start_time = np.datetime64('2010-01-02')
-# member = 1
-# delta_r = 0.1
+end_time =  np.datetime64('2015-12-31')
 
-outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
+outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial_long/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
 print("Output file: ", outfile)
 #%% Import Fieldset
 
@@ -50,8 +48,8 @@ fieldset = FieldSet.from_nemo(filenames, variables, dimensions, netcdf_decodewar
 #%% Declare the ParticleSet
 
 span = delta_r
-L_range = np.linspace(-span, span, 25) # This L_range and theta_range makes that alway there are 1001 particles
-theta_range = np.arange(0, 2*np.pi, np.pi/20)
+L_range = np.linspace(-span, span, 125) # This L_range and theta_range makes that alway there are 1001 particles
+theta_range = np.arange(0, 2*np.pi, np.pi/30)
 
 
 lon_0, lat_0 = (-73.61184289610455, 35.60913368957989)
@@ -64,6 +62,7 @@ for r in L_range:
         lonp.append(lon_0 + np.sin(theta)*r) 
         latp.append(lat_0 + np.cos(theta)*r)
 
+print("Number of particles: ", len(lonp))
 times = [start_time]*len(lonp)
 depp = np.ones(len(lonp))
 hex_ids = [590726022320619519]*len(lonp)

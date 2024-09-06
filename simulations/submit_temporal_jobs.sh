@@ -8,22 +8,23 @@
 #SBATCH -e logs/hatteras.%j.e  # the name of the file where potential errors will be written to. %j will be the jobid determined by SLURM
 #SBATCH --mail-user=c.m.pierard@uu.nl
 #SBATCH --mail-type=ALL
+#SBATCH --nodelist=node04
 
 conda activate nemo-ensemble
 
-# for j in {1..13}
+# for j in {26..50}
 # do
-#    for i in $(seq 4 4 12)
+#    for i in $(seq 4 8 20)
 #    do
 #       echo "Member $j -- Week span: $i"
-#       # python ensemble_Member_temporal.py -m $j -w $i
+#       python ensemble_Member_temporal.py -m $j -w $i
 #    done
 # done
 
-for j in {41..50}
+for j in {1..50}
 do 
-   echo "Member $j -- Week span: 16"
-   python ensemble_Member_temporal.py -m $j -w 16
+   echo "Member $j -- Week span: 20"
+   python ensemble_Member_temporal.py -m $j -w 20
 done
 
 echo "Finished computation."

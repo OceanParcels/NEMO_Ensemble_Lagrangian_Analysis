@@ -19,13 +19,14 @@ location = 'Cape_Hatteras'
 start_time = np.datetime64('2010-01-02')
 end_time = start_time + np.timedelta64(weeks, 'W')
 time_range = np.arange(start_time, end_time, delta(days=1))
-N_particles = 1020
+N_particles = 7520
 subset = int(N_particles/len(time_range)) # Number of particles to release at dt = 1 day
+depth = 1
 
 # If start_time = 2010-01-02, sim_end_time = 2012-01-01
-sim_end_time = start_time + np.timedelta64(730, 'D')
+sim_end_time = np.datetime64('2015-12-31')
 
-outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/temporal/W_{weeks:01d}/{location}_W{weeks:01d}_m{member:03d}.zarr"
+outfile = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/temporal_long/W_{weeks:01d}/{location}_W{weeks:01d}_m{member:03d}.zarr"
 print("Output file: ", outfile)
 #%% Import Fieldset
 
