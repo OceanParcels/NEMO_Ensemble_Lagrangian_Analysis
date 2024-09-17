@@ -16,7 +16,7 @@ import hexbin_functions as hexfunc
 location = "Cape_Hatteras"
 depth = 1
 stats = {}
-total_members = 50
+total_members = 34
 Latitude_limit = 53
 
 n_members = np.arange(1, total_members + 1)
