@@ -30,7 +30,8 @@ std_depth = np.zeros(total_members)
 
 for member in tqdm(range(1, total_members + 1)):
 
-    file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/temporal_connectivity/dep_{depth:01d}/{location}_dep{depth:01d}_m{member:03d}.zarr"
+    # file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/temporal_connectivity/dep_{depth:01d}/{location}_dep{depth:01d}_m{member:03d}.zarr"
+    
     pset = xr.open_zarr(file_path)
     N_particles = len(pset.trajectory)
 

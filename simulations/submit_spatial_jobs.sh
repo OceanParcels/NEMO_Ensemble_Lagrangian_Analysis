@@ -11,12 +11,16 @@
 
 conda activate nemo-ensemble
 
-for j in {40..50}
-do
-   echo "MEMEMber $j -- Delta r: 2.0"
-   python ensemble_Member_spatial.py -m $j -dr 2.0
+echo "MEMEMber 39 -- Delta r: 2.0"
+python ensemble_Member_spatial.py -m 39 -dr 2.0
    
-done
+
+# for j in {40..50}
+# do
+#    echo "MEMEMber $j -- Delta r: 2.0"
+#    python ensemble_Member_spatial.py -m $j -dr 2.0
+   
+# done
 
 # for j in {26..50}
 # do

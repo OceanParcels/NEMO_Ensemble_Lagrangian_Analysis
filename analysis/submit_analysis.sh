@@ -11,8 +11,8 @@
 
 conda activate nemo-ensemble
 
-# python single_member_statistics_temp.py
-python single_member_statistics.py
+python single_member_statistics_temp.py
+# python single_member_statistics.py
 # python all_member_distributions_temp.py
 # python all_member_distributions_Nparticles.py
 # python single_member_statistics_Clusters.py
