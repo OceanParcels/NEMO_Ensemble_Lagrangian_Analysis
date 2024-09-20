@@ -131,7 +131,7 @@ hexbin_grid = hexfunc.hexGrid(hexbin_grid, h3_res=3)
 week_ranges = [4, 12, 20] # np.arange(1, 7)
 location = 'Cape_Hatteras'
 
-members = np.arange(48, 49)
+members = np.arange(49, 51)
 #%%
 for member in tqdm(members):
     for week in week_ranges:
