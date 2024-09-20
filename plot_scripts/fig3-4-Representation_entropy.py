@@ -74,6 +74,8 @@ for i, delta_r in enumerate([0.1, 1, 2]):
 
 
 # %% spatial plot of the mean entropy
+time_range = np.arange(0, 2189)
+
 fig, ax = plt.subplots()
 
 lss = [(0, (1, 1)), '--', '-.']
@@ -96,7 +98,7 @@ ax.set_xlim(1, 2189)
 ax.set_ylim(0., 10.5)
 ax.semilogx()
 ax.legend(shadow=True)
-ax.set_ylabel('Shannon Entropy (bits)')
+ax.set_ylabel('Entropy (bits)')
 ax.set_xlabel('Time (days)')
 ax.grid()
 plt.savefig('../figs/Fig3-Spatial-Representation_entropy.png', dpi=300)
@@ -104,6 +106,7 @@ plt.savefig('../figs/Fig3-Spatial-Representation_entropy.png', dpi=300)
 
 # %%%%%%%%%%%%%%%%%%%%%% TEMPORAL Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ################################################################################
+week_range = [4, 12, 20]
 
 entropies_time_mean = {}
 entropies_time_std = {}
@@ -119,7 +122,7 @@ for week in week_range:
     entropies_time_std[week] = np.std(_entropy, axis=0)
 
 # %%%%%%%%%%%%%%%%%%%%%%%%% Temporal plot of the mean entropy %%%%%%%%%%%%%%%%%%%%%%%%%
-time_range = np.arange(0, 2189)
+
 fig, ax = plt.subplots()
 
 lss = [(0, (1, 1)), '--', '-.', (0, (3, 1, 1, 1, 1, 1))]
@@ -152,7 +155,7 @@ ax.set_ylim(0., 10.5)
 
 ax.semilogx()
 ax.legend(shadow=True)
-ax.set_ylabel('Shannon Entropy (bits)')
+ax.set_ylabel('Entropy (bits)')
 ax.set_xlabel('Time (days)')
 ax.grid()
 plt.savefig('../figs/Fig4-Temporal-Representation_entropy.png', dpi=300)

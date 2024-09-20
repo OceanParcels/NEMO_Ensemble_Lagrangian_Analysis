@@ -180,5 +180,5 @@ for week in [4, 12, 20]:
 
     stats_df = pd.DataFrame(stats)
 
-    save_csv_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_W{week:02d}_m{member:03d}.pkl.csv"
+    save_csv_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_W{week:02d}.pkl.csv"
     stats_df.to_csv(save_csv_path)
