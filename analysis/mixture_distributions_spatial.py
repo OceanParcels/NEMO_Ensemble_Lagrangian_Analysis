@@ -119,7 +119,7 @@ def create_dataframe(probability_set, entropy_set, hexints, time_range):
     return ds
 
 
-np.random.seed(43)
+# np.random.seed(43)
 #%%
 
 # Load the hexbin_grid for the domain
@@ -145,7 +145,7 @@ def process_member(member, delta_r, location, subset_particles):
     return pset
 
 
-for delta_r in [2.]:
+for delta_r in [0.1]:
     for k in range(1, N_subsets+1):
         
         member = 1

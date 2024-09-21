@@ -112,7 +112,7 @@ def create_dataframe(probability_set, entropy_set, hexints, time_range):
     
     return ds
 
-np.random.seed(43)
+# np.random.seed(43)
 
 
 # Load the hexbin_grid for the domain
@@ -126,7 +126,7 @@ members = np.arange(2, 51)
 N_subsets = 50
 
 location = 'Cape_Hatteras'
-week = 4 # Number of weeks
+week = 20 # Number of weeks
 subset_particles = 148
 
 
