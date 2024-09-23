@@ -1,17 +1,11 @@
 # %% Load the packages
 import numpy as np
-import matplotlib.pyplot as plt
 import xarray as xr
-import cartopy
 from tqdm import tqdm
 import pandas as pd
 import pickle
-import sys
 import concurrent.futures
-
-sys.path.append("../functions")
-import hexbin_functions as hexfunc
-
+import os
 # %% Spatial analysis
 
 members = np.arange(2, 51)
@@ -29,20 +23,9 @@ def process_member(member, delta_r, location, subset_particles):
     return pset
 
 
-stats = {}
 distributions = {}
 
 Latitude_limit = 53
-
-n_members = np.arange(1, N_subsets + 1)
-counts = np.zeros(N_subsets)
-median_time = np.zeros(N_subsets)
-mean_time = np.zeros(N_subsets)
-std_time = np.zeros(N_subsets)
-
-mean_depth = np.zeros(N_subsets)
-median_depth = np.zeros(N_subsets)
-std_depth = np.zeros(N_subsets)
 
 for delta_r in [2.]:
     for k in tqdm(range(1, N_subsets+1)):
@@ -81,15 +64,6 @@ for delta_r in [2.]:
             
             depths = pset_members.z.load().values
             depths = depths[subpolar_traj, drift_time]
-            
-            median_time[member - 1] = np.median(drift_time)
-            mean_time[member - 1] = np.mean(drift_time)
-            std_time[member - 1] = np.std(drift_time)
-            counts[member - 1] = len(np.unique(p_index)) / N_particles * 100
-            
-            mean_depth[member - 1] = np.mean(depths)
-            median_depth[member - 1] = np.median(depths)
-            std_depth[member - 1] = np.std(depths)
 
             distributions["member"] = k
             distributions["drift_time"] = drift_time
@@ -103,17 +77,50 @@ for delta_r in [2.]:
             
         else:
             print(f"--EMPTY--")
-            median_time[member - 1] = np.nan
-            mean_time[member - 1] = np.nan
-            std_time[member - 1] = np.nan
-            counts[member - 1] = np.nan
-            
-            mean_depth[member - 1] = np.nan
-            median_depth[member - 1] = np.nan
-            std_depth[member - 1] = np.nan
+           
+# %% Make a dataframe with the statistics
 
+delta_r = 2.0
+N_subsets = 50
+N_particles = 7500
 
-    stats["members"] = n_members
+stats = {}
+
+n_members = np.arange(1, N_subsets + 1)
+counts = np.zeros(N_subsets)
+median_time = np.zeros(N_subsets)
+mean_time = np.zeros(N_subsets)
+std_time = np.zeros(N_subsets)
+
+mean_depth = np.zeros(N_subsets)
+median_depth = np.zeros(N_subsets)
+std_depth = np.zeros(N_subsets)
+
+for k in range(1, N_subsets+1):
+    
+    pkl_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/mix_dr_{delta_r*100:03.0f}/Distributions_mix_dr{delta_r*100:03.0f}_s{k:03d}.pkl"
+    
+    
+    if os.path.exists(pkl_path):
+        with open(pkl_path, "rb") as f:
+            distributions = pickle.load(f)
+        
+        drift_time = distributions["drift_time"]
+        depths = distributions["depths"]
+        trajectory = distributions["trajectory"]
+        
+        median_time[k - 1] = np.median(drift_time)
+        mean_time[k - 1] = np.mean(drift_time)
+        std_time[k - 1] = np.std(drift_time)
+        counts[k - 1] = len(drift_time) / N_particles * 100
+                    
+        mean_depth[k - 1] = np.mean(depths)
+        median_depth[k - 1] = np.median(depths)
+        std_depth[k - 1] = np.std(depths)
+    else:
+        print(f"File {pkl_path} does not exist. Skipping subset {k}.")
+
+    stats["subset"] = n_members
     stats["percentage"] = counts
     stats["median_time"] = median_time
     stats["mean_time"] = mean_time
