@@ -7,123 +7,186 @@ from tqdm import tqdm
 import pandas as pd
 import pickle
 import sys
+import seaborn as sns
 
 sys.path.append("../functions")
 import hexbin_functions as hexfunc
 
-# %% Spatial analysis
+# %% Load all dataframes
+
+all_mix_temp = {}
+all_mix_space = {}
+all_temp = {}
+all_space = {}
 location = "Cape_Hatteras"
-
-file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial_long/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
-        
-       
-
-save_csv_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_dr{delta_r*100:03.0f}.csv"
-
-
-# %% Temporal analysis
-location = "Cape_Hatteras"
-stats = {}
-distributions = {}
-
-total_members = 50
-Latitude_limit = 53
-
-n_members = np.arange(1, total_members + 1)
-counts = np.zeros(total_members)
-median_time = np.zeros(total_members)
-mean_time = np.zeros(total_members)
-std_time = np.zeros(total_members)
-
-mean_depth = np.zeros(total_members)
-median_depth = np.zeros(total_members)
-std_depth = np.zeros(total_members)
 
 for week in [4, 12, 20]:
-    for member in tqdm(range(1, total_members + 1)):
-        print(f"Member: {member:03d},  Week: {week}")
+    
+    df_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_W{week:02d}.csv"
+    _df = pd.read_csv(df_path)
+    all_temp[week] = _df
 
-        file_path = path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/temporal_long/W_{week:01d}/{location}_W{week:01d}_m{member:03d}.zarr"
-        
-        pset = xr.open_zarr(file_path)
-        N_particles = len(pset.trajectory)
+    df_mix = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_mix_W{week:02d}.csv"
+    _df = pd.read_csv(df_mix)
+    all_mix_temp[week] = _df
+    
+for delta_r in [0.1, 1., 2.]:
+    df_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_mix_dr{delta_r*100:03.0f}.csv"
+    _df = pd.read_csv(df_path)
+    all_mix_space[delta_r] = _df
+    
+    df_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_dr{delta_r*100:03.0f}.csv"
+    _df = pd.read_csv(df_path)
+    all_space[delta_r] = _df
 
-        lats = pset.lat.load().values
-        p_index, t_index = np.where(lats[:, :] > Latitude_limit)
-        subpolar_traj = np.unique(p_index)
-        drift_time = []
-        
-        if len(subpolar_traj) > 0:
-            for i in subpolar_traj:
-                idx_t = np.where(p_index == i)[0][0]
-                drift_time.append(t_index[idx_t])
-            
-            drift_time = np.array(drift_time)
-            
-            depths = pset.z.load().values
-            
-            depths = depths[subpolar_traj, drift_time]
-            
-            median_time[member - 1] = np.median(drift_time)
-            mean_time[member - 1] = np.mean(drift_time)
-            std_time[member - 1] = np.std(drift_time)
-            counts[member - 1] = len(np.unique(p_index)) / N_particles * 100
-            
-            mean_depth[member - 1] = np.mean(depths)
-            median_depth[member - 1] = np.median(depths)
-            std_depth[member - 1] = np.std(depths)
+#%% Plot the percentage of subpolar trajectories for temporal and spatial members
+fig, ax = plt.subplots(2, 3, figsize=(10, 6))
 
-            distributions["member"] = member
-            distributions["drift_time"] = drift_time
-            distributions["depths"] = depths
-            distributions["trajectory"] = np.unique(p_index)
+ax = ax.flatten()
+# Plot distributions for percentage of subpolar trajectories
 
-            # SAVE DISTRIBUTIONS in a pickle file
-            save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/W_{week:02d}/Distributions_W{week:02d}_m{member:03d}.pkl"
-            with open(save_path, "wb") as f:
-                pickle.dump(distributions, f)
-                
-        else:
-            median_time[member - 1] = np.nan
-            mean_time[member - 1] = np.nan
-            std_time[member - 1] = np.nan
-            counts[member - 1] = np.nan
-            
-            mean_depth[member - 1] = np.nan
-            median_depth[member - 1] = np.nan
-            std_depth[member - 1] = np.nan
-        
+colors_temp = ["darkred", "orangered", "orange"]
+ls_time = [(0, (1, 1)), '--', '-.', (0, (3, 1, 1, 1, 1, 1))]
+j = 0
+for week in [4, 12, 20]:
+    sns.kdeplot(all_temp[week]["percentage"]/100*7500, ax=ax[0], label=f"{week} weeks", clip=(0, 200),
+                fill=False, color=colors_temp[j], linestyle=ls_time[j])
+    sns.kdeplot(all_temp[week]["median_time"]/365, ax=ax[1], label=f"Temporal W{week}", clip=(0, 6),
+                fill=False, color=colors_temp[j], linestyle=ls_time[j])
+    sns.kdeplot(all_temp[week]["std_time"]/365, ax=ax[2], label=f"Temporal W{week}", clip=(0, 6),
+                fill=False, color=colors_temp[j], linestyle=ls_time[j])
+    j += 1
 
-    stats["members"] = n_members
-    stats["percentage"] = counts
-    stats["median_time"] = median_time
-    stats["mean_time"] = mean_time
-    stats["std_time"] = std_time
-    stats["mean_depth"] = mean_depth
-    stats["median_depth"] = median_depth
-    stats["std_depth"] = std_depth
+colors_space = ["midnightblue", "blueviolet", "teal"]
+ls_space = [(0, (1, 1)), '--', '-.']
+j=0
+for delta_r in [0.1, 1., 2.]:
+    sns.kdeplot(all_space[delta_r]["percentage"]/100*7500, ax=ax[3], label=f"$\delta_r = {delta_r}^o$", clip=(0, 500),
+                fill=False, color=colors_space[j], linestyle=ls_space[j])
+    sns.kdeplot(all_space[delta_r]["median_time"]/365, ax=ax[4], label=f"Spatial dr{delta_r}", clip=(0, 6),
+                fill=False, color=colors_space[j], linestyle=ls_space[j])
+    sns.kdeplot(all_space[delta_r]["std_time"]/365, ax=ax[5], label=f"Spatial dr{delta_r}", clip=(0, 6),
+                fill=False, color=colors_space[j], linestyle=ls_space[j])
+    j += 1
 
-    stats_df = pd.DataFrame(stats)
+# Add labels 'A', 'B', ... for each subplot in the top left corner
+labels = ['A', 'B', 'C', 'D', 'E', 'F']
+for i, label in enumerate(labels):
+    ax[i].text(0.05, 0.95, label, transform=ax[i].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
 
-    save_csv_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_W{week:02d}_m{member:03d}.pkl.csv"
-    stats_df.to_csv(save_csv_path)
+ax[0].set_xlabel("Counts")
+ax[0].set_ylabel("Density")
+ax[0].legend()
+# ax[0].grid()
 
-    #%% Plotss
+ax[1].set_xlabel("Median Drift Time (years)")
+ax[1].set_ylabel("Density")
+# ax[1].grid()
 
+ax[2].set_xlabel("STD Drift Time (years)")
+ax[2].set_ylabel("Density")
+# ax[2].grid()
+
+ax[3].set_xlabel("Counts")
+ax[3].set_ylabel("Density")
+ax[3].legend()
+# ax[3].grid()
+
+ax[4].set_xlabel("Median Drift Time (years)")
+ax[4].set_ylabel("Density")
+
+# ax[4].grid()
+
+ax[5].set_xlabel("STD Drift Time (years)")
+ax[5].set_ylabel("Density")
+# ax[5].grid()
+
+plt.tight_layout()
+# save the figure
+plt.savefig("../figs/Figx-Connect_tempNspace.png", dpi=300)
+
+#%% Plot the percentage of subpolar trajectories for Mixture temporal and spatial members
+fig, ax = plt.subplots(2, 3, figsize=(10, 6))
+
+ax = ax.flatten()
+# Plot distributions for percentage of subpolar trajectories
+
+colors_temp = ["darkred", "orangered", "orange"]
+ls_time = [(0, (1, 1)), '--', '-.', (0, (3, 1, 1, 1, 1, 1))]
+j = 0
+for week in [4, 12, 20]:
+    sns.kdeplot(all_mix_temp[week]["counts"], ax=ax[0], label=f"Mix. {week} weeks", clip=(0, 100),
+                fill=False, color=colors_temp[j], linestyle=ls_time[j])
+    sns.kdeplot(all_mix_temp[week]["median_time"]/365, ax=ax[1], label=f"Mix. {week} weeks", clip=(0, 6),
+                fill=False, color=colors_temp[j], linestyle=ls_time[j])
+    sns.kdeplot(all_mix_temp[week]["std_time"]/365, ax=ax[2], label=f"Mix. {week} weeks", clip=(0, 6),
+                fill=False, color=colors_temp[j], linestyle=ls_time[j])
+    j += 1
+
+colors_space = ["midnightblue", "blueviolet", "teal"]
+ls_space = [(0, (1, 1)), '--', '-.']
+j=0
+for delta_r in [0.1, 1., 2.]:
+    sns.kdeplot(all_mix_space[delta_r]["counts"], ax=ax[3], label=f"Mix. $\delta_r = {delta_r}^o$", clip=(0, 100),
+                fill=False, color=colors_space[j], linestyle=ls_space[j])
+    sns.kdeplot(all_mix_space[delta_r]["median_time"]/365, ax=ax[4], label=f"Mix. $\delta_r = {delta_r}^o$", clip=(0, 6),
+                fill=False, color=colors_space[j], linestyle=ls_space[j])
+    sns.kdeplot(all_mix_space[delta_r]["std_time"]/365, ax=ax[5], label=f"Mix. $\delta_r = {delta_r}^o$", clip=(0, 6),
+                fill=False, color=colors_space[j], linestyle=ls_space[j])
+    j += 1
+
+# Add labels 'A', 'B', ... for each subplot in the top left corner
+labels = ['A', 'B', 'C', 'D', 'E', 'F']
+for i, label in enumerate(labels):
+    ax[i].text(0.05, 0.95, label, transform=ax[i].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
+    
+
+ax[0].set_xlabel("Counts")
+ax[0].set_ylabel("Density")
+ax[0].legend(fontsize=7)
+# ax[0].grid()
+
+ax[1].set_xlabel("Median Drift Time (years)")
+ax[1].set_ylabel("Density")
+# ax[1].grid()
+
+ax[2].set_xlabel("STD Drift Time (years)")
+ax[2].set_ylabel("Density")
+# ax[2].grid()
+
+ax[3].set_xlabel("Counts")
+ax[3].set_ylabel("Density")
+ax[3].legend()
+# ax[3].grid()
+
+ax[4].set_xlabel("Median Drift Time (years)")
+ax[4].set_ylabel("Density")
+# ax[4].grid()
+
+ax[5].set_xlabel("STD Drift Time (years)")
+ax[5].set_ylabel("Density")
+# ax[5].grid()
+
+plt.tight_layout()
+plt.savefig("../figs/Figx-Connect_MIX_tempNspace.png", dpi=300)
+
+###################################################################
+#%% Plotss
+# ----------------------TEMPORAL-------------------------
 fig, ax = plt.subplots(3, 1, figsize=(10, 15))
-ax[0].plot(stats_df["members"], stats_df["percentage"], '.k--')
+ax[0].plot(stats_df["subset"], stats_df["percentage"], '.k--')
 ax[0].set_title("Percentage of Subpolar Trajectories")
 ax[0].set_ylabel("Percentage")
 ax[0].set_xlabel("Members")
 ax[0].grid()
 
-ax[1].plot(stats_df["members"], stats_df["median_time"]/365, 'sr--')
+ax[1].plot(stats_df["subset"], stats_df["median_time"]/365, 'sr--')
 ax[1].set_title("Median time to reach $53^o$N")
 ax[1].set_xlabel("Members")
 ax[1].set_ylabel("Median drift time (years)")
 ax[1].grid()
 
-ax[2].plot(stats_df["members"], stats_df["median_depth"], 'og--')
+ax[2].plot(stats_df["subset"], stats_df["median_depth"], 'og--')
 ax[2].set_title("Median depth at $53^o$N")
 ax[2].set_xlabel("Time (days)")
 ax[2].set_ylabel("Median depth (m)")

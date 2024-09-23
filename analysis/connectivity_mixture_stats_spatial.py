@@ -79,8 +79,6 @@ for delta_r in [2.]:
             print(f"--EMPTY--")
            
 # %% Make a dataframe with the statistics
-
-delta_r = 2.0
 N_subsets = 50
 N_particles = 7500
 
@@ -96,43 +94,53 @@ mean_depth = np.zeros(N_subsets)
 median_depth = np.zeros(N_subsets)
 std_depth = np.zeros(N_subsets)
 
-for k in range(1, N_subsets+1):
-    
-    pkl_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/mix_dr_{delta_r*100:03.0f}/Distributions_mix_dr{delta_r*100:03.0f}_s{k:03d}.pkl"
-    
-    
-    if os.path.exists(pkl_path):
-        with open(pkl_path, "rb") as f:
-            distributions = pickle.load(f)
+for delta_r in [0.1, 1., 2.]:
+    for k in range(1, N_subsets+1):
         
-        drift_time = distributions["drift_time"]
-        depths = distributions["depths"]
-        trajectory = distributions["trajectory"]
+        pkl_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/mix_dr_{delta_r*100:03.0f}/Distributions_mix_dr{delta_r*100:03.0f}_s{k:03d}.pkl"
         
-        median_time[k - 1] = np.median(drift_time)
-        mean_time[k - 1] = np.mean(drift_time)
-        std_time[k - 1] = np.std(drift_time)
-        counts[k - 1] = len(drift_time) / N_particles * 100
-                    
-        mean_depth[k - 1] = np.mean(depths)
-        median_depth[k - 1] = np.median(depths)
-        std_depth[k - 1] = np.std(depths)
-    else:
-        print(f"File {pkl_path} does not exist. Skipping subset {k}.")
+        
+        if os.path.exists(pkl_path):
+            with open(pkl_path, "rb") as f:
+                distributions = pickle.load(f)
+            
+            drift_time = distributions["drift_time"]
+            depths = distributions["depths"]
+            trajectory = distributions["trajectory"]
+            
+            median_time[k - 1] = np.median(drift_time)
+            mean_time[k - 1] = np.mean(drift_time)
+            std_time[k - 1] = np.std(drift_time)
+            counts[k - 1] = len(drift_time) #/ N_particles * 100
+                        
+            mean_depth[k - 1] = np.mean(depths)
+            median_depth[k - 1] = np.median(depths)
+            std_depth[k - 1] = np.std(depths)
+        else:
+            print(f"File {pkl_path} does not exist. Skipping subset {k}.")
+            
+            median_time[k - 1] = np.nan
+            mean_time[k - 1] = np.nan
+            std_time[k - 1] = np.nan
+            counts[k - 1] = 0
+                        
+            mean_depth[k - 1] = np.nan
+            median_depth[k - 1] = np.nan
+            std_depth[k - 1] = np.nan
 
-    stats["subset"] = n_members
-    stats["percentage"] = counts
-    stats["median_time"] = median_time
-    stats["mean_time"] = mean_time
-    stats["std_time"] = std_time
-    stats["mean_depth"] = mean_depth
-    stats["median_depth"] = median_depth
-    stats["std_depth"] = std_depth
+        stats["subset"] = n_members
+        stats["counts"] = counts
+        stats["median_time"] = median_time
+        stats["mean_time"] = mean_time
+        stats["std_time"] = std_time
+        stats["mean_depth"] = mean_depth
+        stats["median_depth"] = median_depth
+        stats["std_depth"] = std_depth
 
-    stats_df = pd.DataFrame(stats)
+        stats_df = pd.DataFrame(stats)
 
-    save_csv_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_mix_dr{delta_r*100:03.0f}.csv"
-    stats_df.to_csv(save_csv_path)
+        save_csv_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_mix_dr{delta_r*100:03.0f}.csv"
+        stats_df.to_csv(save_csv_path)
 
 
 # %%
