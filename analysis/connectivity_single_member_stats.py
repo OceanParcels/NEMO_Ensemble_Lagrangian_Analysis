@@ -55,8 +55,6 @@ location = "Cape_Hatteras"
 distributions = {}
 
 total_members = 50
-Latitude_limit = 53
-
 
 for week in [4, 12, 20]:
     for member in tqdm(range(1, total_members + 1)):

@@ -55,9 +55,9 @@ colors_space = ["midnightblue", "blueviolet", "teal"]
 ls_space = [(0, (1, 1)), '--', '-.']
 j = 0
 for delta_r in [0.1, 1., 2.]:
-    _counts = sns.kdeplot(all_space[delta_r]["counts"], ax=ax[0], label=f"$\delta_r = {delta_r}^o$", clip=(0, 500),
+    _counts_dr = sns.kdeplot(all_space[delta_r]["counts"], ax=ax[0], label=f"$\delta_r = {delta_r}^o$", clip=(0, 500),
                 fill=False, color=colors_space[j], linestyle=ls_space[j])
-    kde_space[delta_r] = _counts.get_lines()[0].get_data() # save the KDE values for entropy computation
+    kde_space[delta_r] = _counts_dr.get_lines()[j].get_data() # save the KDE values for entropy computation
     
     sns.kdeplot(all_space[delta_r]["median_time"]/365, ax=ax[1], label=f"Spatial dr{delta_r}", clip=(0, 6),
                 fill=False, color=colors_space[j], linestyle=ls_space[j])
@@ -71,7 +71,7 @@ j = 0
 for week in [4, 12, 20]:
     _counts = sns.kdeplot(all_temp[week]["counts"], ax=ax[3], label=f"{week} weeks", clip=(0, 200),
                 fill=False, color=colors_temp[j], linestyle=ls_time[j])
-    kde_temp[week] = _counts.get_lines()[0].get_data() # save the KDE values for entropy computation
+    kde_temp[week] = _counts.get_lines()[j].get_data() # save the KDE values for entropy computation
     
     sns.kdeplot(all_temp[week]["median_time"]/365, ax=ax[4], label=f"Temporal W{week}", clip=(0, 6),
                 fill=False, color=colors_temp[j], linestyle=ls_time[j])
@@ -117,8 +117,9 @@ ax = ax.flatten()
 colors_space = ["midnightblue", "blueviolet", "teal"]
 ls_space = [(0, (1, 1)), '--', '-.']
 j=0
+
 for delta_r in [0.1, 1., 2.]:
-    _counts = sns.kdeplot(all_mix_space[delta_r]["counts"], ax=ax[0], label=f"Mix. $\delta_r = {delta_r}^o$", clip=(0, 100),
+    _counts = sns.kdeplot(all_mix_space[delta_r]["counts"], ax=ax[0], label=f"Mix. $\delta_r = {delta_r}^o$", clip=(0, 200),
                 fill=False, color=colors_space[j], linestyle=ls_space[j])
     kde_mix_space[delta_r] = _counts.get_lines()[0].get_data() # save the KDE values for entropy computation
     
@@ -136,7 +137,7 @@ j = 0
 for week in [4, 12, 20]:
     _counts = sns.kdeplot(all_mix_temp[week]["counts"], ax=ax[3], label=f"Mix. {week} weeks", clip=(0, 100),
                 fill=False, color=colors_temp[j], linestyle=ls_time[j])
-    kde_mix_temp[week] = _counts.get_lines()[0].get_data() # save the KDE values for entropy computation
+    kde_mix_temp[week] = _counts.get_lines()[j].get_data() # save the KDE values for entropy computation
     
     sns.kdeplot(all_mix_temp[week]["median_time"]/365, ax=ax[4], label=f"Mix. {week} weeks", clip=(0, 6),
                 fill=False, color=colors_temp[j], linestyle=ls_time[j])
@@ -334,13 +335,13 @@ entropy_mixture = np.zeros(6)
 
 j = 0
 for delta_r in [0.1, 1., 2.]:
-    entropy_single[j] = entropy(kde_space[delta_r][0])
-    entropy_mixture[j] = entropy(kde_mix_space[delta_r][1])
+    entropy_single[j] = entropy(kde_space[delta_r][1])
+    # entropy_mixture[j] = entropy(kde_mix_space[delta_r][1])
     j += 1
     
 for j, week in enumerate([4, 12, 20]):
     entropy_single[j+3] = entropy(kde_temp[week][1])
-    entropy_mixture[j+3] = entropy(kde_mix_temp[week][1])
+    # entropy_mixture[j+3] = entropy(kde_mix_temp[week][1])
     j += 1
 
 # # Create the dataframe
