@@ -1,33 +1,17 @@
 # %% Load the packages
 import numpy as np
-import matplotlib.pyplot as plt
 import xarray as xr
-import cartopy
 from tqdm import tqdm
 import pandas as pd
 import pickle
-import sys
-
-sys.path.append("../functions")
-import hexbin_functions as hexfunc
+import os
 
 # %% Spatial analysis
 location = "Cape_Hatteras"
-stats = {}
 distributions = {}
 
 total_members = 50
 Latitude_limit = 53
-
-n_members = np.arange(1, total_members + 1)
-counts = np.zeros(total_members)
-median_time = np.zeros(total_members)
-mean_time = np.zeros(total_members)
-std_time = np.zeros(total_members)
-
-mean_depth = np.zeros(total_members)
-median_depth = np.zeros(total_members)
-std_depth = np.zeros(total_members)
 
 for delta_r in [0.1, 1, 2]:
     for member in tqdm(range(1, total_members + 1)):
@@ -51,15 +35,6 @@ for delta_r in [0.1, 1, 2]:
             
             depths = pset.z.load().values
             depths = depths[subpolar_traj, drift_time]
-            
-            median_time[member - 1] = np.median(drift_time)
-            mean_time[member - 1] = np.mean(drift_time)
-            std_time[member - 1] = np.std(drift_time)
-            counts[member - 1] = len(np.unique(p_index)) / N_particles * 100
-            
-            mean_depth[member - 1] = np.mean(depths)
-            median_depth[member - 1] = np.median(depths)
-            std_depth[member - 1] = np.std(depths)
 
             distributions["member"] = member
             distributions["drift_time"] = drift_time
@@ -72,47 +47,16 @@ for delta_r in [0.1, 1, 2]:
                 pickle.dump(distributions, f)
             
         else:
-            median_time[member - 1] = np.nan
-            mean_time[member - 1] = np.nan
-            std_time[member - 1] = np.nan
-            counts[member - 1] = np.nan
-            
-            mean_depth[member - 1] = np.nan
-            median_depth[member - 1] = np.nan
-            std_depth[member - 1] = np.nan
-
-
-    stats["members"] = n_members
-    stats["percentage"] = counts
-    stats["median_time"] = median_time
-    stats["mean_time"] = mean_time
-    stats["std_time"] = std_time
-    stats["mean_depth"] = mean_depth
-    stats["median_depth"] = median_depth
-    stats["std_depth"] = std_depth
-
-    stats_df = pd.DataFrame(stats)
-
-    save_csv_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_dr{delta_r*100:03.0f}.csv"
-    stats_df.to_csv(save_csv_path)
+            print(f"--EMPTY--")
 
 # %% Temporal analysis
 location = "Cape_Hatteras"
-stats = {}
+
 distributions = {}
 
 total_members = 50
 Latitude_limit = 53
 
-n_members = np.arange(1, total_members + 1)
-counts = np.zeros(total_members)
-median_time = np.zeros(total_members)
-mean_time = np.zeros(total_members)
-std_time = np.zeros(total_members)
-
-mean_depth = np.zeros(total_members)
-median_depth = np.zeros(total_members)
-std_depth = np.zeros(total_members)
 
 for week in [4, 12, 20]:
     for member in tqdm(range(1, total_members + 1)):
@@ -138,15 +82,6 @@ for week in [4, 12, 20]:
             depths = pset.z.load().values
             
             depths = depths[subpolar_traj, drift_time]
-            
-            median_time[member - 1] = np.median(drift_time)
-            mean_time[member - 1] = np.mean(drift_time)
-            std_time[member - 1] = np.std(drift_time)
-            counts[member - 1] = len(np.unique(p_index)) / N_particles * 100
-            
-            mean_depth[member - 1] = np.mean(depths)
-            median_depth[member - 1] = np.median(depths)
-            std_depth[member - 1] = np.std(depths)
 
             distributions["member"] = member
             distributions["drift_time"] = drift_time
@@ -159,26 +94,139 @@ for week in [4, 12, 20]:
                 pickle.dump(distributions, f)
                 
         else:
+            print(f"--EMPTY--")
+        
+    
+#%% Build the Pandas Dataframes from the pickle files
+    # ____________________Spatial__________________________
+N_members = 50
+
+stats = {}
+
+n_members = np.arange(1, N_members + 1)
+counts = np.zeros(N_members)
+median_time = np.zeros(N_members)
+mean_time = np.zeros(N_members)
+min_time = np.zeros(N_members)
+std_time = np.zeros(N_members)
+
+mean_depth = np.zeros(N_members)
+median_depth = np.zeros(N_members)
+std_depth = np.zeros(N_members)
+
+for delta_r in [0.1, 1., 2.]:
+    for member in range(1, N_members+1):
+        
+        pkl_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/dr_{delta_r*100:03.0f}/Distributions_dr{delta_r*100:03.0f}_m{member:03d}.pkl"
+        
+        if os.path.exists(pkl_path):
+            with open(pkl_path, "rb") as f:
+                distributions = pickle.load(f)
+            
+            drift_time = distributions["drift_time"]
+            depths = distributions["depths"]
+            trajectory = distributions["trajectory"]
+            
+            median_time[member - 1] = np.median(drift_time)
+            mean_time[member - 1] = np.mean(drift_time)
+            min_time[member - 1] = np.min(drift_time)
+            std_time[member - 1] = np.std(drift_time)
+            counts[member - 1] = len(drift_time)
+                        
+            mean_depth[member - 1] = np.mean(depths)
+            median_depth[member - 1] = np.median(depths)
+            std_depth[member - 1] = np.std(depths)
+        else:
+            print(f"File {pkl_path} does not exist. Skipping member {member}.")
+            
             median_time[member - 1] = np.nan
             mean_time[member - 1] = np.nan
+            min_time[member - 1] = np.nan
             std_time[member - 1] = np.nan
-            counts[member - 1] = np.nan
-            
+            counts[member - 1] = 0
+                        
             mean_depth[member - 1] = np.nan
             median_depth[member - 1] = np.nan
             std_depth[member - 1] = np.nan
+
+        stats["subset"] = n_members
+        stats["counts"] = counts
+        stats["median_time"] = median_time
+        stats["mean_time"] = mean_time
+        stats["min_time"] = min_time
+        stats["std_time"] = std_time
+        stats["mean_depth"] = mean_depth
+        stats["median_depth"] = median_depth
+        stats["std_depth"] = std_depth
+
+        stats_df = pd.DataFrame(stats)
+
+        save_csv_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_dr{delta_r*100:03.0f}.csv"
+        stats_df.to_csv(save_csv_path)
+    
+#%% ___________________Temporal__________________________
+N_members = 50
+
+stats = {}
+
+n_members = np.arange(1, N_members + 1)
+counts = np.zeros(N_members)
+median_time = np.zeros(N_members)
+mean_time = np.zeros(N_members)
+min_time = np.zeros(N_members)
+std_time = np.zeros(N_members)
+
+mean_depth = np.zeros(N_members)
+median_depth = np.zeros(N_members)
+std_depth = np.zeros(N_members)
+
+for week in [4, 12, 20]:
+    for member in range(1, N_members + 1):
+        pkl_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/W_{week:02d}/Distributions_W{week:02d}_m{member:03d}.pkl"
         
+        if os.path.exists(pkl_path):
+            with open(pkl_path, "rb") as f:
+                distributions = pickle.load(f)
+            
+            drift_time = distributions["drift_time"]
+            depths = distributions["depths"]
+            trajectory = distributions["trajectory"]
+            
+            median_time[member - 1] = np.median(drift_time)
+            mean_time[member - 1] = np.mean(drift_time)
+            min_time[member - 1] = np.min(drift_time)
+            std_time[member - 1] = np.std(drift_time)
+            counts[member - 1] = len(drift_time)
+                        
+            mean_depth[member - 1] = np.mean(depths)
+            median_depth[member - 1] = np.median(depths)
+            std_depth[member - 1] = np.std(depths)
+        else:
+            print(f"File {pkl_path} does not exist. Skipping member {member}.")
+            
+            median_time[member - 1] = np.nan
+            mean_time[member - 1] = np.nan
+            min_time[member - 1] = np.nan
+            std_time[member - 1] = np.nan
+            counts[member - 1] = 0
+                        
+            mean_depth[member - 1] = np.nan
+            median_depth[member - 1] = np.nan
+            std_depth[member - 1] = np.nan
 
-    stats["members"] = n_members
-    stats["percentage"] = counts
-    stats["median_time"] = median_time
-    stats["mean_time"] = mean_time
-    stats["std_time"] = std_time
-    stats["mean_depth"] = mean_depth
-    stats["median_depth"] = median_depth
-    stats["std_depth"] = std_depth
+        stats["subset"] = n_members
+        stats["counts"] = counts
+        stats["median_time"] = median_time
+        stats["mean_time"] = mean_time
+        stats["min_time"] = min_time
+        stats["std_time"] = std_time
+        stats["mean_depth"] = mean_depth
+        stats["median_depth"] = median_depth
+        stats["std_depth"] = std_depth
 
-    stats_df = pd.DataFrame(stats)
+        stats_df = pd.DataFrame(stats)
 
-    save_csv_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_W{week:02d}.pkl.csv"
-    stats_df.to_csv(save_csv_path)
+        save_csv_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_W{week:02d}.csv"
+        stats_df.to_csv(save_csv_path)
+    
+# %%

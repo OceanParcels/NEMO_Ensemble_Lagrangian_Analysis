@@ -89,6 +89,7 @@ n_members = np.arange(1, N_subsets + 1)
 counts = np.zeros(N_subsets)
 median_time = np.zeros(N_subsets)
 mean_time = np.zeros(N_subsets)
+min_time = np.zeros(N_subsets)
 std_time = np.zeros(N_subsets)
 
 mean_depth = np.zeros(N_subsets)
@@ -111,6 +112,7 @@ for week in [4, 12, 20]:
             
             median_time[k - 1] = np.median(drift_time)
             mean_time[k - 1] = np.mean(drift_time)
+            min_time[k - 1] = np.min(drift_time)
             std_time[k - 1] = np.std(drift_time)
             counts[k - 1] = len(drift_time) #/ N_particles * 100
                         
@@ -121,6 +123,7 @@ for week in [4, 12, 20]:
             print(f"File {pkl_path} does not exist. Skipping subset {k}.")
             median_time[k - 1] = np.nan
             mean_time[k - 1] = np.nan
+            min_time[k - 1] = np.nan
             std_time[k - 1] = np.nan
             counts[k - 1] = 0
                         
@@ -132,6 +135,7 @@ for week in [4, 12, 20]:
         stats["counts"] = counts
         stats["median_time"] = median_time
         stats["mean_time"] = mean_time
+        stats["min_time"] = min_time
         stats["std_time"] = std_time
         stats["mean_depth"] = mean_depth
         stats["median_depth"] = median_depth
