@@ -18,7 +18,7 @@ print(f"Longitude limit: {Longitude_limit}")
 
 # %%  Temporal analysis
 
-members = np.arange(2, 51)
+members = np.arange(1, 51)
 N_subsets = 50
 
 subset_particles = 150
@@ -35,32 +35,26 @@ distributions = {}
 for week in [4, 12, 20]:
     for k in range(1, N_subsets+1): 
         
-        member = 1
-        
-        path = base_path + f"{location}/temporal_long/W_{week:01d}/{location}_W{week:01d}_m{member:03d}.zarr"
-        pset_members = xr.open_zarr(path)
-        obs_length = len(pset_members.obs)
-        obs_range = range(obs_length) # Number of time steps in the observation period
-
-        pset_members = pset_members.isel(trajectory=np.random.choice(pset_members.trajectory, subset_particles, replace=False))
-
+        psets = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [executor.submit(process_member, member, week, location, subset_particles) for member in members]
             for future in tqdm(concurrent.futures.as_completed(futures), total=len(members)):
                 pset = future.result()
-            
-                pset_members = xr.concat([pset_members, pset], dim='trajectory')
+                psets.append(pset)
+                
+        pset_members = xr.concat(psets, dim='trajectory')
+        obs_length = len(pset_members.obs)
         
         print(f"Subset:{k} week: {week}. Number of particles: {len(pset_members.trajectory)}")
 
         N_particles = len(pset_members.trajectory)
 
         if Latitude_limit is not None:
-            lats = pset.lat.load().values
+            lats = pset.lat.values
             p_index, t_index = np.where(lats[:, :] > Latitude_limit)
             
         elif Longitude_limit is not None:
-            lons = pset.lon.load().values
+            lons = pset.lon.values
             p_index, t_index = np.where(lons[:, :] > Longitude_limit)
         
         
@@ -112,7 +106,7 @@ mean_depth = np.zeros(N_subsets)
 median_depth = np.zeros(N_subsets)
 std_depth = np.zeros(N_subsets)
 
-for week in [4, 12, 20]:
+for week in [20]:
     for k in range(1, N_subsets+1):
         
         if Latitude_limit is not None:

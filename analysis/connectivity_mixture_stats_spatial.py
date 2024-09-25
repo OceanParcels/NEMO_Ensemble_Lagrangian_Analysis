@@ -17,7 +17,7 @@ print(f"Latitude limit: {Latitude_limit}")
 print(f"Longitude limit: {Longitude_limit}")
 # %% Spatial analysis
 
-members = np.arange(2, 51)
+members = np.arange(1, 51)
 N_subsets = 50
 
 subset_particles = 150
@@ -33,35 +33,29 @@ def process_member(member, delta_r, location, subset_particles):
 
 distributions = {}
 
-for delta_r in [0.1, 1., 2.]:
+for delta_r in [2.]:
     for k in range(1, N_subsets+1):
         
-        member = 1
-        
-        path = base_path + f"{location}/spatial_long/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
-        pset_members = xr.open_zarr(path)
-        obs_length = len(pset_members.obs)
-        obs_range = range(obs_length) # Number of time steps in the observation period
-
-        pset_members = pset_members.isel(trajectory=np.random.choice(pset_members.trajectory, subset_particles, replace=False))
-
+        psets = []
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [executor.submit(process_member, member, delta_r, location, subset_particles) for member in members]
             for future in tqdm(concurrent.futures.as_completed(futures), total=len(members)):
                 pset = future.result()
-            
-                pset_members = xr.concat([pset_members, pset], dim='trajectory')
+                psets.append(pset)
+        
+        pset_members = xr.concat(psets, dim='trajectory')
+        obs_length = len(pset_members.obs)
         
         print(f"Subset:{k} delta_r: {delta_r}. Number of particles: {len(pset_members.trajectory)}")
 
         N_particles = len(pset_members.trajectory)
 
         if Latitude_limit is not None:
-            lats = pset.lat.load().values
+            lats = pset.lat.values
             p_index, t_index = np.where(lats[:, :] > Latitude_limit)
             
         elif Longitude_limit is not None:
-            lons = pset.lon.load().values
+            lons = pset.lon.values
             p_index, t_index = np.where(lons[:, :] > Longitude_limit)
         
         

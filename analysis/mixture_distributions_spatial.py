@@ -120,8 +120,6 @@ def create_dataframe(probability_set, entropy_set, hexints, time_range):
 
 
 # np.random.seed(43)
-#%%
-# Compute_psets = True
 
 # Load the hexbin_grid for the domain
 with open('../data/hexgrid_no_coast.pkl', 'rb') as f:
@@ -130,12 +128,12 @@ with open('../data/hexgrid_no_coast.pkl', 'rb') as f:
 hexbin_grid = hexfunc.hexGrid(hexbin_grid, h3_res=3)
 
 ###### Calculate for all memebers and delta_rs ####
-# delta_r_ranges = np.linspace(0.1, 1, 10)
-members = np.arange(2, 51)
+
+members = np.arange(1, 51)
 N_subsets = 50
 
 location = 'Cape_Hatteras'
-delta_r = 0.1
+delta_r = 1.0
 subset_particles = 150
 
 
@@ -147,37 +145,34 @@ def process_member(member, delta_r, location, subset_particles):
 
 
 for delta_r in [1.0]:
-    for k in range(1, N_subsets+1):
+    for k in range(7, N_subsets+1):
         
-        member = 1
+        # member = 1
         
-        path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial_long/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
-        pset_members = xr.open_zarr(path)
-        obs_length = len(pset_members.obs)
-        obs_range = range(obs_length) # Number of time steps in the observation period
+        # path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial_long/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
+        # pset_members = xr.open_zarr(path)
+        # obs_length = len(pset_members.obs)
+        # obs_range = range(obs_length) # Number of time steps in the observation period
 
-        pset_members = pset_members.isel(trajectory=np.random.choice(pset_members.trajectory, subset_particles, replace=False))
+        # pset_members = pset_members.isel(trajectory=np.random.choice(pset_members.trajectory, subset_particles, replace=False))
 
         print(f"Subset:{k} delta_r: {delta_r}")
+        
+        psets = []
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [executor.submit(process_member, member, delta_r, location, subset_particles) for member in members]
             for future in tqdm(concurrent.futures.as_completed(futures), total=len(members)):
                 pset = future.result()
-            
-                pset_members = xr.concat([pset_members, pset], dim='trajectory')
-
-        # pset_members = pset_members.compute()
+                psets.append(pset)
+        
+        pset_members = xr.concat(psets, dim='trajectory')
+        obs_range = range(len(pset_members.obs))
+                
         print("length pset_members: ", len(pset_members.trajectory))
-        save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/mix_spatial_long/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_mix_s{k:03d}.nc"
-        pset_members.to_netcdf(save_path)
-        print(f"NetCDF Saved in: {save_path}")
         
-        
-        # P_m, Ent_m = calculate_probability_and_entropy(pset_members, hexbin_grid, entropy)
-        # DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
-        # save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_long/P_dr{delta_r*100:03.0f}_all_s{k:03d}.nc"
-        # DF_m.to_netcdf(save_path)
-        # print(f"Saved: {save_path}")
-
-#%%
+        P_m, Ent_m = calculate_probability_and_entropy(pset_members, hexbin_grid, entropy)
+        DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
+        save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_long/P_dr{delta_r*100:03.0f}_all_s{k:03d}.nc"
+        DF_m.to_netcdf(save_path)
+        print(f"Saved: {save_path}")
