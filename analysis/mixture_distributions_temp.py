@@ -126,7 +126,7 @@ members = np.arange(2, 51)
 N_subsets = 50
 
 location = 'Cape_Hatteras'
-week = 20 # Number of weeks
+week = 12 # Number of weeks
 subset_particles = 148
 
 
@@ -153,10 +153,16 @@ for k in range(1, N_subsets+1):
             pset = future.result()
             pset_members = xr.concat([pset_members, pset], dim='trajectory')
 
+   
     print("length pset_members: ", len(pset_members.trajectory))
 
-    P_m, Ent_m = calculate_probability_and_entropy(pset_members, hexbin_grid, entropy)
-    DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
-    save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_long/P_W{week:02d}_all_s{k:03d}.nc"
-    DF_m.to_netcdf(save_path)
+    # Save the combined particle set to a new zarr file
+    save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/mix_temporal_long/W_{week:02d}/{location}_W{week:02d}_mix_s{k:03d}.nc"
+    pset_members.to_netcdf(save_path)
+    print(f"NetCDF Saved in: {save_path}")
+    
+    # P_m, Ent_m = calculate_probability_and_entropy(pset_members, hexbin_grid, entropy)
+    # DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
+    # save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_long/P_W{week:02d}_all_s{k:03d}.nc"
+    # DF_m.to_netcdf(save_path)
 

@@ -7,32 +7,37 @@ import pickle
 import concurrent.futures
 import os
 
+location = "Cape_Hatteras"
+base_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/"
+
+Latitude_limit = 44
+Longitude_limit = None
+
+print(f"Latitude limit: {Latitude_limit}")
+print(f"Longitude limit: {Longitude_limit}")
+
 # %%  Temporal analysis
 
 members = np.arange(2, 51)
 N_subsets = 50
 
-location = 'Cape_Hatteras'
 subset_particles = 150
 
 def process_member(member, week, location, subset_particles):
-    path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/temporal_long/W_{week:01d}/{location}_W{week:01d}_m{member:03d}.zarr"
+    path = base_path + f"{location}/temporal_long/W_{week:01d}/{location}_W{week:01d}_m{member:03d}.zarr"
     pset = xr.open_zarr(path)
     pset = pset.isel(trajectory=np.random.choice(pset.trajectory, subset_particles, replace=False))
     return pset
 
 
-
 distributions = {}
 
-Latitude_limit = 53
-
-for week in [20]:
-    for k in tqdm(range(1, N_subsets+1)):
+for week in [4, 12, 20]:
+    for k in range(1, N_subsets+1): 
         
         member = 1
         
-        path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/temporal_long/W_{week:01d}/{location}_W{week:01d}_m{member:03d}.zarr"
+        path = base_path + f"{location}/temporal_long/W_{week:01d}/{location}_W{week:01d}_m{member:03d}.zarr"
         pset_members = xr.open_zarr(path)
         obs_length = len(pset_members.obs)
         obs_range = range(obs_length) # Number of time steps in the observation period
@@ -50,8 +55,15 @@ for week in [20]:
 
         N_particles = len(pset_members.trajectory)
 
-        lats = pset_members.lat.load().values
-        p_index, t_index = np.where(lats[:, :] > Latitude_limit)
+        if Latitude_limit is not None:
+            lats = pset.lat.load().values
+            p_index, t_index = np.where(lats[:, :] > Latitude_limit)
+            
+        elif Longitude_limit is not None:
+            lons = pset.lon.load().values
+            p_index, t_index = np.where(lons[:, :] > Longitude_limit)
+        
+        
         subpolar_traj = np.unique(p_index)
         drift_time = []
 
@@ -71,7 +83,11 @@ for week in [20]:
             distributions["trajectory"] = np.unique(p_index)
             
             # SAVE DISTRIBUTIONS in a pickle file
-            save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/mix_W_{week:02d}/Distributions_mix_W{week:02d}_s{k:03d}.pkl"
+            if Latitude_limit is not None:
+                save_path = base_path + f"analysis/connectivity/mix_W_{week:02d}_{Latitude_limit}N/Distributions_mix_W_{week:02d}_s{k:03d}.pkl"
+            elif Longitude_limit is not None:    
+                save_path = base_path + f"analysis/connectivity/mix_W_{week:02d}_{Longitude_limit}W/Distributions_mix_W_{week:02d}_s{k:03d}.pkl"
+            
             with open(save_path, "wb") as f:
                 pickle.dump(distributions, f)
             
@@ -99,8 +115,10 @@ std_depth = np.zeros(N_subsets)
 for week in [4, 12, 20]:
     for k in range(1, N_subsets+1):
         
-        pkl_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/mix_W_{week:02d}/Distributions_mix_W{week:02d}_s{k:03d}.pkl"
-        
+        if Latitude_limit is not None:
+            pkl_path = base_path + f"analysis/connectivity/mix_W_{week:02d}_{Latitude_limit}N/Distributions_mix_W{week:02d}_s{k:03d}.pkl"
+        elif Longitude_limit is not None:    
+            pkl_path = base_path + f"analysis/connectivity/mix_W_{week:02d}_{Longitude_limit}W/Distributions_mix_W{week:02d}_s{k:03d}.pkl"
         
         if os.path.exists(pkl_path):
             with open(pkl_path, "rb") as f:
@@ -143,7 +161,10 @@ for week in [4, 12, 20]:
 
         stats_df = pd.DataFrame(stats)
 
-        save_csv_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_mix_W{week:02d}.csv"
+        if Latitude_limit is not None:
+            save_csv_path = base_path + f"analysis/connectivity/Stats/Stats_mix_W{week:02d}_{Latitude_limit}N.csv"
+        elif Longitude_limit is not None:    
+            save_csv_path = base_path + f"analysis/connectivity/Stats/Stats_mix_W{week:02d}_{Longitude_limit}W.csv"
         stats_df.to_csv(save_csv_path)
 
 

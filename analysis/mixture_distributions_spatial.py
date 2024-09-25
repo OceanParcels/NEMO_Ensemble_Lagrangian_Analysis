@@ -121,6 +121,7 @@ def create_dataframe(probability_set, entropy_set, hexints, time_range):
 
 # np.random.seed(43)
 #%%
+# Compute_psets = True
 
 # Load the hexbin_grid for the domain
 with open('../data/hexgrid_no_coast.pkl', 'rb') as f:
@@ -145,7 +146,7 @@ def process_member(member, delta_r, location, subset_particles):
     return pset
 
 
-for delta_r in [0.1]:
+for delta_r in [1.0]:
     for k in range(1, N_subsets+1):
         
         member = 1
@@ -168,11 +169,15 @@ for delta_r in [0.1]:
 
         # pset_members = pset_members.compute()
         print("length pset_members: ", len(pset_members.trajectory))
+        save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/mix_spatial_long/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_mix_s{k:03d}.nc"
+        pset_members.to_netcdf(save_path)
+        print(f"NetCDF Saved in: {save_path}")
         
-        P_m, Ent_m = calculate_probability_and_entropy(pset_members, hexbin_grid, entropy)
-        DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
-        save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_long/P_dr{delta_r*100:03.0f}_all_s{k:03d}.nc"
-        DF_m.to_netcdf(save_path)
-        print(f"Saved: {save_path}")
+        
+        # P_m, Ent_m = calculate_probability_and_entropy(pset_members, hexbin_grid, entropy)
+        # DF_m = create_dataframe(P_m, Ent_m, hexbin_grid.hexint, obs_range)
+        # save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_long/P_dr{delta_r*100:03.0f}_all_s{k:03d}.nc"
+        # DF_m.to_netcdf(save_path)
+        # print(f"Saved: {save_path}")
 
 #%%

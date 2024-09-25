@@ -11,6 +11,7 @@
 
 conda activate nemo-ensemble
 
+# python connectivity_mixture_stats_spatial.py
 python mixture_distributions_spatial.py
 
 echo 'Finished computation.'

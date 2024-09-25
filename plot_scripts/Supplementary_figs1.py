@@ -98,7 +98,7 @@ gl.right_labels = False
 im = hexbin_grid.pcolorhex(std_maps_space[delta_r], ax=ax, cmap='plasma', draw_edges=False)
 cbar = plt.colorbar(im, ax=ax, orientation='horizontal', label=f'Standard Deviation of Time Average Probability')
 # %%
-
+Latitude_limit = 44
 ncol = 2
 nrow = 4
 fig, axs = plt.subplots(ncols=ncol, nrows=nrow, figsize=(8.27, 11.69),
@@ -115,6 +115,8 @@ for i in range(0, 6):
     axs[i].add_feature(cartopy.feature.LAND, zorder=10, color='black')
     axs[i].scatter(-73.6, 35.6, color="deepskyblue", edgecolor='black', s=30, 
                    marker="o", label="Release Location", zorder=10)
+    # axs[i].plot([-50, -10], [Latitude_limit, Latitude_limit], color="cyan", zorder=10)
+    # axs[i].text(-18, Latitude_limit + 1, f"${Latitude_limit}^o$N", color="cyan", zorder=10, fontsize=8)
     # axs[i].set_title(f'All Members Subset {i+1}')
     gl = axs[i].gridlines(crs=cartopy.crs.PlateCarree(), draw_labels=True,
                          linewidth=0.5, color='gray', alpha=0.3)
@@ -144,7 +146,7 @@ i = 0
 for week in [4, 12, 20]:
     hexbin_grid.pcolorhex(std_maps_temp[week], ax=axs[i], cmap='plasma', draw_edges=False, 
                                maxnorm=max_STD)
-    axs[i].set_title(f'{week} weeks release')
+    axs[i].set_title(f'{week} weeks')
     i += 2
     
 i = 1
@@ -159,4 +161,60 @@ colorbar = fig.colorbar(im, cax=colorbar_axis, orientation='horizontal', label=f
 
 # save the plot
 plt.savefig(f'../figs/FigS3_Ensemble_STD.png', dpi=300)
-# %% Repeat analysis for Mixture distributions
+# %% ###############################################################
+# ##### Repeat analysis for Mixture distributions #################
+####################################################################
+location = 'Cape_Hatteras'
+week = 20
+subset = 1
+subset_list = np.arange(1, 29)
+
+# Define the file path for the NetCDF file containing probability distributions
+file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_long/P_W{week:02d}_all_s{subset:03d}.nc"
+
+# Open the dataset and sort by 'hexint'
+P_m = xr.open_dataset(file_path)
+P_m = P_m.sortby('hexint')
+
+# Convert hexint values to hex grid and create a hexbin grid with resolution 3
+hex_grid = hexfunc.int_to_hex(P_m.hexint.values)
+hexbin_grid = hexfunc.hexGrid(hex_grid, h3_res=3)
+
+# Dictinary with all STDs maps
+std_maps_temp_mix = {}
+std_maps_space_mix = {}
+
+for week in [4, 12, 20]:
+    print(f"Week: {week}")
+    time_average = np.zeros((len(subset_list), len(P_m.hexint)))
+
+    # Loop through each subset to calculate the time_average probabilities
+    for i, subset in tqdm(enumerate(subset_list)):
+        file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_long/P_W{week:02d}_all_s{subset:03d}.nc"
+        P_m = xr.open_dataset(file_path)
+        P_m = P_m.sortby('hexint')
+        likelihood = P_m['probability'][:, :].values
+        hypothesis = likelihood #* prior
+        time_average[i, :] = np.nanmean(hypothesis, axis=1)
+
+    #Calculate the Standard Deviation of the time_average probabilities
+    std_maps_temp_mix[week] = np.nanstd(time_average, axis=0)
+    
+for delta_r in[0.1, 1., 2.]:
+    print(f"Delta_r: {delta_r}")
+    time_average = np.zeros((len(subset_list), len(P_m.hexint)))
+
+    # Loop through each subset to calculate the time_average probabilities
+    for i, subset in tqdm(enumerate(subset_list)):
+        file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_long/P_dr{delta_r*100:03.0f}_all_s{subset:03d}.nc"
+        P_m = xr.open_dataset(file_path)
+        P_m = P_m.sortby('hexint')
+        likelihood = P_m['probability'][:, :].values
+        hypothesis = likelihood #* prior
+        time_average[i, :] = np.nanmean(hypothesis, axis=1)
+
+    #Calculate the Standard Deviation of the time_average probabilities
+    std_maps_space_mix[delta_r] = np.nanstd(time_average, axis=0)
+
+# %% PLot the maps
+
