@@ -217,4 +217,68 @@ for delta_r in[0.1, 1., 2.]:
     std_maps_space_mix[delta_r] = np.nanstd(time_average, axis=0)
 
 # %% PLot the maps
+Latitude_limit = 44
+ncol = 2
+nrow = 4
+fig, axs = plt.subplots(ncols=ncol, nrows=nrow, figsize=(8.27, 11.69),
+                        subplot_kw={'projection': cartopy.crs.PlateCarree()},
+                        sharey=True, constrained_layout=True,
+                        gridspec_kw={'height_ratios': [1, 1, 1, 0.4]})
 
+axs = axs.reshape(ncol*nrow)
+
+# formatiiing
+
+for i in range(0, 6):
+    axs[i].set_extent([-100, 20, -25, 77], crs=cartopy.crs.PlateCarree())
+    axs[i].add_feature(cartopy.feature.LAND, zorder=10, color='black')
+    axs[i].scatter(-73.6, 35.6, color="deepskyblue", edgecolor='black', s=30, 
+                   marker="o", label="Release Location", zorder=10)
+    # axs[i].plot([-50, -10], [Latitude_limit, Latitude_limit], color="cyan", zorder=10)
+    # axs[i].text(-18, Latitude_limit + 1, f"${Latitude_limit}^o$N", color="cyan", zorder=10, fontsize=8)
+    # axs[i].set_title(f'All Members Subset {i+1}')
+    gl = axs[i].gridlines(crs=cartopy.crs.PlateCarree(), draw_labels=True,
+                         linewidth=0.5, color='gray', alpha=0.3)
+
+    if i in [1, 3, 5]:
+        gl.left_labels = False
+
+    if i < 4:
+        gl.bottom_labels = False
+
+    gl.top_labels = False
+    gl.right_labels = False
+
+    if i in [1, 3, 5]:
+        gl.right_labels = True
+
+    # Add labels like A, B, C, etc.
+    label = chr(65 + i)  # 65 is the ASCII value for 'A'
+    axs[i].text(0.02, 0.02, label, transform=axs[i].transAxes, fontsize=12, fontweight='bold', va='bottom', ha='left')
+        
+
+for i in range(ncol*nrow - nrow, ncol*nrow):
+    axs[i].axis('off')
+    
+# Plot the maps
+i = 1
+for week in [4, 12, 20]:
+    hexbin_grid.pcolorhex(std_maps_temp_mix[week], ax=axs[i], cmap='plasma', draw_edges=False, 
+                               maxnorm=max_STD)
+    axs[i].set_title(f'Mixture {week} weeks')
+    i += 2
+    
+i = 0
+for delta_r in [0.1, 1., 2.]:
+    im = hexbin_grid.pcolorhex(std_maps_space_mix[delta_r], ax=axs[i], cmap='plasma', draw_edges=False, 
+                               maxnorm=max_STD)
+    axs[i].set_title(f'Mixture $\delta_r = {delta_r}^o$')
+    i += 2
+    
+colorbar_axis = fig.add_axes([0.1, 0.06, 0.8, 0.03])  # Adjust the height of the colorbar
+colorbar = fig.colorbar(im, cax=colorbar_axis, orientation='horizontal', label=f'Ensemble Standard Deviation of the Time Averaged Occurrence per Bin')
+
+# save the plot
+plt.savefig(f'../figs/FigS4_Mixture_Ensemble_STD.png', dpi=300)
+
+# %%

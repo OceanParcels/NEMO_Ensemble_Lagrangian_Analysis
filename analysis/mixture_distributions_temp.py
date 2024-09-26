@@ -126,7 +126,7 @@ members = np.arange(1, 51)
 N_subsets = 50
 
 location = 'Cape_Hatteras'
-week = 12 # Number of weeks
+week = 20 # Number of weeks
 subset_particles = 148
 
 
@@ -136,7 +136,7 @@ def process_member(member, week, location, subset_particles):
     pset = pset.isel(trajectory=np.random.choice(pset.trajectory, subset_particles, replace=False))
     return pset
 
-for k in range(6, N_subsets+1):
+for k in range(30, N_subsets+1):
     # member = 1
 
     # path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/temporal_long/W_{week:01d}/{location}_W{week:01d}_m{member:03d}.zarr"

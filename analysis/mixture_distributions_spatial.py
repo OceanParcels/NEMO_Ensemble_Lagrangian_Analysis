@@ -133,7 +133,6 @@ members = np.arange(1, 51)
 N_subsets = 50
 
 location = 'Cape_Hatteras'
-delta_r = 1.0
 subset_particles = 150
 
 
@@ -144,18 +143,9 @@ def process_member(member, delta_r, location, subset_particles):
     return pset
 
 
-for delta_r in [1.0]:
-    for k in range(7, N_subsets+1):
+for delta_r in [2.0]:
+    for k in range(29, N_subsets+1):
         
-        # member = 1
-        
-        # path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial_long/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
-        # pset_members = xr.open_zarr(path)
-        # obs_length = len(pset_members.obs)
-        # obs_range = range(obs_length) # Number of time steps in the observation period
-
-        # pset_members = pset_members.isel(trajectory=np.random.choice(pset_members.trajectory, subset_particles, replace=False))
-
         print(f"Subset:{k} delta_r: {delta_r}")
         
         psets = []
