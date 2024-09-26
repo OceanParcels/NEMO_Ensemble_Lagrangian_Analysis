@@ -17,7 +17,7 @@ distributions = {}
 
 total_members = 50
 
-for delta_r in [1, 2]:
+for delta_r in [0.1, 1., 2.]:
     for member in tqdm(range(1, total_members + 1)):
         print(f"Member: {member:03d},  Delta_r: {delta_r}")
         file_path = path + f"{location}/spatial_long/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
@@ -70,7 +70,7 @@ distributions = {}
 total_members = 50
 
 for week in [4, 12, 20]:
-    for member in tqdm(range(1, total_members + 1)):
+    for member in tqdm(range(27, total_members + 1)):
         print(f"Member: {member:03d},  Week: {week}")
         file_path = path + f"{location}/temporal_long/W_{week:01d}/{location}_W{week:01d}_m{member:03d}.zarr"
         
@@ -104,9 +104,9 @@ for week in [4, 12, 20]:
             
             # SAVE DISTRIBUTIONS in a pickle file
             if Latitude_limit is not None:
-                save_path = path + f"analysis/connectivity/W_{week:02d}_{Latitude_limit}N/Distributions_W_{week:02d}_m{member:03d}.pkl"
+                save_path = path + f"analysis/connectivity/W_{week:02d}_{Latitude_limit}N/Distributions_W{week:02d}_m{member:03d}.pkl"
             elif Longitude_limit is not None:    
-                save_path = path + f"analysis/connectivity/W_{week:02d}_{abs(Longitude_limit)}W/Distributions_W_{week:02d}_m{member:03d}.pkl"
+                save_path = path + f"analysis/connectivity/W_{week:02d}_{abs(Longitude_limit)}W/Distributions_W{week:02d}_m{member:03d}.pkl"
             
             with open(save_path, "wb") as f:
                 pickle.dump(distributions, f)
@@ -171,24 +171,25 @@ for delta_r in [0.1, 1., 2.]:
             median_depth[member - 1] = np.nan
             std_depth[member - 1] = np.nan
 
-        stats["subset"] = n_members
-        stats["counts"] = counts
-        stats["median_time"] = median_time
-        stats["mean_time"] = mean_time
-        stats["min_time"] = min_time
-        stats["std_time"] = std_time
-        stats["mean_depth"] = mean_depth
-        stats["median_depth"] = median_depth
-        stats["std_depth"] = std_depth
+    stats["subset"] = n_members
+    stats["counts"] = counts
+    stats["median_time"] = median_time
+    stats["mean_time"] = mean_time
+    stats["min_time"] = min_time
+    stats["std_time"] = std_time
+    stats["mean_depth"] = mean_depth
+    stats["median_depth"] = median_depth
+    stats["std_depth"] = std_depth
 
-        stats_df = pd.DataFrame(stats)
+    stats_df = pd.DataFrame(stats)
 
-        if Latitude_limit is not None:
-            save_csv_path = path + f"analysis/connectivity/Stats/Stats_dr{delta_r*100:03.0f}_{Latitude_limit}N.csv"
-        elif Longitude_limit is not None:    
-            save_csv_path = path + f"analysis/connectivity/Stats/Stats_dr{delta_r*100:03.0f}_{abs(Longitude_limit)}W.csv"
-    
-        stats_df.to_csv(save_csv_path)
+    if Latitude_limit is not None:
+        save_csv_path = path + f"analysis/connectivity/Stats/Stats_dr{delta_r*100:03.0f}_{Latitude_limit}N.csv"
+    elif Longitude_limit is not None:    
+        save_csv_path = path + f"analysis/connectivity/Stats/Stats_dr{delta_r*100:03.0f}_{abs(Longitude_limit)}W.csv"
+
+    stats_df.to_csv(save_csv_path)
+    print(f"Saved {save_csv_path}")
     
 #%% ___________________Temporal__________________________
 N_members = 50
@@ -196,17 +197,19 @@ N_members = 50
 stats = {}
 
 n_members = np.arange(1, N_members + 1)
-counts = np.zeros(N_members)
-median_time = np.zeros(N_members)
-mean_time = np.zeros(N_members)
-min_time = np.zeros(N_members)
-std_time = np.zeros(N_members)
 
-mean_depth = np.zeros(N_members)
-median_depth = np.zeros(N_members)
-std_depth = np.zeros(N_members)
+for week in [12, 20]:
+    counts = np.zeros(N_members)
+    median_time = np.zeros(N_members)
+    mean_time = np.zeros(N_members)
+    min_time = np.zeros(N_members)
+    std_time = np.zeros(N_members)
 
-for week in [4, 12, 20]:
+    mean_depth = np.zeros(N_members)
+    median_depth = np.zeros(N_members)
+    std_depth = np.zeros(N_members)
+    
+    
     for member in range(1, N_members + 1):
         
         if Latitude_limit is not None:
@@ -220,6 +223,7 @@ for week in [4, 12, 20]:
                 distributions = pickle.load(f)
             
             drift_time = distributions["drift_time"]
+            # print(f"Member {member} week {week}. Number of particles: {len(drift_time)}")
             depths = distributions["depths"]
             trajectory = distributions["trajectory"]
             
@@ -245,23 +249,24 @@ for week in [4, 12, 20]:
             median_depth[member - 1] = np.nan
             std_depth[member - 1] = np.nan
 
-        stats["subset"] = n_members
-        stats["counts"] = counts
-        stats["median_time"] = median_time
-        stats["mean_time"] = mean_time
-        stats["min_time"] = min_time
-        stats["std_time"] = std_time
-        stats["mean_depth"] = mean_depth
-        stats["median_depth"] = median_depth
-        stats["std_depth"] = std_depth
+    stats["subset"] = n_members
+    stats["counts"] = counts
+    stats["median_time"] = median_time
+    stats["mean_time"] = mean_time
+    stats["min_time"] = min_time
+    stats["std_time"] = std_time
+    stats["mean_depth"] = mean_depth
+    stats["median_depth"] = median_depth
+    stats["std_depth"] = std_depth
 
-        stats_df = pd.DataFrame(stats)
+    stats_df = pd.DataFrame(stats)
 
-        if Latitude_limit is not None:
-            save_csv_path = path + f"analysis/connectivity/Stats/Stats_W{week:02d}_{Latitude_limit}N.csv"
-        elif Longitude_limit is not None:    
-            save_csv_path = path + f"analysis/connectivity/Stats/Stats_W{week:02d}_{abs(Longitude_limit)}W.csv"
-        
-        stats_df.to_csv(save_csv_path)
+    if Latitude_limit is not None:
+        save_csv_path = path + f"analysis/connectivity/Stats/Stats_W{week:02d}_{Latitude_limit}N.csv"
+    elif Longitude_limit is not None:    
+        save_csv_path = path + f"analysis/connectivity/Stats/Stats_W{week:02d}_{abs(Longitude_limit)}W.csv"
+    
+    stats_df.to_csv(save_csv_path)
+    print(f"Saved {save_csv_path}")
     
 # %%

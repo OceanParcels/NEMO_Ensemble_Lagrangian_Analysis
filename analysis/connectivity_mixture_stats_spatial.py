@@ -10,11 +10,11 @@ import os
 location = "Cape_Hatteras"
 base_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/"
 
-Latitude_limit = 44
-Longitude_limit = None
+Latitude_limit = None
+Longitude_limit = -40
 
-print(f"Latitude limit: {Latitude_limit}")
-print(f"Longitude limit: {Longitude_limit}")
+print(f"Space. Latitude limit: {Latitude_limit}")
+print(f"Space. Longitude limit: {Longitude_limit}")
 # %% Spatial analysis
 
 members = np.arange(1, 51)
@@ -33,7 +33,7 @@ def process_member(member, delta_r, location, subset_particles):
 
 distributions = {}
 
-for delta_r in [2.]:
+for delta_r in [0.1, 1., 2.]:
     for k in range(1, N_subsets+1):
         
         psets = []
@@ -81,7 +81,7 @@ for delta_r in [2.]:
             if Latitude_limit is not None:
                 save_path = base_path + f"analysis/connectivity/mix_dr_{delta_r*100:03.0f}_{Latitude_limit}N/Distributions_mix_dr{delta_r*100:03.0f}_s{k:03d}.pkl"
             elif Longitude_limit is not None:    
-                save_path = base_path + f"analysis/connectivity/mix_dr_{delta_r*100:03.0f}_{Longitude_limit}W/Distributions_mix_dr{delta_r*100:03.0f}_s{k:03d}.pkl"
+                save_path = base_path + f"analysis/connectivity/mix_dr_{delta_r*100:03.0f}_{abs(Longitude_limit)}W/Distributions_mix_dr{delta_r*100:03.0f}_s{k:03d}.pkl"
             
             
             with open(save_path, "wb") as f:
@@ -92,7 +92,6 @@ for delta_r in [2.]:
            
 # %% Make a dataframe with the statistics
 N_subsets = 50
-N_particles = 7500
 
 stats = {}
 
@@ -111,12 +110,9 @@ for delta_r in [0.1, 1., 2.]:
     for k in range(1, N_subsets+1):
         
         if Latitude_limit is not None:
-            pkl_path = base_path + f"analysis/connectivity/mix_dr_{delta_r*100:03.0f}_{Latitude_limit}N/Distributions_mix_dr_{delta_r*100:03.0f}_s{k:03d}.pkl"
+            pkl_path = base_path + f"analysis/connectivity/mix_dr_{delta_r*100:03.0f}_{Latitude_limit}N/Distributions_mix_dr{delta_r*100:03.0f}_s{k:03d}.pkl"
         elif Longitude_limit is not None:    
-            pkl_path = base_path + f"analysis/connectivity/mix_dr_{delta_r*100:03.0f}_{Longitude_limit}W/Distributions_mix_dr_{delta_r*100:03.0f}_s{k:03d}.pkl"
-            
-        
-        # pkl_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/mix_dr_{delta_r*100:03.0f}/Distributions_mix_dr{delta_r*100:03.0f}_s{k:03d}.pkl"
+            pkl_path = base_path + f"analysis/connectivity/mix_dr_{delta_r*100:03.0f}_{abs(Longitude_limit)}W/Distributions_mix_dr{delta_r*100:03.0f}_s{k:03d}.pkl"
         
         
         if os.path.exists(pkl_path):
@@ -126,13 +122,13 @@ for delta_r in [0.1, 1., 2.]:
             drift_time = distributions["drift_time"]
             depths = distributions["depths"]
             trajectory = distributions["trajectory"]
+            print(f"Subset {k} has {len(trajectory)} trajectories, Latitude limit: {Latitude_limit}N")
             
             median_time[k - 1] = np.median(drift_time)
             mean_time[k - 1] = np.mean(drift_time)
             min_time[k - 1] = np.min(drift_time)
             std_time[k - 1] = np.std(drift_time)
-            counts[k - 1] = len(drift_time) #/ N_particles * 100
-                        
+            counts[k - 1] = len(drift_time) 
             mean_depth[k - 1] = np.mean(depths)
             median_depth[k - 1] = np.median(depths)
             std_depth[k - 1] = np.std(depths)
@@ -149,25 +145,25 @@ for delta_r in [0.1, 1., 2.]:
             median_depth[k - 1] = np.nan
             std_depth[k - 1] = np.nan
 
-        stats["subset"] = n_members
-        stats["counts"] = counts
-        stats["median_time"] = median_time
-        stats["mean_time"] = mean_time
-        stats["min_time"] = min_time
-        stats["std_time"] = std_time
-        stats["mean_depth"] = mean_depth
-        stats["median_depth"] = median_depth
-        stats["std_depth"] = std_depth
+    stats["subset"] = n_members
+    stats["counts"] = counts
+    stats["median_time"] = median_time
+    stats["mean_time"] = mean_time
+    stats["min_time"] = min_time
+    stats["std_time"] = std_time
+    stats["mean_depth"] = mean_depth
+    stats["median_depth"] = median_depth
+    stats["std_depth"] = std_depth
 
-        stats_df = pd.DataFrame(stats)
+    stats_df = pd.DataFrame(stats)
 
-        
-        if Latitude_limit is not None:
-            save_csv_path = base_path + f"analysis/connectivity/Stats/Stats_mix_dr{delta_r*100:03.0f}_{Latitude_limit}N.csv"
-        elif Longitude_limit is not None:    
-            save_csv_path = base_path + f"analysis/connectivity/Stats/Stats_mix_dr{delta_r*100:03.0f}_{Longitude_limit}W.csv"
-        
-        stats_df.to_csv(save_csv_path)
-
+    
+    if Latitude_limit is not None:
+        save_csv_path = base_path + f"analysis/connectivity/Stats/Stats_mix_dr{delta_r*100:03.0f}_{Latitude_limit}N.csv"
+    elif Longitude_limit is not None:    
+        save_csv_path = base_path + f"analysis/connectivity/Stats/Stats_mix_dr{delta_r*100:03.0f}_{abs(Longitude_limit)}W.csv"
+    
+    stats_df.to_csv(save_csv_path)
+    print(f"Saved stats in {save_csv_path}")
 
 # %%

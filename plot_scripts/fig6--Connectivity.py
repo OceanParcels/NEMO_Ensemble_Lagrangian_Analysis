@@ -12,39 +12,35 @@ all_mix_space = {}
 all_temp = {}
 all_space = {}
 location = "Cape_Hatteras"
+base_path = "/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/"
 
-Latitude_limit = 44
-Longitude_limit = None
+
+Latitude_limit = None
+Longitude_limit = -40
 
 if Latitude_limit is not None:
-    crit_string = f"-{Latitude_limit}N.csv"
+    criterium_string = f"_{Latitude_limit}N"
 elif Longitude_limit is not None:
-    crit_string = f"-{abs(Longitude_limit)}E.csv"
+    criterium_string = f"_{abs(Longitude_limit)}W"
 
 for week in [4, 12, 20]:
     
-    df_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_W{week:02d}.csv"
+    df_path = base_path + f"analysis/connectivity/Stats/Stats_W{week:02d}" + criterium_string + ".csv"
     _df = pd.read_csv(df_path)
     all_temp[week] = _df
 
-    df_mix = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_mix_W{week:02d}.csv"
+    df_mix = base_path + f"analysis/connectivity/Stats/Stats_mix_W{week:02d}" + criterium_string + ".csv"
     _df = pd.read_csv(df_mix)
     all_mix_temp[week] = _df
     
 for delta_r in [0.1, 1., 2.]:
-    df_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_mix_dr{delta_r*100:03.0f}.csv"
-    _df = pd.read_csv(df_path)
-    all_mix_space[delta_r] = _df
-    
-    df_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/Stats/Stats_dr{delta_r*100:03.0f}.csv"
+    df_path = base_path + f"analysis/connectivity/Stats/Stats_dr{delta_r*100:03.0f}" + criterium_string + ".csv"
     _df = pd.read_csv(df_path)
     all_space[delta_r] = _df
-
-
-kde_space = {}
-kde_temp = {}
-kde_mix_space = {}
-kde_mix_temp = {}
+    
+    df_path = base_path + f"analysis/connectivity/Stats/Stats_mix_dr{delta_r*100:03.0f}" + criterium_string + ".csv"
+    _df = pd.read_csv(df_path)
+    all_mix_space[delta_r] = _df
 
 #%% Plot the percentage of subpolar trajectories for temporal and spatial members
 fig, ax = plt.subplots(2, 3, figsize=(10, 6))
@@ -56,9 +52,9 @@ colors_space = ["midnightblue", "blueviolet", "teal"]
 ls_space = [(0, (1, 1)), '--', '-.']
 j = 0
 for delta_r in [0.1, 1., 2.]:
-    _counts_dr = sns.kdeplot(all_space[delta_r]["counts"], ax=ax[0], label=f"$\delta_r = {delta_r}^o$", clip=(0, 500),
+    sns.kdeplot(all_space[delta_r]["counts"], ax=ax[0], label=f"$\delta_r = {delta_r}^o$", clip=(0, 500),
                 fill=False, color=colors_space[j], linestyle=ls_space[j])
-    kde_space[delta_r] = _counts_dr.get_lines()[j].get_data() # save the KDE values for entropy computation
+    # kde_space[delta_r] = _counts_dr.get_lines()[j].get_data() # save the KDE values for entropy computation
     
     sns.kdeplot(all_space[delta_r]["median_time"]/365, ax=ax[1], label=f"Spatial dr{delta_r}", clip=(0, 6),
                 fill=False, color=colors_space[j], linestyle=ls_space[j])
@@ -70,9 +66,9 @@ colors_temp = ["darkred", "orangered", "orange"]
 ls_time = [(0, (1, 1)), '--', '-.', (0, (3, 1, 1, 1, 1, 1))]
 j = 0
 for week in [4, 12, 20]:
-    _counts = sns.kdeplot(all_temp[week]["counts"], ax=ax[3], label=f"{week} weeks", clip=(0, 200),
+    sns.kdeplot(all_temp[week]["counts"], ax=ax[3], label=f"{week} weeks", clip=(0, 500),
                 fill=False, color=colors_temp[j], linestyle=ls_time[j])
-    kde_temp[week] = _counts.get_lines()[j].get_data() # save the KDE values for entropy computation
+    # kde_temp[week] = _counts.get_lines()[j].get_data() # save the KDE values for entropy computation
     
     sns.kdeplot(all_temp[week]["median_time"]/365, ax=ax[4], label=f"Temporal W{week}", clip=(0, 6),
                 fill=False, color=colors_temp[j], linestyle=ls_time[j])
@@ -107,7 +103,7 @@ ax[5].set_ylabel("Density")
 
 plt.tight_layout()
 # save the figure
-plt.savefig("../figs/Figx-Connect_tempNspace.png", dpi=300)
+plt.savefig("../figs/Figx-Connect_tempNspace" + criterium_string + ".png", dpi=300)
 
 #%% Plot the percentage of subpolar trajectories for Mixture temporal and spatial members
 fig, ax = plt.subplots(2, 3, figsize=(10, 6))
@@ -120,9 +116,9 @@ ls_space = [(0, (1, 1)), '--', '-.']
 j=0
 
 for delta_r in [0.1, 1., 2.]:
-    _counts = sns.kdeplot(all_mix_space[delta_r]["counts"], ax=ax[0], label=f"Mix. $\delta_r = {delta_r}^o$", clip=(0, 200),
+    sns.kdeplot(all_mix_space[delta_r]["counts"], ax=ax[0], label=f"Mix. $\delta_r = {delta_r}^o$", clip=(0, 500),
                 fill=False, color=colors_space[j], linestyle=ls_space[j])
-    kde_mix_space[delta_r] = _counts.get_lines()[0].get_data() # save the KDE values for entropy computation
+    # kde_mix_space[delta_r] = _counts.get_lines()[0].get_data() # save the KDE values for entropy computation
     
     sns.kdeplot(all_mix_space[delta_r]["median_time"]/365, ax=ax[1], label=f"Mix. $\delta_r = {delta_r}^o$", clip=(0, 6),
                 fill=False, color=colors_space[j], linestyle=ls_space[j])
@@ -136,9 +132,9 @@ colors_temp = ["darkred", "orangered", "orange"]
 ls_time = [(0, (1, 1)), '--', '-.', (0, (3, 1, 1, 1, 1, 1))]
 j = 0
 for week in [4, 12, 20]:
-    _counts = sns.kdeplot(all_mix_temp[week]["counts"], ax=ax[3], label=f"Mix. {week} weeks", clip=(0, 100),
+    sns.kdeplot(all_mix_temp[week]["counts"], ax=ax[3], label=f"Mix. {week} weeks", clip=(0, 500),
                 fill=False, color=colors_temp[j], linestyle=ls_time[j])
-    kde_mix_temp[week] = _counts.get_lines()[j].get_data() # save the KDE values for entropy computation
+    # kde_mix_temp[week] = _counts.get_lines()[j].get_data() # save the KDE values for entropy computation
     
     sns.kdeplot(all_mix_temp[week]["median_time"]/365, ax=ax[4], label=f"Mix. {week} weeks", clip=(0, 6),
                 fill=False, color=colors_temp[j], linestyle=ls_time[j])
@@ -183,7 +179,7 @@ ax[5].set_ylabel("Density")
 # ax[5].grid()
 
 plt.tight_layout()
-plt.savefig("../figs/Figx-Connect_MIX_tempNspace.png", dpi=300)
+plt.savefig("../figs/Figx-Connect_MIX_tempNspace" + criterium_string + ".png", dpi=300)
 
 ###################################################################
 #%% COMPARISON OF TEMPORAL AND SPATIAL CONNECTIVITY with Mixture

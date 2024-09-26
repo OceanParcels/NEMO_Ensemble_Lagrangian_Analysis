@@ -10,11 +10,11 @@ import os
 location = "Cape_Hatteras"
 base_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/"
 
-Latitude_limit = 44
-Longitude_limit = None
+Latitude_limit = None
+Longitude_limit = -40
 
-print(f"Latitude limit: {Latitude_limit}")
-print(f"Longitude limit: {Longitude_limit}")
+print(f"Temp. Latitude limit: {Latitude_limit}")
+print(f"Temp. Longitude limit: {Longitude_limit}")
 
 # %%  Temporal analysis
 
@@ -47,8 +47,6 @@ for week in [4, 12, 20]:
         
         print(f"Subset:{k} week: {week}. Number of particles: {len(pset_members.trajectory)}")
 
-        N_particles = len(pset_members.trajectory)
-
         if Latitude_limit is not None:
             lats = pset.lat.values
             p_index, t_index = np.where(lats[:, :] > Latitude_limit)
@@ -78,9 +76,9 @@ for week in [4, 12, 20]:
             
             # SAVE DISTRIBUTIONS in a pickle file
             if Latitude_limit is not None:
-                save_path = base_path + f"analysis/connectivity/mix_W_{week:02d}_{Latitude_limit}N/Distributions_mix_W_{week:02d}_s{k:03d}.pkl"
+                save_path = base_path + f"analysis/connectivity/mix_W_{week:02d}_{Latitude_limit}N/Distributions_mix_W{week:02d}_s{k:03d}.pkl"
             elif Longitude_limit is not None:    
-                save_path = base_path + f"analysis/connectivity/mix_W_{week:02d}_{Longitude_limit}W/Distributions_mix_W_{week:02d}_s{k:03d}.pkl"
+                save_path = base_path + f"analysis/connectivity/mix_W_{week:02d}_{abs(Longitude_limit)}W/Distributions_mix_W{week:02d}_s{k:03d}.pkl"
             
             with open(save_path, "wb") as f:
                 pickle.dump(distributions, f)
@@ -91,7 +89,6 @@ for week in [4, 12, 20]:
 # %% Make a dataframe with the statistics
 
 N_subsets = 50
-N_particles = 7500
 
 stats = {}
 
@@ -106,19 +103,20 @@ mean_depth = np.zeros(N_subsets)
 median_depth = np.zeros(N_subsets)
 std_depth = np.zeros(N_subsets)
 
-for week in [20]:
+for week in [4, 12, 20]:
     for k in range(1, N_subsets+1):
         
         if Latitude_limit is not None:
             pkl_path = base_path + f"analysis/connectivity/mix_W_{week:02d}_{Latitude_limit}N/Distributions_mix_W{week:02d}_s{k:03d}.pkl"
         elif Longitude_limit is not None:    
-            pkl_path = base_path + f"analysis/connectivity/mix_W_{week:02d}_{Longitude_limit}W/Distributions_mix_W{week:02d}_s{k:03d}.pkl"
+            pkl_path = base_path + f"analysis/connectivity/mix_W_{week:02d}_{abs(Longitude_limit)}W/Distributions_mix_W{week:02d}_s{k:03d}.pkl"
         
         if os.path.exists(pkl_path):
             with open(pkl_path, "rb") as f:
                 distributions = pickle.load(f)
             
             drift_time = distributions["drift_time"]
+            print(f"Subset {k} week {week}. Number of particles: {len(drift_time)}")
             depths = distributions["depths"]
             trajectory = distributions["trajectory"]
             
@@ -126,7 +124,7 @@ for week in [20]:
             mean_time[k - 1] = np.mean(drift_time)
             min_time[k - 1] = np.min(drift_time)
             std_time[k - 1] = np.std(drift_time)
-            counts[k - 1] = len(drift_time) #/ N_particles * 100
+            counts[k - 1] = len(drift_time)
                         
             mean_depth[k - 1] = np.mean(depths)
             median_depth[k - 1] = np.median(depths)
@@ -143,23 +141,24 @@ for week in [20]:
             median_depth[k - 1] = np.nan
             std_depth[k - 1] = np.nan
 
-        stats["subset"] = n_members
-        stats["counts"] = counts
-        stats["median_time"] = median_time
-        stats["mean_time"] = mean_time
-        stats["min_time"] = min_time
-        stats["std_time"] = std_time
-        stats["mean_depth"] = mean_depth
-        stats["median_depth"] = median_depth
-        stats["std_depth"] = std_depth
+    stats["subset"] = n_members
+    stats["counts"] = counts
+    stats["median_time"] = median_time
+    stats["mean_time"] = mean_time
+    stats["min_time"] = min_time
+    stats["std_time"] = std_time
+    stats["mean_depth"] = mean_depth
+    stats["median_depth"] = median_depth
+    stats["std_depth"] = std_depth
 
-        stats_df = pd.DataFrame(stats)
+    stats_df = pd.DataFrame(stats)
 
-        if Latitude_limit is not None:
-            save_csv_path = base_path + f"analysis/connectivity/Stats/Stats_mix_W{week:02d}_{Latitude_limit}N.csv"
-        elif Longitude_limit is not None:    
-            save_csv_path = base_path + f"analysis/connectivity/Stats/Stats_mix_W{week:02d}_{Longitude_limit}W.csv"
-        stats_df.to_csv(save_csv_path)
+    if Latitude_limit is not None:
+        save_csv_path = base_path + f"analysis/connectivity/Stats/Stats_mix_W{week:02d}_{Latitude_limit}N.csv"
+    elif Longitude_limit is not None:    
+        save_csv_path = base_path + f"analysis/connectivity/Stats/Stats_mix_W{week:02d}_{abs(Longitude_limit)}W.csv"
+    stats_df.to_csv(save_csv_path)
+    print(f"Saved in {save_csv_path}")
 
 
 # %%
