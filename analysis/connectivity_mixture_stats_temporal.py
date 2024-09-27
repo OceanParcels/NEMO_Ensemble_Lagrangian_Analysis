@@ -10,8 +10,8 @@ import os
 location = "Cape_Hatteras"
 base_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/"
 
-Latitude_limit = None
-Longitude_limit = -40
+Latitude_limit = 44
+Longitude_limit = None
 
 print(f"Temp. Latitude limit: {Latitude_limit}")
 print(f"Temp. Longitude limit: {Longitude_limit}")
@@ -48,11 +48,12 @@ for week in [4, 12, 20]:
         print(f"Subset:{k} week: {week}. Number of particles: {len(pset_members.trajectory)}")
 
         if Latitude_limit is not None:
-            lats = pset.lat.values
+            lats = pset_members.lat.load().values
             p_index, t_index = np.where(lats[:, :] > Latitude_limit)
             
         elif Longitude_limit is not None:
-            lons = pset.lon.values
+            lons = pset_members.lon.load().values
+            print("lons shape", lons.shape)
             p_index, t_index = np.where(lons[:, :] > Longitude_limit)
         
         

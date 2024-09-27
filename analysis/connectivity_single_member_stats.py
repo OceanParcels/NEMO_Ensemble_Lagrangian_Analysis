@@ -70,7 +70,7 @@ distributions = {}
 total_members = 50
 
 for week in [4, 12, 20]:
-    for member in tqdm(range(27, total_members + 1)):
+    for member in tqdm(range(1, total_members + 1)):
         print(f"Member: {member:03d},  Week: {week}")
         file_path = path + f"{location}/temporal_long/W_{week:01d}/{location}_W{week:01d}_m{member:03d}.zarr"
         
@@ -223,9 +223,10 @@ for week in [12, 20]:
                 distributions = pickle.load(f)
             
             drift_time = distributions["drift_time"]
-            # print(f"Member {member} week {week}. Number of particles: {len(drift_time)}")
+            print(f"Member {member} week {week}. Number of particles: {len(drift_time)}")
             depths = distributions["depths"]
             trajectory = distributions["trajectory"]
+            
             
             median_time[member - 1] = np.median(drift_time)
             mean_time[member - 1] = np.mean(drift_time)

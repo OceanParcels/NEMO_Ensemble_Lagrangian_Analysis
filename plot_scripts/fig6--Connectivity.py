@@ -15,8 +15,8 @@ location = "Cape_Hatteras"
 base_path = "/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/"
 
 
-Latitude_limit = None
-Longitude_limit = -40
+Latitude_limit = 44 # 44 or 53
+Longitude_limit = None # -40 
 
 if Latitude_limit is not None:
     criterium_string = f"_{Latitude_limit}N"
@@ -52,7 +52,7 @@ colors_space = ["midnightblue", "blueviolet", "teal"]
 ls_space = [(0, (1, 1)), '--', '-.']
 j = 0
 for delta_r in [0.1, 1., 2.]:
-    sns.kdeplot(all_space[delta_r]["counts"], ax=ax[0], label=f"$\delta_r = {delta_r}^o$", clip=(0, 500),
+    sns.kdeplot(all_space[delta_r]["counts"], ax=ax[0], label=f"$\delta_r = {delta_r}^o$", clip=(0, 7500),
                 fill=False, color=colors_space[j], linestyle=ls_space[j])
     # kde_space[delta_r] = _counts_dr.get_lines()[j].get_data() # save the KDE values for entropy computation
     
@@ -66,7 +66,7 @@ colors_temp = ["darkred", "orangered", "orange"]
 ls_time = [(0, (1, 1)), '--', '-.', (0, (3, 1, 1, 1, 1, 1))]
 j = 0
 for week in [4, 12, 20]:
-    sns.kdeplot(all_temp[week]["counts"], ax=ax[3], label=f"{week} weeks", clip=(0, 500),
+    sns.kdeplot(all_temp[week]["counts"], ax=ax[3], label=f"{week} weeks", clip=(0, 7500),
                 fill=False, color=colors_temp[j], linestyle=ls_time[j])
     # kde_temp[week] = _counts.get_lines()[j].get_data() # save the KDE values for entropy computation
     
@@ -105,7 +105,7 @@ plt.tight_layout()
 # save the figure
 plt.savefig("../figs/Figx-Connect_tempNspace" + criterium_string + ".png", dpi=300)
 
-#%% Plot the percentage of subpolar trajectories for Mixture temporal and spatial members
+# %% Plot the percentage of subpolar trajectories for Mixture temporal and spatial members
 fig, ax = plt.subplots(2, 3, figsize=(10, 6))
 
 ax = ax.flatten()
@@ -116,7 +116,7 @@ ls_space = [(0, (1, 1)), '--', '-.']
 j=0
 
 for delta_r in [0.1, 1., 2.]:
-    sns.kdeplot(all_mix_space[delta_r]["counts"], ax=ax[0], label=f"Mix. $\delta_r = {delta_r}^o$", clip=(0, 500),
+    sns.kdeplot(all_mix_space[delta_r]["counts"], ax=ax[0], label=f"Mix. $\delta_r = {delta_r}^o$", clip=(0, 5000),
                 fill=False, color=colors_space[j], linestyle=ls_space[j])
     # kde_mix_space[delta_r] = _counts.get_lines()[0].get_data() # save the KDE values for entropy computation
     
@@ -132,7 +132,7 @@ colors_temp = ["darkred", "orangered", "orange"]
 ls_time = [(0, (1, 1)), '--', '-.', (0, (3, 1, 1, 1, 1, 1))]
 j = 0
 for week in [4, 12, 20]:
-    sns.kdeplot(all_mix_temp[week]["counts"], ax=ax[3], label=f"Mix. {week} weeks", clip=(0, 500),
+    sns.kdeplot(all_mix_temp[week]["counts"], ax=ax[3], label=f"Mix. {week} weeks", clip=(0, 5000),
                 fill=False, color=colors_temp[j], linestyle=ls_time[j])
     # kde_mix_temp[week] = _counts.get_lines()[j].get_data() # save the KDE values for entropy computation
     
