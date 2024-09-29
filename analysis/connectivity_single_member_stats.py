@@ -9,8 +9,8 @@ import os
 location = "Cape_Hatteras"
 path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/"
 
-Latitude_limit = None
-Longitude_limit = -40
+Latitude_limit = 53
+Longitude_limit = None
 
 # %% Spatial analysis
 distributions = {}

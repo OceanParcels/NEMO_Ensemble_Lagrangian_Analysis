@@ -10,11 +10,11 @@ import os
 location = "Cape_Hatteras"
 base_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/"
 
-Latitude_limit = 44
-Longitude_limit = None
+Latitude_limit = None
+Longitude_limit = -40
 
-print(f"Space. Latitude limit: {Latitude_limit}")
-print(f"Space. Longitude limit: {Longitude_limit}")
+print(f"Space mix. Latitude limit: {Latitude_limit}")
+print(f"Space mix. Longitude limit: {Longitude_limit}")
 # %% Spatial analysis
 
 members = np.arange(1, 51)
@@ -51,11 +51,11 @@ for delta_r in [0.1, 1., 2.]:
         N_particles = len(pset_members.trajectory)
 
         if Latitude_limit is not None:
-            lats = pset_members.lat.values
+            lats = pset_members.lat.load().values
             p_index, t_index = np.where(lats[:, :] > Latitude_limit)
             
         elif Longitude_limit is not None:
-            lons = pset_members.lon.values
+            lons = pset_members.lon.load().values
             p_index, t_index = np.where(lons[:, :] > Longitude_limit)
         
         

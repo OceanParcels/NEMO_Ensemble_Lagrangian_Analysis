@@ -15,8 +15,8 @@ location = "Cape_Hatteras"
 base_path = "/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/"
 
 
-Latitude_limit = 44 # 44 or 53
-Longitude_limit = None # -40 
+Latitude_limit = None #44 # 44 or 53
+Longitude_limit =  -40 
 
 if Latitude_limit is not None:
     criterium_string = f"_{Latitude_limit}N"
@@ -83,7 +83,7 @@ for i, label in enumerate(labels):
 
 ax[0].set_xlabel("Counts")
 ax[0].set_ylabel("Density")
-ax[0].legend()
+ax[0].legend(fontsize=7, shadow=True)
 
 ax[1].set_xlabel("Median Drift Time (years)")
 ax[1].set_ylabel("Density")
@@ -93,7 +93,7 @@ ax[2].set_ylabel("Density")
 
 ax[3].set_xlabel("Counts")
 ax[3].set_ylabel("Density")
-ax[3].legend()
+ax[3].legend(fontsize=7, shadow=True)
 
 ax[4].set_xlabel("Median Drift Time (years)")
 ax[4].set_ylabel("Density")
@@ -152,7 +152,7 @@ for i, label in enumerate(labels):
 
 ax[0].set_xlabel("Counts")
 ax[0].set_ylabel("Density")
-ax[0].legend()
+ax[0].legend(fontsize=7, shadow=True)
 # ax[0].grid()
 
 ax[1].set_xlabel("Median Drift Time (years)")
@@ -166,7 +166,7 @@ ax[2].set_ylabel("Density")
 
 ax[3].set_xlabel("Counts")
 ax[3].set_ylabel("Density")
-ax[3].legend(fontsize=7)
+ax[3].legend(fontsize=7, shadow=True)
 # ax[3].grid()
 
 ax[4].set_xlabel("Median Drift Time (years)")
