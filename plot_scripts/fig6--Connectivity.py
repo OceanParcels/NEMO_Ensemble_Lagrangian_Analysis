@@ -16,7 +16,7 @@ base_path = "/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble
 
 
 Latitude_limit = None #44 # 44 or 53
-Longitude_limit =  -40 
+Longitude_limit =  -40
 
 if Latitude_limit is not None:
     criterium_string = f"_{Latitude_limit}N"
@@ -83,7 +83,7 @@ for i, label in enumerate(labels):
 
 ax[0].set_xlabel("Counts")
 ax[0].set_ylabel("Density")
-ax[0].legend(fontsize=7, shadow=True)
+ax[0].legend(fontsize=7, shadow=False)
 
 ax[1].set_xlabel("Median Drift Time (years)")
 ax[1].set_ylabel("Density")
@@ -93,7 +93,7 @@ ax[2].set_ylabel("Density")
 
 ax[3].set_xlabel("Counts")
 ax[3].set_ylabel("Density")
-ax[3].legend(fontsize=7, shadow=True)
+ax[3].legend(fontsize=7, shadow=False)
 
 ax[4].set_xlabel("Median Drift Time (years)")
 ax[4].set_ylabel("Density")
@@ -101,6 +101,11 @@ ax[4].set_ylabel("Density")
 ax[5].set_xlabel("Minimum Drift Time (years)")
 ax[5].set_ylabel("Density")
 
+# set a title
+if Latitude_limit is not None:
+    plt.suptitle(f"Particles Crossing {Latitude_limit}°N", fontsize=14)
+elif Longitude_limit is not None:
+    plt.suptitle(f"Particles Crossing {abs(Longitude_limit)}°W", fontsize=14)
 plt.tight_layout()
 # save the figure
 plt.savefig("../figs/Figx-Connect_tempNspace" + criterium_string + ".png", dpi=300)
@@ -152,7 +157,7 @@ for i, label in enumerate(labels):
 
 ax[0].set_xlabel("Counts")
 ax[0].set_ylabel("Density")
-ax[0].legend(fontsize=7, shadow=True)
+ax[0].legend(fontsize=7, shadow=False)
 # ax[0].grid()
 
 ax[1].set_xlabel("Median Drift Time (years)")
@@ -166,7 +171,7 @@ ax[2].set_ylabel("Density")
 
 ax[3].set_xlabel("Counts")
 ax[3].set_ylabel("Density")
-ax[3].legend(fontsize=7, shadow=True)
+ax[3].legend(fontsize=7, shadow=False)
 # ax[3].grid()
 
 ax[4].set_xlabel("Median Drift Time (years)")
@@ -178,12 +183,18 @@ ax[5].set_xlabel("Minimum Drift Time (years)")
 ax[5].set_ylabel("Density")
 # ax[5].grid()
 
+# set a title
+if Latitude_limit is not None:
+    plt.suptitle(f"Mixture Particles Crossing {Latitude_limit}°N", fontsize=14)
+elif Longitude_limit is not None:
+    plt.suptitle(f"Mixture Particles Crossing {abs(Longitude_limit)}°W", fontsize=14)
+
 plt.tight_layout()
 plt.savefig("../figs/Figx-Connect_MIX_tempNspace" + criterium_string + ".png", dpi=300)
 
 ###################################################################
 #%% COMPARISON OF TEMPORAL AND SPATIAL CONNECTIVITY with Mixture
-#%% Plot the percentage of subpolar trajectories for temporal and spatial members
+# Plot the percentage of subpolar trajectories for temporal and spatial members
 fig, ax = plt.subplots(2, 3, figsize=(10, 6))
 
 ax = ax.flatten()
@@ -193,7 +204,7 @@ colors_space = ["midnightblue", "blueviolet", "teal"]
 ls_space = [(0, (1, 1)), '--', '-.']
 j = 0
 for delta_r in [0.1, 1., 2.]:
-    sns.kdeplot(all_space[delta_r]["counts"], ax=ax[0], label=f"$\delta_r = {delta_r}^o$", clip=(0, 500),
+    sns.kdeplot(all_space[delta_r]["counts"], ax=ax[0], label=f"$\delta_r = {delta_r}^o$", clip=(0, 5000),
                 fill=False, color=colors_space[j], linestyle=ls_space[j])
     sns.kdeplot(all_space[delta_r]["median_time"]/365, ax=ax[1], label=f"Spatial dr{delta_r}", clip=(0, 6),
                 fill=False, color=colors_space[j], linestyle=ls_space[j])
@@ -202,7 +213,7 @@ for delta_r in [0.1, 1., 2.]:
     j += 1
 
 dr_ref = 0.1
-sns.kdeplot(all_mix_space[dr_ref]["counts"], ax=ax[0], label=f"Mix. $\delta_r = {dr_ref}^o$", clip=(0, 100),
+sns.kdeplot(all_mix_space[dr_ref]["counts"], ax=ax[0], label=f"Mix. $\delta_r = {dr_ref}^o$", clip=(0, 5000),
             fill=False, color='k', linestyle='-')
 sns.kdeplot(all_mix_space[dr_ref]["median_time"]/365, ax=ax[1], label=f"Mix. $\delta_r = 1^o$", clip=(0, 6),
             fill=False, color='k', linestyle='-')
@@ -220,7 +231,7 @@ colors_temp = ["darkred", "orangered", "orange"]
 ls_time = [(0, (1, 1)), '--', '-.', (0, (3, 1, 1, 1, 1, 1))]
 j = 0
 for week in [4, 12, 20]:
-    sns.kdeplot(all_temp[week]["counts"], ax=ax[3], label=f"{week} weeks", clip=(0, 200),
+    sns.kdeplot(all_temp[week]["counts"], ax=ax[3], label=f"{week} weeks", clip=(0, 5000),
                 fill=False, color=colors_temp[j], linestyle=ls_time[j])
     sns.kdeplot(all_temp[week]["median_time"]/365, ax=ax[4], label=f"Temporal W{week}", clip=(0, 6),
                 fill=False, color=colors_temp[j], linestyle=ls_time[j])
@@ -229,7 +240,7 @@ for week in [4, 12, 20]:
     j += 1
     
 dr_ref = 0.1
-sns.kdeplot(all_mix_space[dr_ref]["counts"], ax=ax[3], label=f"Mix. $\delta_r = {dr_ref}^o$", clip=(0, 100),
+sns.kdeplot(all_mix_space[dr_ref]["counts"], ax=ax[3], label=f"Mix. $\delta_r = {dr_ref}^o$", clip=(0, 5000),
             fill=False, color='k', linestyle='-')
 sns.kdeplot(all_mix_space[dr_ref]["median_time"]/365, ax=ax[4], label=f"Mix. $\delta_r = 1^o$", clip=(0, 6),
             fill=False, color='k', linestyle='-')
@@ -250,7 +261,7 @@ for i, label in enumerate(labels):
 
 ax[0].set_xlabel("Counts")
 ax[0].set_ylabel("Density")
-ax[0].legend()
+ax[0].legend(fontsize=7)
 
 ax[1].set_xlabel("Median Drift Time (years)")
 ax[1].set_ylabel("Density")
@@ -260,7 +271,7 @@ ax[2].set_ylabel("Density")
 
 ax[3].set_xlabel("Counts")
 ax[3].set_ylabel("Density")
-ax[3].legend(fontsize=8)
+ax[3].legend(fontsize=7)
 
 ax[4].set_xlabel("Median Drift Time (years)")
 ax[4].set_ylabel("Density")
@@ -268,9 +279,14 @@ ax[4].set_ylabel("Density")
 ax[5].set_xlabel("Minimum Drift Time (years)")
 ax[5].set_ylabel("Density")
 
+if Latitude_limit is not None:
+    plt.suptitle(f"Comparisson Particles Crossing {Latitude_limit}°N", fontsize=14)
+elif Longitude_limit is not None:
+    plt.suptitle(f"Comparisson Particles Crossing {abs(Longitude_limit)}°W", fontsize=14)
+
 plt.tight_layout()
 # save the figure
-plt.savefig("../figs/Figx-Connect_Comparisson.png", dpi=300)
+plt.savefig("../figs/Figx-Connect_Comparisson" + criterium_string + ".png", dpi=300)
 
 #%% Average the temporal and spatial members and mixtures and put the values in a dataframe
 
