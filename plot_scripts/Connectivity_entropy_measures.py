@@ -1,12 +1,13 @@
 # %% Load the packages
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import tqdm
+# from tqdm import tqdm
 import pandas as pd
 import seaborn as sns
-from scipy.stats import gaussian_kde
+# from scipy.stats import gaussian_kde
 import pickle
 import os
+import cmocean.cm as cmo
 
 def marginal_entropy(P):
     # Shannon entropy
@@ -22,100 +23,25 @@ def cross_entropy(P, Q):
     # Replace zeros with a very small number to avoid log(0)
     P_safe = np.where(P > 0, P, np.finfo(float).eps)
     return -np.nansum(Q * np.log2(P_safe))
-
-
-# %% Load all dataframes
-
-all_mix_temp = {}
-all_mix_space = {}
-all_temp = {}
-all_space = {}
-location = "Cape_Hatteras"
-base_path = "/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/"
-
-
-Latitude_limit = 53 # 44 or 53
-Longitude_limit = None # -40 
+ 
+    
+#%% ################# Single Member #################
+Latitude_limit = None # 53 or 44
+Longitude_limit = -40 # -40
 
 if Latitude_limit is not None:
     criterium_string = f"_{Latitude_limit}N"
 elif Longitude_limit is not None:
     criterium_string = f"_{abs(Longitude_limit)}W"
 
-for week in [4, 12, 20]:
-    
-    df_path = base_path + f"analysis/connectivity/Stats/Stats_W{week:02d}" + criterium_string + ".csv"
-    _df = pd.read_csv(df_path)
-    all_temp[week] = _df
-
-    df_mix = base_path + f"analysis/connectivity/Stats/Stats_mix_W{week:02d}" + criterium_string + ".csv"
-    _df = pd.read_csv(df_mix)
-    all_mix_temp[week] = _df
-    
-for delta_r in [0.1, 1., 2.]:
-    df_path = base_path + f"analysis/connectivity/Stats/Stats_dr{delta_r*100:03.0f}" + criterium_string + ".csv"
-    _df = pd.read_csv(df_path)
-    all_space[delta_r] = _df
-    
-    df_path = base_path + f"analysis/connectivity/Stats/Stats_mix_dr{delta_r*100:03.0f}" + criterium_string + ".csv"
-    _df = pd.read_csv(df_path)
-    all_mix_space[delta_r] = _df
-
-# # %% Build KDEs to compute entropy etc.. 
-# def evaluate_kde(kde, x):
-#     pdf = kde(x)
-#     pdf = np.where(pdf > 0, pdf, np.nan)
-#     return pdf
-
-# x = np.linspace(0, 7500, 7500)
-
-# kde_temp = {}
-# kde_space = {}
-# kde_mix_temp = {}
-# kde_mix_space = {}
-
-# for week in [4, 12, 20]:
-#     kde_single = gaussian_kde(all_temp[week]["counts"])
-#     kde_mix = gaussian_kde(all_mix_temp[week]["counts"])
-    
-#     kde_temp[week] = evaluate_kde(kde_single, x)
-#     kde_mix_temp[week] = evaluate_kde(kde_mix, x)
-    
-# for delta_r in [0.1, 1., 2.]:
-#     kde_single = gaussian_kde(all_space[delta_r]["counts"])
-#     kde_mix = gaussian_kde(all_mix_space[delta_r]["counts"])
-#     kde_space[delta_r] = evaluate_kde(kde_single, x)
-#     kde_mix_space[delta_r] = evaluate_kde(kde_mix, x)
-    
-
-# %% Compute the entropy of the distributions
-# ensemble_entropy = np.zeros(6)
-# mixture_entropy = np.zeros(6)
-
-# i = 0
-# for week in [4, 12, 20]:
-#     ensemble_entropy[i] = marginal_entropy(kde_temp[week])
-#     mixture_entropy[i] = marginal_entropy(kde_mix_temp[week])
-#     i += 1
-
-# for delta_r in [0.1, 1., 2.]:
-#     ensemble_entropy[i] = marginal_entropy(kde_space[delta_r])
-#     mixture_entropy[i] = marginal_entropy(kde_mix_space[delta_r])
-#     i += 1
-
-# np.where(pdf > 0, pdf, np.finfo(float).eps)
-
-#%%
-Latitude_limit = None # 44 or 53
-Longitude_limit = -40
-path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/"
+path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/connectivity/"
 
 N_members = 50
 
 all_messages = {}
 all_prob = {}
 
-time_range = np.arange(0, 6*365-1, 1)
+time_range = np.arange(0, 6*365-20*7, 1)
 all_prob['time'] = time_range
 
 
@@ -126,168 +52,333 @@ for delta_r in [0.1, 1., 2.]:
     for member in range(1, N_members+1):
         
         if Latitude_limit is not None:
-            pkl_path = path + f"analysis/connectivity/dr_{delta_r*100:03.0f}_{Latitude_limit}N/Distributions_dr{delta_r*100:03.0f}_m{member:03d}.pkl"
+            pkl_path = path + f"dr_{delta_r*100:03.0f}_{Latitude_limit}N/Distributions_dr{delta_r*100:03.0f}_m{member:03d}.pkl"
         elif Longitude_limit is not None:    
-            pkl_path = path + f"analysis/connectivity/dr_{delta_r*100:03.0f}_{abs(Longitude_limit)}W/Distributions_dr{delta_r*100:03.0f}_m{member:03d}.pkl"
+            pkl_path = path + f"dr_{delta_r*100:03.0f}_{abs(Longitude_limit)}W/Distributions_dr{delta_r*100:03.0f}_m{member:03d}.pkl"
             
+        ping = np.zeros_like(time_range)
+        
         if os.path.exists(pkl_path):
             with open(pkl_path, "rb") as f:
                 distributions = pickle.load(f)
             
             drift_time = distributions["drift_time"]
+            drift_time = np.sort(drift_time)
             depths = distributions["depths"]
             trajectory = distributions["trajectory"]
             
+            unique, counts = np.unique(drift_time, return_counts=True)
+            
+            for k in time_range:
+                if k in unique:
+                    ping[k] = 1 # counts[np.where(unique == k)[0][0]]
+            
+            if np.sum(ping) > 0:
+                ping = ping / np.sum(ping)
+            # ping = ping / np.sum(ping)
+            
         else:
-            print(f"--EMPTY--")
-
-        drift_time = np.sort(drift_time)
-
-        unique, counts = np.unique(drift_time, return_counts=True)
-
-        sms = np.zeros_like(time_range)
-
-        for k in time_range:
-            if k in unique:
-                sms[k] = 1 # counts[np.where(unique == k)[0][0]]
-
-        sms = sms / np.sum(sms)
-        messages[member - 1, :] = sms
+            print(f"Delta_r {delta_r}, member {member} --EMPTY--")
+        
+        messages[member - 1, :] = ping
     
     all_messages[delta_r] = messages
-    all_prob[delta_r] = np.mean(messages, axis=0)
+    all_prob[delta_r] = np.mean(messages, axis=0)/np.sum(np.mean(messages, axis=0))
 
-# %%
-for delta_r in [0.1, 1., 2.]:
+
+for week in [4, 12, 20]:
     
-    plt.plot(all_prob[delta_r], label=f"$\delta_r = {delta_r}^o$",alpha=1)
-    print(sum(all_prob[delta_r]))
-    print(f"Entropy dr = {delta_r}: {all_prob[delta_r]}")
+    messages = np.zeros((50, len(time_range)))
+    
+    for member in range(1, N_members+1):
+        
+        if Latitude_limit is not None:
+            pkl_path = path + f"W_{week:02d}_{Latitude_limit}N/Distributions_W{week:02d}_m{member:03d}.pkl"
+        elif Longitude_limit is not None:    
+            pkl_path = path + f"W_{week:02d}_{abs(Longitude_limit)}W/Distributions_W{week:02d}_m{member:03d}.pkl"
+        
+        ping = np.zeros_like(time_range)
+        
+        if os.path.exists(pkl_path):
+            with open(pkl_path, "rb") as f:
+                distributions = pickle.load(f)
+            
+            drift_time = distributions["drift_time"]
+            drift_time = np.sort(drift_time)
+            depths = distributions["depths"]
+            trajectory = distributions["trajectory"]
+            
+            unique, counts = np.unique(drift_time, return_counts=True)
+            
+            for k in time_range:
+                if k in unique:
+                    ping[k] = 1 # counts[np.where(unique == k)[0][0]]
+            
+            if np.sum(ping) > 0:
+                ping = ping / np.sum(ping)
+            # ping = ping / np.sum(ping)
+            
+        else:
+            print(f"Week {week}, member {member} --EMPTY--")
 
-plt.xlabel("Time (days)")
-plt.ylim(0, 0.0013)
-plt.ylabel("Probability")
-# plt.title("Probability of particles crossing the 40W meridian")
 
-plt.legend()    
-# %%
+        messages[member - 1, :] = ping
+    
+    all_messages[week] = messages
+    all_prob[week] = np.mean(messages, axis=0)/np.sum(np.mean(messages, axis=0))
 
-Latitude_limit = None # 44 or 53
-Longitude_limit = -40
-path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/"
-
-
+    
+# %% ################ MIXTURES ################
 N_members = 50
 
 all_mix_messages = {}
 all_prob_mix = {}
 all_prob_mix['time'] = time_range
-# all_mix_entropy = {}
 
 for delta_r in [0.1, 1., 2.]:
     
     messages = np.zeros((50, len(time_range)))
-    # entropy = np.zeros(50)
     
     for member in range(1, N_members+1):
         
         if Latitude_limit is not None:
-            pkl_path = path + f"analysis/connectivity/mix_dr_{delta_r*100:03.0f}_{Latitude_limit}N/Distributions_mix_dr{delta_r*100:03.0f}_s{member:03d}.pkl"
+            pkl_path = path + f"mix_dr_{delta_r*100:03.0f}_{Latitude_limit}N/Distributions_mix_dr{delta_r*100:03.0f}_s{member:03d}.pkl"
         elif Longitude_limit is not None:    
-            pkl_path = path + f"analysis/connectivity/mix_dr_{delta_r*100:03.0f}_{abs(Longitude_limit)}W/Distributions_mix_dr{delta_r*100:03.0f}_s{member:03d}.pkl"
+            pkl_path = path + f"mix_dr_{delta_r*100:03.0f}_{abs(Longitude_limit)}W/Distributions_mix_dr{delta_r*100:03.0f}_s{member:03d}.pkl"
 
-            
+        ping = np.zeros_like(time_range)
+        
         if os.path.exists(pkl_path):
             with open(pkl_path, "rb") as f:
                 distributions = pickle.load(f)
             
             drift_time = distributions["drift_time"]
+            drift_time = np.sort(drift_time)
             depths = distributions["depths"]
             trajectory = distributions["trajectory"]
             
+            unique, counts = np.unique(drift_time, return_counts=True)
+            
+            for k in time_range:
+                if k in unique:
+                    ping[k] = 1 # counts[np.where(unique == k)[0][0]]
+            
+            if np.sum(ping) > 0:
+                ping = ping / np.sum(ping)
+            # ping = ping / np.sum(ping)
+            
         else:
-            print(f"--EMPTY--")
-            # print("member", member, "dr", delta_r)
+            print(f"Delta_r {delta_r}, member {member} --EMPTY--")
 
-        drift_time = np.sort(drift_time)
-        # print(drift_time)
 
-        unique, counts = np.unique(drift_time, return_counts=True)
-
-        sms = np.zeros_like(time_range)
-
-        for k in time_range:
-            if k in unique:
-                sms[k] = 1 #counts[np.where(unique == k)[0][0]]
-
-        # sms = sms / np.sum(sms)
-        messages[member - 1, :] = sms 
-        # entropy[member - 1] = marginal_entropy(sms)
+        messages[member - 1, :] = ping 
     
     all_mix_messages[delta_r] = messages
     all_prob_mix[delta_r] = np.mean(messages, axis=0)/np.sum(np.mean(messages, axis=0))
-    # all_mix_entropy[delta_r] = entropy
-
-# %%
-for delta_r in [0.1, 1., 2.]:
-   
-    print(sum(all_prob_mix[delta_r]))
-    plt.plot(all_prob_mix[delta_r], label=f"Mix. $\delta_r = {delta_r}^o$", alpha=1)
     
-    print(f"Entropy dr = {delta_r}: {marginal_entropy(all_prob_mix[delta_r])}")
+    
+for week in [4, 12, 20]:
+    
+    messages = np.zeros((50, len(time_range)))
+    
+    for member in range(1, N_members+1):
+        
+        if Latitude_limit is not None:
+            pkl_path = path + f"mix_W_{week:02d}_{Latitude_limit}N/Distributions_mix_W{week:02d}_s{member:03d}.pkl"
+        elif Longitude_limit is not None:    
+            pkl_path = path + f"mix_W_{week:02d}_{abs(Longitude_limit)}W/Distributions_mix_W{week:02d}_s{member:03d}.pkl"
+            
+        ping = np.zeros_like(time_range)
+        
+        if os.path.exists(pkl_path):
+            with open(pkl_path, "rb") as f:
+                distributions = pickle.load(f)
+            
+            drift_time = distributions["drift_time"]
+            drift_time = np.sort(drift_time)
+            depths = distributions["depths"]
+            trajectory = distributions["trajectory"]
+            
+            unique, counts = np.unique(drift_time, return_counts=True)
+            
+            for k in time_range:
+                if k in unique:
+                    ping[k] = 1 # counts[np.where(unique == k)[0][0]]
+            
+            if np.sum(ping) > 0:
+                ping = ping / np.sum(ping)
+            # ping = ping / np.sum(ping)
+            
+        else:
+            print(f"Week {week}, member {member} --EMPTY--")
 
-plt.xlabel("Time (days)")
-plt.ylabel("Probability")
-plt.ylim(0, 0.0013)
-plt.legend()
+        messages[member - 1, :] = ping
+    
+    all_mix_messages[week] = messages
+    all_prob_mix[week] = np.mean(messages, axis=0)
+
+# %% ############### PLOT Single members and Mixtures ####################
+fig, axs = plt.subplots(2, 2, figsize=(8, 6), sharex=True, sharey=True)
+colors_space = ['mediumblue', 'blueviolet', 'teal']
+colors_time = ['darkred', 'orangered', 'orange']
+
+# Top left: Single members (delta_r)
+i = 0
+for delta_r in [0.1, 1., 2.]:
+    axs[0, 0].plot(all_prob[delta_r], label=f"$\delta_r = {delta_r}^o$", alpha=0.5, color=colors_space[i])
+    i += 1
+    
+axs[0, 0].set_ylabel("Probability")
+axs[0, 0].legend(fontsize="small")
+axs[0, 0].text(0.05, 0.05, 'A', transform=axs[0, 0].transAxes, fontsize=12, verticalalignment='bottom', horizontalalignment='left', fontweight='bold')
+
+# Bottom left: Single members (week)
+i = 0
+for week in [4, 12, 20]:
+    axs[1, 0].plot(all_prob[week], label=f"Week {week}", alpha=0.5, color=colors_time[i])
+    i += 1
+axs[1, 0].set_xlabel("Time (days)")
+axs[1, 0].set_ylabel("Probability")
+axs[1, 0].legend(fontsize='small')
+axs[1, 0].text(0.05, 0.05, 'C', transform=axs[1, 0].transAxes, fontsize=12, verticalalignment='bottom', horizontalalignment='left', fontweight='bold')
+
+# Top right: Mixtures (delta_r)
+i = 0
+for delta_r in [0.1, 1., 2.]:
+    axs[0, 1].plot(all_prob_mix[delta_r], label=f"Mix. $\delta_r = {delta_r}^o$", alpha=0.5, color=colors_space[i])
+    i += 1
+axs[0, 1].legend(fontsize='small')
+axs[0, 1].text(0.05, 0.05, 'B', transform=axs[0, 1].transAxes, fontsize=12, verticalalignment='bottom', horizontalalignment='left', fontweight='bold')
+
+# Bottom right: Mixtures (week)
+i = 0
+for week in [4, 12, 20]:
+    axs[1, 1].plot(all_prob_mix[week], label=f"Mix. Week {week}", alpha=0.5, color=colors_time[i])
+    i += 1
+    
+axs[1, 1].set_xlabel("Time (days)")
+axs[1, 1].legend(fontsize='small')
+axs[1, 1].text(0.05, 0.05, 'D', transform=axs[1, 1].transAxes, fontsize=12, verticalalignment='bottom', horizontalalignment='left', fontweight='bold')
+
+# Adjust layout
+plt.tight_layout()
+plt.show()
+fig.savefig("../figs/FigX_Frequency_probability" + criterium_string + ".png", dpi=300)
 
 # %% Dataframe with the statistics
 ensemble = pd.DataFrame(all_prob)
 ensemble.set_index('time', inplace=True)
+# ensemble.columns = [r'$\delta_r 0.1^o$', 'dr 1.', 'dr 2.', '4 weeks', '12 weeks', '20 weeks']
 
 mixture = pd.DataFrame(all_prob_mix)
 mixture.set_index('time', inplace=True)
 
-# %% Entropy of the ensemble and mixture
+# %% DATAFRAMES Entropy of the ensemble and mixture
 ensemble_cross_entropy = {}
 ensemble_KLD = {}
-ensemble_entropy = np.zeros(3)
+ensemble_entropy = np.zeros(6)
+ensemble_mix_entropy = np.zeros(6)
 
-for j, delta in enumerate([0.1, 1., 2.]):
-    cross = np.zeros(3)
-    KLD = np.zeros(3)
-    for i, delta_ref in enumerate([0.1, 1., 2.]):
+
+    
+for j, delta in enumerate([0.1, 1., 2., 4, 12, 20]):
+    
+    cross = np.zeros(6)
+    KLD = np.zeros(6)
+    
+    for i, delta_ref in enumerate([0.1, 1., 2., 4, 12, 20]):
         cross[i] = cross_entropy(all_prob_mix[delta_ref], all_prob[delta]) #- marginal_entropy(all_prob[delta])
-        KLD[i] = cross_entropy(all_prob[delta_ref], all_prob_mix[delta]) - marginal_entropy(all_prob[delta])
+        KLD[i] = cross_entropy(all_prob_mix[delta_ref], all_prob[delta]) - marginal_entropy(all_prob[delta])
 
     ensemble_cross_entropy[delta] = cross
     ensemble_KLD[delta] = KLD
     
     ensemble_entropy[j] = marginal_entropy(all_prob[delta])
+    ensemble_mix_entropy[j] = marginal_entropy(all_prob_mix[delta])
     
-H_cross = pd.DataFrame(ensemble_cross_entropy, index=['Mix 0.1', 'Mix 1.', 'Mix 2.'])
-KLD_ensemble = pd.DataFrame(ensemble_KLD, index=['Mix 0.1', 'Mix 1.', 'Mix 2.'])
 
-H_ensemble = pd.DataFrame(ensemble_entropy, index=['0.1', '1.', '2.'])
+#redefine keys in ensemble_cross_KLD
+ensemble_KLD = {r'$\delta_r = 0.1^o$': ensemble_KLD[0.1],
+                            r'$\delta_r = 1^o$': ensemble_KLD[1.],
+                            r'$\delta_r = 2^o$': ensemble_KLD[2.],
+                            '4 weeks': ensemble_KLD[4],
+                            '12 weeks': ensemble_KLD[12],
+                            '20 weeks': ensemble_KLD[20]}
 
 
-# %%
-fig, ax = plt.subplots(figsize=(4, 4))
-sns.heatmap(H_cross.T, annot=True, fmt=".3f", cmap='magma', ax=ax, vmin=10.64, vmax=11.24, cbar_kws={'label': '(bits)'})
-ax.set_title('Cross Entropy')
+H_cross = pd.DataFrame(ensemble_cross_entropy, index=[r'Mix $\delta_r = 0.1^o$', r'Mix $\delta_r = 1^o$', r'Mix $\delta_r = 2^o$', 
+                                                           'Mix 4 weeks', 'Mix 12 weeks', 'Mix 20 weeks'])
+KLD_ensemble = pd.DataFrame(ensemble_KLD, index=[r'Mix $\delta_r = 0.1^o$', r'Mix $\delta_r = 1^o$', r'Mix $\delta_r = 2^o$', 
+                                                           'Mix 4 weeks', 'Mix 12 weeks', 'Mix 20 weeks'])
+
+H_ensemble = pd.DataFrame(ensemble_entropy, index=[r'$\delta_r = 0.1^o$', r'$\delta_r = 1^o$', r'$\delta_r = 2^o$',
+                                                   '4 weeks', '12 weeks', '20 weeks'])
+H_ensemble_mix = pd.DataFrame(ensemble_mix_entropy, index=[r'Mix $\delta_r = 0.1^o$', r'Mix $\delta_r = 1^o$', r'Mix $\delta_r = 2^o$', 
+                                                           'Mix 4 weeks', 'Mix 12 weeks', 'Mix 20 weeks'])
+
+
+# %% PLOT CROSS ENTROPY 
+# Create a 2x2 grid of subplots with space for colorbars
+fig, axs = plt.subplots(2, 3, figsize=(8, 7), gridspec_kw={'width_ratios': [1/7, 6/7, 1/7], 'height_ratios': [6/7, 1/7]})
+
+cmmap = cmo.balance
+central_plot_data = H_cross.T
+Max_ent = np.max(central_plot_data.max())
+Min_ent = np.min(central_plot_data.min())
+
+# Marginal entropy single members (upper left)
+sns.heatmap(H_ensemble, annot=True, fmt=".3f", cmap=cmmap, ax=axs[0, 0], cbar=False, vmin=Min_ent, vmax=Max_ent) 
+# axs[0, 0].set_title('Marginal Entropy')
+axs[0, 0].set_xticklabels([r'$H(P_i)$'])  # Remove x tick labels
+# axs[0, 0].set_xticks([])  # Remove x ticks
+
+# Marginal entropy mixtures (lower right)
+sns.heatmap(H_ensemble_mix.T, annot=True, fmt=".3f", cmap=cmmap, ax=axs[1, 1], cbar=False, vmin=Min_ent, vmax=Max_ent)
+# axs[1, 1].set_title('Marginal Entropy')
+axs[1, 1].set_yticklabels([r'$H(P_{Mix})$'])  # Remove y tick labels
+# axs[1, 1].set_yticks([])  # Remove y ticks
+axs[1, 1].set_xticklabels(axs[1, 1].get_xticklabels(), rotation=15, ha='center')  # Rotate x tick labels
+
+# Hide the bottom left subplot (lower left)
+axs[1, 0].text(0.5, 0.5, "Marginal\nEntropy", ha='center', va='center', rotation=-45, fontsize=12)
+axs[1, 0].axis('off')
+axs[1, 2].axis('off')
+axs[0, 2].axis('off')
+axs[0, 1].axis('off')
+
+# Add colorbars
+fig.subplots_adjust(right=0.85)
+cbar_ax2 = fig.add_axes([0.87, 0.28, 0.03, 0.66])
+
+sns.heatmap(central_plot_data, annot=True, fmt=".3f", cmap=cmmap, ax=axs[0, 1], cbar_ax=cbar_ax2)
+cbar_ax2.set_ylabel('(bits)')
+axs[0, 1].set_title(r'Cross Entropy, $H_{P_{Mix}}(P_i)$')
+
+# Adjust layout
+plt.tight_layout()
 plt.show()
-  
-# %%
-fig, ax = plt.subplots(figsize=(2, 4))
-sns.heatmap(H_ensemble, annot=True, fmt=".3f", cmap='magma', ax=ax, vmin=10.64, vmax=11.24, cbar_kws={'label': '(bits)'})
-ax.set_title('Marginal Entropy')
-ax.set_xticklabels([])  # Remove x tick labels
+
+fig.savefig("../figs/FigX_Cross_entropy" + criterium_string + ".png", dpi=300)
+
+# %% Kullback-Leibler divergence plot 
+fig, ax = plt.subplots(figsize=(6, 5))
+
+cmmap = cmo.amp
+
+sns.heatmap(KLD_ensemble.T, annot=True, fmt=".3f", cmap=cmmap, ax=ax, cbar=True)
+
+# Rotate y tick labels 90 degrees
+ax.set_yticklabels(ax.get_yticklabels(), rotation=90, ha='center', fontsize=9)
+# Rotate x tick labels 15 degrees
+ax.set_xticklabels(ax.get_xticklabels(), rotation=15, ha='center', fontsize=9)
+
+# Add colorbar label
+cbar = ax.collections[0].colorbar
+cbar.set_label('KL Divergence, $D_{P_{Mix}}(P_i)$ (bits)')
+
+plt.tight_layout()
 plt.show()
 
-# %%
-fig, ax = plt.subplots(figsize=(4, 4))
-sns.heatmap(KLD_ensemble.T, annot=True, fmt=".3f", cmap='magma', ax=ax, cbar_kws={'label': '(bits)'})
-ax.set_title('Kullback Leibler Divergence')
-plt.show()
+fig.savefig("../figs/FigX_KLDivergence" + criterium_string + ".png", dpi=300)
 
 # %%
