@@ -195,67 +195,68 @@ plt.savefig("../figs/Figx-Connect_MIX_tempNspace" + criterium_string + ".png", d
 ###################################################################
 #%% COMPARISON OF TEMPORAL AND SPATIAL CONNECTIVITY with Mixture
 # Plot the percentage of subpolar trajectories for temporal and spatial members
-fig, ax = plt.subplots(2, 3, figsize=(10, 6))
-
+fig, ax = plt.subplots(2, 2, figsize=(8, 6))
 ax = ax.flatten()
 # Plot distributions for percentage of subpolar trajectories
 
 colors_space = ["midnightblue", "blueviolet", "teal"]
 ls_space = [(0, (1, 1)), '--', '-.']
-j = 0
-for delta_r in [0.1, 1., 2.]:
-    sns.kdeplot(all_space[delta_r]["counts"], ax=ax[0], label=f"$\delta_r = {delta_r}^o$", clip=(0, 5000),
+
+for j, delta_r in enumerate([0.1, 1., 2.]):
+    sns.kdeplot(all_space[delta_r]["counts"], ax=ax[0], label=f"$\delta_r = {delta_r}^o$", clip=(0, 7500),
                 fill=False, color=colors_space[j], linestyle=ls_space[j])
     sns.kdeplot(all_space[delta_r]["median_time"]/365, ax=ax[1], label=f"Spatial dr{delta_r}", clip=(0, 6),
                 fill=False, color=colors_space[j], linestyle=ls_space[j])
-    sns.kdeplot(all_space[delta_r]["min_time"]/365, ax=ax[2], label=f"Spatial dr{delta_r}", clip=(0, 6),
-                fill=False, color=colors_space[j], linestyle=ls_space[j])
-    j += 1
 
-dr_ref = 0.1
-sns.kdeplot(all_mix_space[dr_ref]["counts"], ax=ax[0], label=f"Mix. $\delta_r = {dr_ref}^o$", clip=(0, 5000),
-            fill=False, color='k', linestyle='-')
-sns.kdeplot(all_mix_space[dr_ref]["median_time"]/365, ax=ax[1], label=f"Mix. $\delta_r = 1^o$", clip=(0, 6),
-            fill=False, color='k', linestyle='-')
-sns.kdeplot(all_mix_space[dr_ref]["min_time"]/365, ax=ax[2], label=f"Mix. $\delta_r = 1^o$", clip=(0, 6),
-            fill=False, color='k', linestyle='-')
 
-# sns.kdeplot(all_mix_temp[4]["counts"], ax=ax[0], label=f"Mix. 4 weeks", clip=(0, 100),
-#             fill=False, color='k', linestyle=(0, (3, 1, 1, 3)))
-# sns.kdeplot(all_mix_temp[4]["median_time"]/365, ax=ax[1], label=f"Mix. 4 weeks", clip=(0, 6),
-#             fill=False, color='k', linestyle=(0, (3, 1, 1, 3)))
-# sns.kdeplot(all_mix_temp[4]["min_time"]/365, ax=ax[2], label=f"Mix. 4 weeks", clip=(0, 6),
-#             fill=False, color='k', linestyle=(0, (3, 1, 1, 3)))
+for j, dr_ref in enumerate([0.1, 1., 2.]):
+    mean_counts = all_mix_space[dr_ref]["counts"].mean()
+    std_counts = all_mix_space[dr_ref]["counts"].std()
+
+    ax[0].fill_betweenx([0, 0.002], mean_counts-std_counts, mean_counts+std_counts,
+                        color=colors_space[j], alpha=0.2, label=f"Mix. $\delta_r = {dr_ref}^o$",
+                        edgecolor='none')
+    ax[0].set_ylim(0, 0.0009)
+    ax[0].set_xlim(0, 6500)
+    
+    mean_median_time = all_mix_space[dr_ref]["median_time"].mean()/365
+    std_median_time = all_mix_space[dr_ref]["median_time"].std()/365
+
+    ax[1].axvline(mean_median_time, color=colors_space[j], linestyle='-', 
+                  label=f"Mix. $\delta_r = {dr_ref}^o$", alpha=0.3)
+    ax[1].set_xlim(1, 6)
 
 colors_temp = ["darkred", "orangered", "orange"]
 ls_time = [(0, (1, 1)), '--', '-.', (0, (3, 1, 1, 1, 1, 1))]
-j = 0
-for week in [4, 12, 20]:
-    sns.kdeplot(all_temp[week]["counts"], ax=ax[3], label=f"{week} weeks", clip=(0, 5000),
-                fill=False, color=colors_temp[j], linestyle=ls_time[j])
-    sns.kdeplot(all_temp[week]["median_time"]/365, ax=ax[4], label=f"Temporal W{week}", clip=(0, 6),
-                fill=False, color=colors_temp[j], linestyle=ls_time[j])
-    sns.kdeplot(all_temp[week]["min_time"]/365, ax=ax[5], label=f"Temporal W{week}", clip=(0, 6),
-                fill=False, color=colors_temp[j], linestyle=ls_time[j])
-    j += 1
-    
-dr_ref = 0.1
-sns.kdeplot(all_mix_space[dr_ref]["counts"], ax=ax[3], label=f"Mix. $\delta_r = {dr_ref}^o$", clip=(0, 5000),
-            fill=False, color='k', linestyle='-')
-sns.kdeplot(all_mix_space[dr_ref]["median_time"]/365, ax=ax[4], label=f"Mix. $\delta_r = 1^o$", clip=(0, 6),
-            fill=False, color='k', linestyle='-')
-sns.kdeplot(all_mix_space[dr_ref]["min_time"]/365, ax=ax[5], label=f"Mix. $\delta_r = 1^o$", clip=(0, 6),
-            fill=False, color='k', linestyle='-')
 
-sns.kdeplot(all_mix_temp[4]["counts"], ax=ax[3], label=f"Mix. 4 weeks", clip=(0, 100),
-            fill=False, color='k', linestyle=(0, (3, 1, 1, 3)))
-sns.kdeplot(all_mix_temp[4]["median_time"]/365, ax=ax[4], label=f"Mix. 4 weeks", clip=(0, 6),
-            fill=False, color='k', linestyle=(0, (3, 1, 1, 3)))
-sns.kdeplot(all_mix_temp[4]["min_time"]/365, ax=ax[5], label=f"Mix. 4 weeks", clip=(0, 6),
-            fill=False, color='k', linestyle=(0, (3, 1, 1, 3)))
+for j, week in enumerate([4, 12, 20]):
+    sns.kdeplot(all_temp[week]["counts"], ax=ax[2], label=f"{week} weeks", clip=(0, 7500),
+                fill=False, color=colors_temp[j], linestyle=ls_time[j])
+    sns.kdeplot(all_temp[week]["median_time"]/365, ax=ax[3], label=f"Temporal W{week}", clip=(0, 6),
+                fill=False, color=colors_temp[j], linestyle=ls_time[j])
+    
+
+for j, dr_ref in enumerate([4, 12, 20]):
+    mean_counts = all_mix_temp[dr_ref]["counts"].mean()
+    std_counts = all_mix_temp[dr_ref]["counts"].std()
+
+    ax[2].fill_betweenx([0, 0.001], mean_counts-std_counts, mean_counts+std_counts,
+                        color=colors_temp[j], alpha=0.2, label=f"Mix. {dr_ref} weeks", edgecolor='none')
+    ax[2].set_ylim(0, 0.001)
+    
+    ax[2].set_ylim(0, 0.001)
+    ax[2].set_xlim(0, 6500)
+    
+    mean_median_time = all_mix_temp[dr_ref]["median_time"].mean()/365
+    std_median_time = all_mix_temp[dr_ref]["median_time"].std()/365
+
+    ax[3].axvline(mean_median_time, color=colors_temp[j], linestyle='-', 
+                  label=f"Mix. $\delta_r = {dr_ref}^o$", alpha=0.3)
+
+    ax[3].set_xlim(1, 6)
 
 # Add labels 'A', 'B', ... for each subplot in the top left corner
-labels = ['A', 'B', 'C', 'D', 'E', 'F']
+labels = ['A', 'B', 'C', 'D']
 for i, label in enumerate(labels):
     ax[i].text(0.05, 0.95, label, transform=ax[i].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
 
@@ -266,23 +267,12 @@ ax[0].legend(fontsize=7)
 ax[1].set_xlabel("Median Drift Time (years)")
 ax[1].set_ylabel("Density")
 
-ax[2].set_xlabel("Minimum Drift Time (years)")
+ax[2].set_xlabel("Counts")
 ax[2].set_ylabel("Density")
+ax[2].legend(fontsize=7)
 
-ax[3].set_xlabel("Counts")
+ax[3].set_xlabel("Median Drift Time (years)")
 ax[3].set_ylabel("Density")
-ax[3].legend(fontsize=7)
-
-ax[4].set_xlabel("Median Drift Time (years)")
-ax[4].set_ylabel("Density")
-
-ax[5].set_xlabel("Minimum Drift Time (years)")
-ax[5].set_ylabel("Density")
-
-if Latitude_limit is not None:
-    plt.suptitle(f"Comparisson Particles Crossing {Latitude_limit}°N", fontsize=14)
-elif Longitude_limit is not None:
-    plt.suptitle(f"Comparisson Particles Crossing {abs(Longitude_limit)}°W", fontsize=14)
 
 plt.tight_layout()
 # save the figure

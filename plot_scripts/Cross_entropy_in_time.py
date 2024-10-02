@@ -2,9 +2,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
-# import cartopy
 from tqdm import tqdm
-# import pickle
+import pickle
 import pandas as pd
 import seaborn as sns
 import cmocean.cm as cmo
@@ -47,7 +46,7 @@ hexbin_grid = hexfunc.hexGrid(hex_grid, h3_res=3)
 
 
 #%% KLD
-N_members = 10
+N_members = 50
 
 time_length = 2189 - 7*20
 time_range = np.arange(0, time_length)
@@ -55,7 +54,7 @@ time_range = np.arange(0, time_length)
 KLD_ALL_mean = {}
 KLD_ALL_std = {}
 
-for delta_ref in [0.1, 2., 4, 20]:
+for delta_ref in [0.1, 1., 2., 4, 12, 20]:
     
     KLDivergence_mean = {}
     KLDivergence_std = {}
@@ -98,6 +97,14 @@ for delta_ref in [0.1, 2., 4, 20]:
     KLD_ALL_mean[delta_ref] = KLDivergence_mean
     KLD_ALL_std[delta_ref] = KLDivergence_std
 
+#%% # save KLDivergence_mean and KLDivergence_std to file
+with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_ALL_mean.pkl', 'wb') as f:
+    pickle.dump(KLD_ALL_mean, f)
+        
+with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_ALL_std.pkl', 'wb') as f:
+    pickle.dump(KLD_ALL_std, f)
+    
+
 #%%
 fig, axs = plt.subplots(2, 2, figsize=(10, 8), sharex=True, sharey=True)
 # fig.subplots_adjust(hspace=0.4, wspace=0.4)
@@ -132,11 +139,11 @@ for i, key in enumerate(KLD_ALL_mean.keys()):
         
     ax.text(0.05, 0.9, f'$\mathbf{{{labels[i]}}}$  Ref.: {labeltt}', fontsize=14, transform=ax.transAxes)
 
-    # ax.semilogx()
+    ax.semilogx()
     ax.legend()
     # ax.grid()
     ax.set_xlim(0, time_length)
-    ax.set_ylim(0, 20)
+    ax.set_ylim(0, 30)
 
 axs[2].set_xlabel('Time (days)')
 axs[3].set_xlabel('Time (days)')
@@ -169,9 +176,9 @@ DF.set_index([[r'$\delta_r = 0.1^o$', r'$\delta_r = 2^o$', 'Mix 4 weeks', 'Mix 2
 # %% Kullback-Leibler divergence plot 
 fig, ax = plt.subplots(figsize=(6, 5))
 
-cmmap = cmo.amp
+cmmap = "Greens_r"
 
-sns.heatmap(DF.T, annot=True, fmt=".3f", cmap=cmmap, ax=ax, cbar=True)
+sns.heatmap(DF, annot=True, fmt=".3f", cmap=cmmap, ax=ax, cbar=True)
 
 # Rotate y tick labels 90 degrees
 ax.set_yticklabels(ax.get_yticklabels(), rotation=90, ha='center', fontsize=9)

@@ -321,7 +321,7 @@ H_ensemble_mix = pd.DataFrame(ensemble_mix_entropy, index=[r'Mix $\delta_r = 0.1
 # Create a 2x2 grid of subplots with space for colorbars
 fig, axs = plt.subplots(2, 3, figsize=(8, 7), gridspec_kw={'width_ratios': [1/7, 6/7, 1/7], 'height_ratios': [6/7, 1/7]})
 
-cmmap = cmo.balance
+cmmap = 'Greys_r'
 central_plot_data = H_cross.T
 Max_ent = np.max(central_plot_data.max())
 Min_ent = np.min(central_plot_data.min())
@@ -363,9 +363,9 @@ fig.savefig("../figs/FigX_Cross_entropy" + criterium_string + ".png", dpi=300)
 # %% Kullback-Leibler divergence plot 
 fig, ax = plt.subplots(figsize=(6, 5))
 
-cmmap = cmo.amp
+cmmap = 'Greens_r' #cmo.algae_r
 
-sns.heatmap(KLD_ensemble.T, annot=True, fmt=".3f", cmap=cmmap, ax=ax, cbar=True)
+sns.heatmap(KLD_ensemble.T, annot=True, fmt=".3f", cmap=cmmap, ax=ax, cbar=True, vmin=0)
 
 # Rotate y tick labels 90 degrees
 ax.set_yticklabels(ax.get_yticklabels(), rotation=90, ha='center', fontsize=9)
@@ -375,6 +375,8 @@ ax.set_xticklabels(ax.get_xticklabels(), rotation=15, ha='center', fontsize=9)
 # Add colorbar label
 cbar = ax.collections[0].colorbar
 cbar.set_label('KL Divergence, $D_{P_{Mix}}(P_i)$ (bits)')
+
+# ax.set_xlabel(r'$P_{Mix}$')
 
 plt.tight_layout()
 plt.show()
