@@ -178,7 +178,7 @@ fig, ax = plt.subplots(figsize=(6, 5))
 
 cmmap = "Greens_r"
 
-sns.heatmap(DF, annot=True, fmt=".3f", cmap=cmmap, ax=ax, cbar=True)
+sns.heatmap(DF, annot=True, fmt=".3f", cmap=cmmap, ax=ax, cbar=True, vmin=0)
 
 # Rotate y tick labels 90 degrees
 ax.set_yticklabels(ax.get_yticklabels(), rotation=90, ha='center', fontsize=9)
