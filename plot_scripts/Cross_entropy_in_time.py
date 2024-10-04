@@ -45,27 +45,30 @@ hex_grid = hexfunc.int_to_hex(P_AX.hexint.values)
 hexbin_grid = hexfunc.hexGrid(hex_grid, h3_res=3)
 
 
+time_length = 2189 - 7*20
+time_range = np.arange(0, time_length)
+
+
 #%% KLD
 N_members = 50
 
-time_length = 2189 - 7*20
-time_range = np.arange(0, time_length)
+flip = True
 
 KLD_ALL_mean = {}
 KLD_ALL_std = {}
 
-for delta_ref in [0.1, 1., 2.]:
+for delta_ref in [4, 12, 20]:
     
     KLDivergence_mean = {}
     KLDivergence_std = {}
     
-    for set in [0.1, 2., 4, 20]:
+    for set in [0.1, 1., 2., 4, 12, 20]:
         print(f'Processing set P: {delta_ref}, Q:{set}')
 
         _KLD = np.zeros((N_members**2, time_length))
 
-        l = 0
-        for member in tqdm(range(1, N_members+1)):
+        
+        for l, member in tqdm(enumerate(range(1, N_members+1))):
             for subset_ref in range(1, N_members+1):
                 # print(f'member {member} and subset {subset_ref}')
 
@@ -85,40 +88,55 @@ for delta_ref in [0.1, 1., 2.]:
                 P_Q = xr.open_dataset(file_path_Q)
                 P_Q = P_Q.sortby('hexint')
 
-                _KLD[l, :] = KLDivergence(P_ref['probability'], P_Q['probability'], axis=0)[:time_length]
-                l+=1
-                
+                if flip:
+                    _KLD[l, :] = KLDivergence(P_Q['probability'], P_ref['probability'], axis=0)[:time_length]
+                    patch = '_flipped'
+                else:
+                    _KLD[l, :] = KLDivergence(P_ref['probability'], P_Q['probability'], axis=0)[:time_length]
+                    patch = '_normal'
+                    
+                    
         avg_KLD = np.mean(_KLD, axis=0)
         std_KLD = np.std(_KLD, axis=0)
         
         KLDivergence_mean[set] = avg_KLD
         KLDivergence_std[set] = std_KLD
         
-    with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_{delta_ref}.pkl', 'wb') as f:
+    with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_{delta_ref}{patch}.pkl', 'wb') as f:
         pickle.dump(KLDivergence_mean, f)
     
-    with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_{delta_ref}_std.pkl', 'wb') as f:
+    with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_{delta_ref}_std{patch}.pkl', 'wb') as f:
         pickle.dump(KLDivergence_std, f)
 
     KLD_ALL_mean[delta_ref] = KLDivergence_mean
     KLD_ALL_std[delta_ref] = KLDivergence_std
 
 #%% # save KLDivergence_mean and KLDivergence_std to file
-with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_ALL_mean.pkl', 'wb') as f:
-    pickle.dump(KLD_ALL_mean, f)
+# with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_ALL_mean{patch}.pkl', 'wb') as f:
+#     pickle.dump(KLD_ALL_mean, f)
         
-with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_ALL_std.pkl', 'wb') as f:
-    pickle.dump(KLD_ALL_std, f)
-    
-# #%% Load KLDivergence_mean and KLDivergence_std from file
-# with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_ALL_mean.pkl', 'rb') as f:
-#     KLD_ALL_mean = pickle.load(f)
-    
-# with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_ALL_std.pkl', 'rb') as f:
-#     KLD_ALL_std = pickle.load(f)
+# with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_ALL_std{patch}.pkl', 'wb') as f:
+#     pickle.dump(KLD_ALL_std, f)
+
+#%% Open pickles and make KLD_mean and KLD_std
+# KLD_ALL_mean = {}
+# KLD_ALL_std = {}
 
 
-# #%%
+# for delta_ref in [0.1, 2., 4, 20]:
+#     path = f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_{delta_ref}.pkl'
+    
+#     with open(path, 'rb') as f:
+#         KLD_ALL_mean[delta_ref] = pickle.load(f)
+        
+#     path = f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_{delta_ref}_std.pkl'
+    
+#     with open(path, 'rb') as f:
+#         KLD_ALL_std[delta_ref] = pickle.load(f)
+
+    
+
+#%%
 # fig, axs = plt.subplots(2, 2, figsize=(10, 8), sharex=True, sharey=True)
 # # fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
@@ -130,7 +148,7 @@ with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/
 # for i, key in enumerate(KLD_ALL_mean.keys()):
     
 #     lss = [(0, (1, 1)), '-.', '--', (0, (3, 1, 1, 1, 1, 1))]
-#     colors = ['mediumblue', 'teal', 'darkred', 'black']
+#     colors = ['mediumblue', 'teal', 'darkred', 'orange']
     
 #     ax = axs[i]
 #     for k, set in enumerate([0.1, 2., 4, 20]):
@@ -154,7 +172,7 @@ with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/
 
 #     ax.semilogx()
 #     ax.legend()
-#     # ax.grid()
+#     ax.grid()
 #     ax.set_xlim(0, time_length)
 #     ax.set_ylim(0, 30)
 
@@ -165,7 +183,7 @@ with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/
 
 # plt.tight_layout()
 
-# plt.savefig('../figs/KLDivergence_subplots.png', dpi=300)
+# plt.savefig(f'../figs/KLDivergence_subplots{patch}.png', dpi=300)
 # # %%
 # DF = {}
 
@@ -184,7 +202,7 @@ with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/
 #     DF[labeltt] = _kld
 
 # DF = pd.DataFrame(DF)
-# DF.set_index([[r'$\delta_r = 0.1^o$', r'$\delta_r = 2^o$', 'Mix 4 weeks', 'Mix 20 weeks']], inplace=True)
+# DF.set_index([[r'$\delta_r = 0.1^o$', r'$\delta_r = 2^o$', '4 weeks', '20 weeks']], inplace=True)
 
 # # %% Kullback-Leibler divergence plot 
 # fig, ax = plt.subplots(figsize=(6, 5))
@@ -200,11 +218,13 @@ with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/
 
 # # Add colorbar label
 # cbar = ax.collections[0].colorbar
-# cbar.set_label('Time Average KL Divergence, $D_{P_{Mix}}(P_i)$ (bits)')
+# cbar.set_label('Time Average KL Divergence, $D(P_{Mix}||P_i)$ (bits)')
 
 # plt.tight_layout()
 # plt.show()
 
-# fig.savefig("../figs/FigX_Time_Average_KLDivergence.png", dpi=300)
+# fig.savefig(f"../figs/FigX_Time_Average_KLDivergence{patch}.png", dpi=300)
 
 # # %%
+
+# %%

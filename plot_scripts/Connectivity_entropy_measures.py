@@ -23,7 +23,11 @@ def cross_entropy(P, Q):
     # Replace zeros with a very small number to avoid log(0)
     P_safe = np.where(P > 0, P, np.finfo(float).eps)
     return -np.nansum(Q * np.log2(P_safe))
- 
+
+def KLDivergence(P, Q):
+    # Kullback-Leibler divergence D_KL(P||Q)
+    # P is the true distribution, Q is the estimated distribution.
+    return cross_entropy(P, Q) - marginal_entropy(Q)
     
 #%% ################# Single Member #################
 Latitude_limit = None # 53 or 44
@@ -280,15 +284,21 @@ ensemble_entropy = np.zeros(6)
 ensemble_mix_entropy = np.zeros(6)
 
 
-    
 for j, delta in enumerate([0.1, 1., 2., 4, 12, 20]):
     
     cross = np.zeros(6)
     KLD = np.zeros(6)
     
     for i, delta_ref in enumerate([0.1, 1., 2., 4, 12, 20]):
-        cross[i] = cross_entropy(all_prob_mix[delta_ref], all_prob[delta]) #- marginal_entropy(all_prob[delta])
-        KLD[i] = cross_entropy(all_prob_mix[delta_ref], all_prob[delta]) - marginal_entropy(all_prob[delta])
+        
+        full = all_prob_mix[delta]
+        aprox = all_prob[delta_ref]
+        
+        # cross[i] = cross_entropy(all_prob_mix[delta_ref], all_prob[delta]) #- marginal_entropy(all_prob[delta])
+        # KLD[i] = cross_entropy(all_prob_mix[delta_ref], all_prob[delta]) - marginal_entropy(all_prob[delta])
+        
+        cross[i] = cross_entropy(aprox, full) #- marginal_entropy(all_prob[delta])
+        KLD[i] = KLDivergence(aprox, full)
 
     ensemble_cross_entropy[delta] = cross
     ensemble_KLD[delta] = KLD
@@ -352,7 +362,7 @@ cbar_ax2 = fig.add_axes([0.87, 0.28, 0.03, 0.66])
 
 sns.heatmap(central_plot_data, annot=True, fmt=".3f", cmap=cmmap, ax=axs[0, 1], cbar_ax=cbar_ax2)
 cbar_ax2.set_ylabel('(bits)')
-axs[0, 1].set_title(r'Cross Entropy, $H_{P_{Mix}}(P_i)$')
+axs[0, 1].set_title(r'Cross Entropy, $H_{P_{i}}(P_{Mix})$')
 
 # Adjust layout
 plt.tight_layout()
@@ -374,7 +384,7 @@ ax.set_xticklabels(ax.get_xticklabels(), rotation=15, ha='center', fontsize=9)
 
 # Add colorbar label
 cbar = ax.collections[0].colorbar
-cbar.set_label('KL Divergence, $D_{P_{Mix}}(P_i)$ (bits)')
+cbar.set_label('KL Divergence, $D(P_{Mix}||P_i)$ (bits)')
 
 # ax.set_xlabel(r'$P_{Mix}$')
 
