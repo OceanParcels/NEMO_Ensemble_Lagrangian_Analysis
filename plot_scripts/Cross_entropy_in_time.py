@@ -48,11 +48,17 @@ hexbin_grid = hexfunc.hexGrid(hex_grid, h3_res=3)
 time_length = 2189 - 7*20
 time_range = np.arange(0, time_length)
 
+flip = True
+
+if flip:
+    patch = '_flipped'
+else:
+    patch = '_normal'
 
 #%% KLD
 N_members = 50
 
-flip = True
+
 
 KLD_ALL_mean = {}
 KLD_ALL_std = {}
@@ -119,112 +125,112 @@ for delta_ref in [4, 12, 20]:
 #     pickle.dump(KLD_ALL_std, f)
 
 #%% Open pickles and make KLD_mean and KLD_std
-# KLD_ALL_mean = {}
-# KLD_ALL_std = {}
+KLD_ALL_mean = {}
+KLD_ALL_std = {}
 
 
-# for delta_ref in [0.1, 2., 4, 20]:
-#     path = f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_{delta_ref}.pkl'
+for delta_ref in [0.1, 1., 2., 4, 12, 20]:
+    path = f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_{delta_ref}{patch}.pkl'
     
-#     with open(path, 'rb') as f:
-#         KLD_ALL_mean[delta_ref] = pickle.load(f)
+    with open(path, 'rb') as f:
+        KLD_ALL_mean[delta_ref] = pickle.load(f)
         
-#     path = f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_{delta_ref}_std.pkl'
+    path = f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_{delta_ref}_std{patch}.pkl'
     
-#     with open(path, 'rb') as f:
-#         KLD_ALL_std[delta_ref] = pickle.load(f)
+    with open(path, 'rb') as f:
+        KLD_ALL_std[delta_ref] = pickle.load(f)
 
     
 
 #%%
-# fig, axs = plt.subplots(2, 2, figsize=(10, 8), sharex=True, sharey=True)
-# # fig.subplots_adjust(hspace=0.4, wspace=0.4)
+fig, axs = plt.subplots(2, 2, figsize=(9, 7), sharex=True, sharey=True)
+# fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
-# # keys = list(KLD_ALL_mean[0.1].keys())
-# labels = ['A', 'B', 'C', 'D', 'E', 'F']
+# keys = list(KLD_ALL_mean[0.1].keys())
+labels = ['A', 'B', 'C', 'D', 'E', 'F']
 
-# axs = axs.ravel()
+axs = axs.ravel()
 
-# for i, key in enumerate(KLD_ALL_mean.keys()):
+for i, key in enumerate([0.1, 2., 4, 20]):
     
-#     lss = [(0, (1, 1)), '-.', '--', (0, (3, 1, 1, 1, 1, 1))]
-#     colors = ['mediumblue', 'teal', 'darkred', 'orange']
+    lss = [(0, (1, 1)), '-.', '--',(0, (3, 1, 1, 1, 1, 1))]
+    colors = ['mediumblue', 'teal', 'darkred', 'orange']
     
-#     ax = axs[i]
-#     for k, set in enumerate([0.1, 2., 4, 20]):
-#         if set > 2:
-#             labelz = f'{set:01d} weeks'
-#         else:
-#             labelz = f'$\delta_r = {set}^o$'
+    ax = axs[i]
+    for k, set in enumerate([0.1, 2., 4, 20]):
+        if set > 2:
+            labelz = f'{set:01d} weeks'
+        else:
+            labelz = f'$\delta_r = {set}^o$'
         
-#         ax.fill_between(time_range, KLD_ALL_mean[key][set] - KLD_ALL_std[key][set], 
-#                         KLD_ALL_mean[key][set] + KLD_ALL_std[key][set], alpha=0.2, 
-#                         color=colors[k])
-#         ax.plot(time_range, KLD_ALL_mean[key][set], label=labelz, color=colors[k], 
-#                 linestyle=lss[k], linewidth=2)
+        ax.fill_between(time_range, KLD_ALL_mean[key][set] - KLD_ALL_std[key][set], 
+                        KLD_ALL_mean[key][set] + KLD_ALL_std[key][set], alpha=0.3, 
+                        color=colors[k])
+        ax.plot(time_range, KLD_ALL_mean[key][set], label=labelz, color=colors[k], 
+                linestyle=lss[k], linewidth=2)
     
-#     if key > 2:
-#         labeltt = f'Mixture {key:01d} weeks'
-#     else:
-#         labeltt = f'Mixture $\delta_r = {key}^o$'
+    if key > 2:
+        labeltt = f'Mixture {key:01d} weeks'
+    else:
+        labeltt = f'Mixture $\delta_r = {key}^o$'
         
-#     ax.text(0.05, 0.9, f'$\mathbf{{{labels[i]}}}$  Ref.: {labeltt}', fontsize=14, transform=ax.transAxes)
+    ax.text(0.05, 0.9, f'$\mathbf{{{labels[i]}}}$  Ref.: {labeltt}', fontsize=14, transform=ax.transAxes)
 
-#     ax.semilogx()
-#     ax.legend()
-#     ax.grid()
-#     ax.set_xlim(0, time_length)
-#     ax.set_ylim(0, 30)
+    ax.semilogx()
+    ax.legend()
+    ax.grid()
+    ax.set_xlim(0, time_length)
+    ax.set_ylim(0, 8)
 
-# axs[2].set_xlabel('Time (days)')
-# axs[3].set_xlabel('Time (days)')
-# axs[0].set_ylabel('KL Divergence (bits)')
-# axs[2].set_ylabel('KL Divergence (bits)')
+axs[2].set_xlabel('Particle Age (days)')
+axs[3].set_xlabel('Particle Age (days)')
+axs[0].set_ylabel('Relative Entropy (bits)')
+axs[2].set_ylabel('Relative Entropy (bits)')
 
-# plt.tight_layout()
+plt.tight_layout()
 
-# plt.savefig(f'../figs/KLDivergence_subplots{patch}.png', dpi=300)
-# # %%
-# DF = {}
+plt.savefig(f'../figs/Fig6_relative_entropy_subplots{patch}.png', dpi=300)
+# %%
+DF = {}
 
-# for i, key in enumerate(KLD_ALL_mean.keys()):
-#     _kld = np.zeros(4)
+for i, key in enumerate(KLD_ALL_mean.keys()):
+    _kld = np.zeros(6)
     
-#     for k, set in enumerate([0.1, 2., 4, 20]):
+    for k, set in enumerate([0.1, 1., 2., 4, 12, 20]):
         
-#         _kld[k] = np.mean(KLD_ALL_mean[key][set])
+        _kld[k] = np.mean(KLD_ALL_mean[key][set])
         
-#     if key > 2:
-#         labeltt = f'Mix. {key:01d} weeks'
-#     else:
-#         labeltt = f'Mix. $\delta_r = {key}^o$'
+    if key > 2:
+        labeltt = f'Mix. {key:01d} weeks'
+    else:
+        labeltt = f'Mix. $\delta_r = {key}^o$'
         
-#     DF[labeltt] = _kld
+    DF[labeltt] = _kld
 
-# DF = pd.DataFrame(DF)
-# DF.set_index([[r'$\delta_r = 0.1^o$', r'$\delta_r = 2^o$', '4 weeks', '20 weeks']], inplace=True)
+DF = pd.DataFrame(DF)
+DF.set_index([[r'$\delta_r = 0.1^o$', r'$\delta_r = 1^o$',  r'$\delta_r = 2^o$', '4 weeks', '12 weeks', '20 weeks']], inplace=True)
 
-# # %% Kullback-Leibler divergence plot 
-# fig, ax = plt.subplots(figsize=(6, 5))
+# %% Kullback-Leibler divergence plot 
+fig, ax = plt.subplots(figsize=(6, 5))
 
-# cmmap = "Greens_r"
+cmmap = "Greens_r"
 
-# sns.heatmap(DF, annot=True, fmt=".3f", cmap=cmmap, ax=ax, cbar=True, vmin=0)
+sns.heatmap(DF, annot=True, fmt=".3f", cmap=cmmap, ax=ax, cbar=True, vmin=0)
 
-# # Rotate y tick labels 90 degrees
-# ax.set_yticklabels(ax.get_yticklabels(), rotation=90, ha='center', fontsize=9)
-# # Rotate x tick labels 15 degrees
-# ax.set_xticklabels(ax.get_xticklabels(), rotation=15, ha='center', fontsize=9)
+# Rotate y tick labels 90 degrees
+ax.set_yticklabels(ax.get_yticklabels(), rotation=90, ha='center', fontsize=9)
+# Rotate x tick labels 15 degrees
+ax.set_xticklabels(ax.get_xticklabels(), rotation=15, ha='center', fontsize=9)
 
-# # Add colorbar label
-# cbar = ax.collections[0].colorbar
-# cbar.set_label('Time Average KL Divergence, $D(P_{Mix}||P_i)$ (bits)')
+# Add colorbar label
+cbar = ax.collections[0].colorbar
+cbar.set_label('Time Averaged Relative Entropy, $D(P_{Mix}||P_i)$ (bits)')
 
-# plt.tight_layout()
-# plt.show()
+plt.tight_layout()
+plt.show()
 
-# fig.savefig(f"../figs/FigX_Time_Average_KLDivergence{patch}.png", dpi=300)
+fig.savefig(f"../figs/Fig7_Time_Average_relentropy{patch}.png", dpi=300)
 
-# # %%
+# %%
 
 # %%

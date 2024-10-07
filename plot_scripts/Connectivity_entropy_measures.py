@@ -241,7 +241,7 @@ i = 0
 for week in [4, 12, 20]:
     axs[1, 0].plot(all_prob[week], label=f"Week {week}", alpha=0.5, color=colors_time[i])
     i += 1
-axs[1, 0].set_xlabel("Time (days)")
+axs[1, 0].set_xlabel("Particle Age (days)")
 axs[1, 0].set_ylabel("Probability")
 axs[1, 0].legend(fontsize='small')
 axs[1, 0].text(0.05, 0.05, 'C', transform=axs[1, 0].transAxes, fontsize=12, verticalalignment='bottom', horizontalalignment='left', fontweight='bold')
@@ -260,7 +260,7 @@ for week in [4, 12, 20]:
     axs[1, 1].plot(all_prob_mix[week], label=f"Mix. Week {week}", alpha=0.5, color=colors_time[i])
     i += 1
     
-axs[1, 1].set_xlabel("Time (days)")
+axs[1, 1].set_xlabel("Particle Age (days)")
 axs[1, 1].legend(fontsize='small')
 axs[1, 1].text(0.05, 0.05, 'D', transform=axs[1, 1].transAxes, fontsize=12, verticalalignment='bottom', horizontalalignment='left', fontweight='bold')
 
@@ -373,7 +373,7 @@ fig.savefig("../figs/FigX_Cross_entropy" + criterium_string + ".png", dpi=300)
 # %% Kullback-Leibler divergence plot 
 fig, ax = plt.subplots(figsize=(6, 5))
 
-cmmap = 'Greens_r' #cmo.algae_r
+cmmap = 'Blues_r' #cmo.algae_r
 
 sns.heatmap(KLD_ensemble.T, annot=True, fmt=".3f", cmap=cmmap, ax=ax, cbar=True, vmin=0)
 
@@ -384,7 +384,7 @@ ax.set_xticklabels(ax.get_xticklabels(), rotation=15, ha='center', fontsize=9)
 
 # Add colorbar label
 cbar = ax.collections[0].colorbar
-cbar.set_label('KL Divergence, $D(P_{Mix}||P_i)$ (bits)')
+cbar.set_label('Relative Entropy, $D(P_{Mix}||P_i)$ (bits)')
 
 # ax.set_xlabel(r'$P_{Mix}$')
 

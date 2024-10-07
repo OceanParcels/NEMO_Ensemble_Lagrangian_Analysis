@@ -89,10 +89,10 @@ for i, week in enumerate(week_range):
     axs[i + 3].set_title(f'Release span {week} weeks')
     axs[i + 3].set_xlim(0, chop_time)
     
-axs[3].set_ylabel('Entropy (bits)')
-axs[4].set_xlabel('Time (days)')
-axs[5].set_xlabel('Time (days)')
-axs[3].set_xlabel('Time (days)')
+axs[3].set_ylabel('Marginal Entropy (bits)')
+axs[4].set_xlabel('Particle Age (days)')
+axs[5].set_xlabel('Particle Age (days)')
+axs[3].set_xlabel('Particle Age (days)')
 axs[3].legend()
 
 plt.savefig('../figs/FigS1-Combined-Representation_entropy_all.png', dpi=300)
@@ -167,10 +167,10 @@ for i, week in enumerate(week_range):
     axs[i + 3].set_title(f'Release span {week} weeks (Mixture)')
     axs[i + 3].set_xlim(0, chop_time)
     
-axs[3].set_ylabel('Entropy (bits)')
-axs[4].set_xlabel('Time (days)')
-axs[5].set_xlabel('Time (days)')
-axs[3].set_xlabel('Time (days)')
+axs[3].set_ylabel('Marginal Entropy (bits)')
+axs[4].set_xlabel('Particle Age (days)')
+axs[5].set_xlabel('Particle Age (days)')
+axs[3].set_xlabel('Particle Age (days)')
 axs[3].legend()
 
 plt.savefig('../figs/FigS2-Combined-Representation_entropy_mixture.png', dpi=300)
