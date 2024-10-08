@@ -116,7 +116,7 @@ for week in [4, 12, 20]:
             
             for k in time_range:
                 if k in unique:
-                    ping[k] = 1 # counts[np.where(unique == k)[0][0]]
+                    ping[k] =  1# counts[np.where(unique == k)[0][0]]
             
             if np.sum(ping) > 0:
                 ping = ping / np.sum(ping)
@@ -220,6 +220,14 @@ for week in [4, 12, 20]:
     
     all_mix_messages[week] = messages
     all_prob_mix[week] = np.mean(messages, axis=0)
+    
+#%% Check that the sum of the probabilities is 1
+for key in all_prob.keys():
+    print(f"Sum of probabilities for {key}: {np.sum(all_prob[key])}")
+    
+for key in all_prob_mix.keys():
+    print(f"Sum of probabilities for {key}: {np.sum(all_prob_mix[key])}")
+    
 
 # %% ############### PLOT Single members and Mixtures ####################
 fig, axs = plt.subplots(2, 2, figsize=(8, 6), sharex=True, sharey=True)
@@ -229,7 +237,7 @@ colors_time = ['darkred', 'orangered', 'orange']
 # Top left: Single members (delta_r)
 i = 0
 for delta_r in [0.1, 1., 2.]:
-    axs[0, 0].plot(all_prob[delta_r], label=f"$\delta_r = {delta_r}^o$", alpha=0.5, color=colors_space[i])
+    axs[0, 0].plot(all_prob[delta_r], label=f"$\delta_r = {delta_r}^o$", alpha=0.5, color=colors_space[i], lw=0.3)
     i += 1
     
 axs[0, 0].set_ylabel("Probability")
@@ -239,7 +247,7 @@ axs[0, 0].text(0.05, 0.05, 'A', transform=axs[0, 0].transAxes, fontsize=12, vert
 # Bottom left: Single members (week)
 i = 0
 for week in [4, 12, 20]:
-    axs[1, 0].plot(all_prob[week], label=f"Week {week}", alpha=0.5, color=colors_time[i])
+    axs[1, 0].plot(all_prob[week], label=f"Week {week}", alpha=0.5, color=colors_time[i], lw=0.3)
     i += 1
 axs[1, 0].set_xlabel("Particle Age (days)")
 axs[1, 0].set_ylabel("Probability")
@@ -249,7 +257,7 @@ axs[1, 0].text(0.05, 0.05, 'C', transform=axs[1, 0].transAxes, fontsize=12, vert
 # Top right: Mixtures (delta_r)
 i = 0
 for delta_r in [0.1, 1., 2.]:
-    axs[0, 1].plot(all_prob_mix[delta_r], label=f"Mix. $\delta_r = {delta_r}^o$", alpha=0.5, color=colors_space[i])
+    axs[0, 1].plot(all_prob_mix[delta_r], label=f"Mix. $\delta_r = {delta_r}^o$", alpha=0.5, color=colors_space[i], lw=0.3)
     i += 1
 axs[0, 1].legend(fontsize='small')
 axs[0, 1].text(0.05, 0.05, 'B', transform=axs[0, 1].transAxes, fontsize=12, verticalalignment='bottom', horizontalalignment='left', fontweight='bold')
@@ -257,7 +265,7 @@ axs[0, 1].text(0.05, 0.05, 'B', transform=axs[0, 1].transAxes, fontsize=12, vert
 # Bottom right: Mixtures (week)
 i = 0
 for week in [4, 12, 20]:
-    axs[1, 1].plot(all_prob_mix[week], label=f"Mix. Week {week}", alpha=0.5, color=colors_time[i])
+    axs[1, 1].plot(all_prob_mix[week], label=f"Mix. Week {week}", alpha=0.5, color=colors_time[i], lw=0.3)
     i += 1
     
 axs[1, 1].set_xlabel("Particle Age (days)")
@@ -276,6 +284,31 @@ ensemble.set_index('time', inplace=True)
 
 mixture = pd.DataFrame(all_prob_mix)
 mixture.set_index('time', inplace=True)
+
+#%% Comparisson mesage by message
+ensemble_rel_H = {}
+df_labels = ['$\\delta_r = 0.1^o$', '$\\delta_r = 1^o$', '$\\delta_r = 2^o$', '4 weeks', '12 weeks', '20 weeks']
+
+
+for j, delta in enumerate([0.1, 1., 2., 4, 12, 20]):
+    
+    KLD = np.zeros(6)
+    
+    for i, delta_ref in enumerate([0.1, 1., 2., 4, 12, 20]):
+        
+        relative_entropy = []
+        
+        for member in range(0, N_members):
+            for set in range(0, N_members):
+                
+                full = all_mix_messages[delta][set, :]
+                aprox = all_messages[delta_ref][member, :]
+        
+                relative_entropy.append(KLDivergence(aprox, full))
+
+        KLD[i] = np.mean(relative_entropy)
+    ensemble_rel_H[df_labels[j]] = KLD
+
 
 # %% DATAFRAMES Entropy of the ensemble and mixture
 ensemble_cross_entropy = {}
