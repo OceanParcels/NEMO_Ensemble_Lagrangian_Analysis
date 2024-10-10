@@ -135,7 +135,7 @@ class hexGrid:
         ax.gridlines(draw_labels=True, zorder=0, linestyle="--", linewidth=0.5)
         plt.show()
 
-    def pcolorhex(self, counts, cmap="viridis", maxnorm=None, ax=None, draw_edges=False, alpha=1.0):
+    def pcolorhex(self, counts, cmap="viridis", minnorm=None, maxnorm=None, ax=None, draw_edges=False, alpha=1.0):
         """
         Plot a histogram of particle counts in a hexagonal grid
 
@@ -145,13 +145,18 @@ class hexGrid:
             Array of particle counts. Should be the same length as the grid
         cmap : str, optional
             Colormap, by default 'viridis'
+        minnorm : int, optional
+            Minimum value of the colorbar, by default None
         maxnorm : int, optional
             Maximum value of the colorbar, by default None
         ax : matplotlib.axes.Axes, optional
             Axes to plot to, by default None
         """
-        if not maxnorm:
+        if maxnorm is None:
             maxnorm = counts.max() if counts.size > 0 else 1
+
+        if minnorm is None:
+            minnorm = counts.min() if counts.size > 0 else 0
 
         if ax is None:
             fig, ax = plt.subplots(
@@ -160,7 +165,7 @@ class hexGrid:
 
         cmap_instance = plt.cm.get_cmap(cmap)
         cmap_instance.set_bad("w")
-        color_values = get_colors(counts, cmap_instance, 0, maxnorm)
+        color_values = get_colors(counts, cmap_instance, minnorm, maxnorm)
         plot_hexagons(
             ax,
             self.hexagons,
@@ -171,7 +176,7 @@ class hexGrid:
         )
 
         sm = plt.cm.ScalarMappable(
-            cmap=cmap_instance, norm=plt.Normalize(vmin=0, vmax=maxnorm)
+            cmap=cmap_instance, norm=plt.Normalize(vmin=minnorm, vmax=maxnorm)
         )
 
         return sm
@@ -299,7 +304,7 @@ def get_colors(
     return colormap(norm(inp))
 
 
-def pcolorhex(counts, grid, cmap="viridis", maxnorm=None, ax=None):
+def pcolorhex(counts, grid, cmap="viridis", minnorm=None, maxnorm=None, ax=None):
     """
     Creates a hexagonal binning plot of particle counts on a specified grid, with customizable colormap and normalization.
 
@@ -311,6 +316,8 @@ def pcolorhex(counts, grid, cmap="viridis", maxnorm=None, ax=None):
         An object representing the hexagonal grid layout.
     cmap : str, optional
         The colormap for the plot. Defaults to 'viridis'.
+    minnorm : int, optional
+        The minimum value for color normalization. If None, uses the minimum count. Defaults to None.
     maxnorm : int, optional
         The maximum value for color normalization. If None, uses the maximum count. Defaults to None.
     ax : matplotlib.axes.Axes, optional
@@ -327,26 +334,29 @@ def pcolorhex(counts, grid, cmap="viridis", maxnorm=None, ax=None):
     matplotlib.cm.ScalarMappable
         A ScalarMappable instance created with the specified colormap and normalization, useful for creating a colorbar.
     """
-    if not maxnorm:
+    if maxnorm is None:
         maxnorm = counts.max()
+
+    if minnorm is None:
+        minnorm = counts.min()
 
     if ax is None:
         fig, ax = plt.subplots(
-            1, 1, subplot_kw={"projection": cartopy.crs.PlateCarree()}, cmap=plt.cm.viridis
+            1, 1, subplot_kw={"projection": cartopy.crs.PlateCarree()}
         )
 
     plot_hexagons(
         ax,
         grid.hexagons,
-        get_colors(counts, plt.cm.viridis, 0, maxnorm),
+        get_colors(counts, plt.cm.viridis, minnorm, maxnorm),
         draw_edges=False,
         alpha=1.0,
-        label=" concentration",
+        label="concentration",
     )
 
     cmap = plt.cm.get_cmap(cmap)
     cmap.set_bad("w")
-    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=maxnorm))
+    sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=minnorm, vmax=maxnorm))
 
     return sm
 
