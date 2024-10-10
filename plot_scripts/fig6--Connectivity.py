@@ -92,7 +92,7 @@ ax[0].set_xlabel("Counts")
 ax[0].set_ylabel("Density")
 ax[0].legend(fontsize=7, shadow=False)
 
-ax[1].set_xlabel("Median Drift Time (years)")
+ax[1].set_xlabel("Median Particle Age (years)")
 ax[1].set_ylabel("Density")
 
 ax[2].set_xlabel("Median Depth (m)")
@@ -102,7 +102,7 @@ ax[3].set_xlabel("Counts")
 ax[3].set_ylabel("Density")
 ax[3].legend(fontsize=7, shadow=False)
 
-ax[4].set_xlabel("Median Drift Time (years)")
+ax[4].set_xlabel("Median Particle Age (years)")
 ax[4].set_ylabel("Density")
 
 ax[5].set_xlabel("Median Depth (m)")
@@ -359,11 +359,11 @@ for i, label in enumerate(labels):
     ax[i].text(0.05, 0.95, label, transform=ax[i].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
 
 ax[0].set_xlabel("Counts")
-ax[0].set_ylabel("CDF")
+ax[0].set_ylabel("ECDF")
 ax[0].legend(fontsize=7)
 ax[0].grid(True)
 
-ax[1].set_xlabel("Median Drift Time (years)")
+ax[1].set_xlabel("Median Particle Age (years)")
 ax[1].set_ylabel("ECDF")
 ax[1].grid(True)
 
@@ -372,7 +372,7 @@ ax[2].set_ylabel("ECDF")
 ax[2].legend(fontsize=7, loc='lower right')
 ax[2].grid(True)
 
-ax[3].set_xlabel("Median Drift Time (years)")
+ax[3].set_xlabel("Median Particle Age (years)")
 ax[3].set_ylabel("ECDF")
 ax[3].grid(True)
 
@@ -451,7 +451,7 @@ cbar.set_label('Probability of having fewer particles than the Mixture')
 
 plt.tight_layout()
 plt.show()
-plt.savefig(f"../figs/Figx-ECDF_Probs.png", dpi=300)
+fig.savefig(f"../figs/Figx-ECDF_Probs.png", dpi=300)
 #%% Average the temporal and spatial members and mixtures and put the values in a dataframe
 
 zero_counts = np.zeros(3*4)
