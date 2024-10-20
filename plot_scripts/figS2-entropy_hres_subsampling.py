@@ -80,5 +80,5 @@ ax1.set_ylabel('Entropy (bits)')
 ax1.tick_params(axis='y')
 ax1.legend()
 ax1.grid()
-plt.savefig(f'../figs/Fig2_entropy_hres.png', dpi=300)
+plt.savefig(f'../figs/FigS2_entropy_hres.png', dpi=300)
 # %%

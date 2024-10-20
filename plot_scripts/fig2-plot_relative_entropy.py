@@ -124,5 +124,5 @@ axs[2].set_title(r'$D(P_{mix}||P_m) = ' + f'{np.sum(rel_inf):0.1f}$ bits', fonts
 axs[3].set_title(r'$D(P_{m}||P_{mix}) = ' + f'{np.sum(rel_inf_r):0.1f}$ bits', fontsize=10)
 
 # Save figure
-plt.savefig(f'../figs/explanations_relative_entropy.png', dpi=300)
+plt.savefig(f'../figs/Fig2_explanations_relative_entropy.png', dpi=300)
 #%%

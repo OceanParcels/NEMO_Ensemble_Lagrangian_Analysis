@@ -108,20 +108,20 @@ for i in range(N_particles):
         ax.annotate('', xy=(mix_lons[i, t], mix_lats[i, t]), 
                 xytext=(mix_lons[i, t-1], mix_lats[i, t-1]),
                 arrowprops=dict(arrowstyle="-|>", color='black', lw=1.5, alpha=0.5), 
-                zorder=10, alpha=0.5) 
+                zorder=10) 
 
 for i in indexes:
         ax.annotate('', xy=(pset_temp.lon[i, t], pset_temp.lat[i, t]), 
                 xytext=(pset_temp.lon[i, t-1], pset_temp.lat[i, t-1]),
                 arrowprops=dict(arrowstyle="-|>", color='orangered', lw=1.5, alpha=0.5), 
-                zorder=10, alpha=0.5)
+                zorder=10)
         
         
 for i in indexes_space:
         ax.annotate('', xy=(pset_space.lon[i, t], pset_space.lat[i, t]), 
                 xytext=(pset_space.lon[i, t-1], pset_space.lat[i, t-1]),
                 arrowprops=dict(arrowstyle="-|>", color='blueviolet', lw=1.5, alpha=0.5), 
-                zorder=10, alpha=0.5)
+                zorder=10)
 
 # Add legend
 handles, labels = ax.get_legend_handles_labels()

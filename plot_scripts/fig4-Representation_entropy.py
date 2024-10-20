@@ -119,7 +119,7 @@ ax.legend(shadow=True)
 ax.set_ylabel('Marginal Entropy (bits)')
 ax.set_xlabel('Particle Age (days)')
 ax.grid()
-plt.savefig('../figs/Fig3-Spatial-Representation_entropy.png', dpi=300)
+# plt.savefig('../figs/Fig3-Spatial-Representation_entropy.png', dpi=300)
 
 
 # %%%%%%%%%%%%%%%%%%%%%%%%% Temporal plot of the mean entropy %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -159,7 +159,7 @@ ax.legend(shadow=True)
 ax.set_ylabel('Marginal Entropy (bits)')
 ax.set_xlabel('Particle Age (days)')
 ax.grid()
-plt.savefig('../figs/Fig4-Temporal-Representation_entropy.png', dpi=300)
+# plt.savefig('../figs/Fig4-Temporal-Representation_entropy.png', dpi=300)
 
 
 #%%
@@ -226,6 +226,6 @@ ax2.grid()
 ax2.text(0.95, 0.05, 'B', transform=ax2.transAxes, fontsize=16, fontweight='bold', va='bottom', ha='right')
 
 plt.tight_layout()
-plt.savefig('../figs/Fig3-4-Combined-Representation_entropy.png', dpi=300)
+plt.savefig('../figs/Fig4_Combined-Representation_entropy.png', dpi=300)
 
 # %%

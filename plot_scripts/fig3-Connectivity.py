@@ -115,7 +115,7 @@ elif Longitude_limit is not None:
     plt.suptitle(f"Particles Crossing {abs(Longitude_limit)}°W", fontsize=14)
 plt.tight_layout()
 # save the figure
-plt.savefig("../figs/Figx-Connect_tempNspace" + criterium_string + ".png", dpi=300)
+plt.savefig("../figs/FigS5_Connect_tempNspace" + criterium_string + ".png", dpi=300)
 
 # %% Plot the percentage of subpolar trajectories for Mixture temporal and spatial members
 fig, ax = plt.subplots(2, 3, figsize=(10, 6))
@@ -204,7 +204,7 @@ elif Longitude_limit is not None:
     plt.suptitle(f"Mixture Particles Crossing {abs(Longitude_limit)}°W", fontsize=14)
 
 plt.tight_layout()
-plt.savefig("../figs/Figx-Connect_MIX_tempNspace" + criterium_string + ".png", dpi=300)
+plt.savefig("../figs/FigS6_Connect_MIX_tempNspace" + criterium_string + ".png", dpi=300)
 
 ###################################################################
 #%% COMPARISON OF TEMPORAL AND SPATIAL CONNECTIVITY with Mixture
@@ -298,7 +298,7 @@ ax[3].set_ylabel("Density")
 
 plt.tight_layout()
 # save the figure
-plt.savefig("../figs/Figx-Connect_Comparisson" + criterium_string + ".png", dpi=300)
+# plt.savefig("../figs/Figx-Connect_Comparisson" + criterium_string + ".png", dpi=300)
 
 #%% ECDFs of the counts and median time for temporal and spatial members
 # 
@@ -379,9 +379,9 @@ ax[3].grid(True)
 plt.tight_layout()
 # save the figure
 
-plt.savefig("../figs/Figx-ECDF_Comparisson" + criterium_string + ".png", dpi=300)
+plt.savefig("../figs/Fig3_ECDF_Comparisson" + criterium_string + ".png", dpi=300)
 
-#%% COMpute ECDF curver for all_temp and all_space with and ecdf function writen by you
+#%% COMpute ECDF curver for all_temp and all_space with and ecdf function
 def ecdf(data):
     x = np.sort(data)
     y = np.arange(1, len(x)+1) / len(x)
@@ -451,7 +451,7 @@ cbar.set_label('Probability of having fewer particles than the Mixture')
 
 plt.tight_layout()
 plt.show()
-fig.savefig(f"../figs/Figx-ECDF_Probs.png", dpi=300)
+# fig.savefig(f"../figs/Figx-ECDF_Probs.png", dpi=300)
 #%% Average the temporal and spatial members and mixtures and put the values in a dataframe
 
 zero_counts = np.zeros(3*4)

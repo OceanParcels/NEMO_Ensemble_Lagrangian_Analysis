@@ -244,7 +244,7 @@ plt.legend()
 plt.ylim([-0.75, 1])
 plt.xlim([0, 2])
 plt.title('Cape Hatteras Spatial Correlation')
-plt.savefig('../figs/cape_hatteras_spatial_correlation.png', dpi=300)
+# plt.savefig('../figs/cape_hatteras_spatial_correlation.png', dpi=300)
 
 
 
@@ -337,5 +337,5 @@ ax.set_ylim([-1, 1])
 ax.set_title(r'$\mathbf{C}$  Temporal Correlation', loc='left')
 
 plt.tight_layout()
-plt.savefig('../figs/figS0_cape_hatteras_correlations.png', dpi=300)
+plt.savefig('../figs/FigS1_cape_hatteras_correlations.png', dpi=300)
 # %%

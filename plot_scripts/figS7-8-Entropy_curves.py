@@ -95,7 +95,7 @@ axs[5].set_xlabel('Particle Age (days)')
 axs[3].set_xlabel('Particle Age (days)')
 axs[3].legend()
 
-plt.savefig('../figs/FigS1-Combined-Representation_entropy_all.png', dpi=300)
+plt.savefig('../figs/FigS7-Combined-Representation_entropy_all.png', dpi=300)
 
 #%% Mixture spatial
 entropies_space_mix_mean = {}
@@ -173,7 +173,7 @@ axs[5].set_xlabel('Particle Age (days)')
 axs[3].set_xlabel('Particle Age (days)')
 axs[3].legend()
 
-plt.savefig('../figs/FigS2-Combined-Representation_entropy_mixture.png', dpi=300)
+plt.savefig('../figs/FigS8-Combined-Representation_entropy_mixture.png', dpi=300)
 
 # %%Print the min and max std of the mixtures 
 for week in week_range:

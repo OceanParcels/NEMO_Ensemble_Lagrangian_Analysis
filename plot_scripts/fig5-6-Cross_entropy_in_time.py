@@ -189,7 +189,8 @@ axs[2].set_ylabel('Relative Entropy (bits)')
 
 plt.tight_layout()
 
-plt.savefig(f'../figs/Fig6_relative_entropy_subplots{patch}.png', dpi=300)
+plt.savefig(f'../figs/Fig5_relative_entropy_subplots{patch}
+            .png', dpi=300)
 # %%
 DF = {}
 
@@ -229,7 +230,7 @@ cbar.set_label('Time Averaged Relative Entropy, $D(P_{Mix}||P_i)$ (bits)')
 plt.tight_layout()
 plt.show()
 
-fig.savefig(f"../figs/Fig7_Time_Average_relentropy{patch}.png", dpi=300)
+fig.savefig(f"../figs/Fig6_Time_Average_relentropy{patch}.png", dpi=300)
 
 # %%
 
