@@ -206,16 +206,13 @@ for week in week_range:
                      alpha=0.2, color=colors_time[i])
     i += 1
 
-ax2.plot(time_range[:2189-4*7], mixture_entropy_time[4][:2189-4*7], ls=(0, (3, 1, 1, 3)), 
-         color='black', label='Mixture: 4 weeks')
-
-# ax2.plot(time_range[:2189-20*7], mixture_entropy_time[20][:2189-20*7], ls=(0, (3, 1, 1, 5)), 
-#          color='black', label='Mixture: 20 weeks')
-
-# ax2.plot(time_range[:730-16*7], mixture_entropy_time[16][:730-16*7], ls='-', 
-#          color='black', label='Mixture: 16 weeks')
 
 ax2.plot(time_range, mixture_entropy_space[0.1], ls='-', color='black', label=r'Mixture: $\delta_r = 0.1^o$')
+ax2.plot(time_range[:2189-4*7], mixture_entropy_time[4][:2189-4*7], ls=(0, (3, 1, 1, 3)), 
+         color='black', label='Mixture: 4 weeks')
+ax2.plot(time_range[:2189-20*7], mixture_entropy_time[20][:2189-20*7], ls=(0, (6, 4, 2, 2)), 
+         color='black', label='Mixture: 20 weeks')
+
 
 ax2.set_xlim(1, 2189)
 ax2.set_ylim(0., 10.5)
