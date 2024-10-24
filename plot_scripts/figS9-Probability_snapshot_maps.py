@@ -14,8 +14,8 @@ import deprecated_hexbin_functions as hexfunc
 # MIXTURE
 location = 'Cape_Hatteras'
 delta_r = 0.1
-subset = 10
-member = 46
+subset = 43
+member = 22
 
 # Define the file path for the NetCDF file containing probability distributions
 file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_long/P_dr{delta_r*100:03.0f}_all_s{subset:03d}.nc"
@@ -69,9 +69,9 @@ hexbin_grid.pcolorhex(all_ps[2.]['probability'][:, 10], ax=axs[6], cmap=colr_map
 hexbin_grid.pcolorhex(all_ps[2.]['probability'][:, 100], ax=axs[7], cmap=colr_mapa, draw_edges=False, maxnorm=0.1)
 hexbin_grid.pcolorhex(all_ps[2.]['probability'][:, 1000], ax=axs[8], cmap=colr_mapa, draw_edges=False, maxnorm=0.1)
 
-hexbin_grid.pcolorhex(all_ps[4]['probability'][:, 10], ax=axs[9], cmap=colr_mapa, draw_edges=False, maxnorm=0.1)
-hexbin_grid.pcolorhex(all_ps[4]['probability'][:, 100], ax=axs[10], cmap=colr_mapa, draw_edges=False, maxnorm=0.1)
-hexbin_grid.pcolorhex(all_ps[4]['probability'][:, 1000], ax=axs[11], cmap=colr_mapa, draw_edges=False, maxnorm=0.1)
+hexbin_grid.pcolorhex(all_ps[0.1]['probability'][:, 10], ax=axs[9], cmap=colr_mapa, draw_edges=False, maxnorm=0.1)
+hexbin_grid.pcolorhex(all_ps[0.1]['probability'][:, 100], ax=axs[10], cmap=colr_mapa, draw_edges=False, maxnorm=0.1)
+hexbin_grid.pcolorhex(all_ps[0.1]['probability'][:, 1000], ax=axs[11], cmap=colr_mapa, draw_edges=False, maxnorm=0.1)
 
 # formating
 
@@ -106,7 +106,7 @@ for i in range(0, ncol * nrow - ncol):
 axs[0].text(-0.01, 0.5, r'Mixture $\delta_r = 0.1^o$', transform=axs[0].transAxes, fontsize=12, fontweight='bold', va='center', ha='right', rotation='vertical')
 axs[3].text(-0.01, 0.5, '20 weeks', transform=axs[3].transAxes, fontsize=12, va='center', ha='right', rotation='vertical')
 axs[6].text(-0.01, 0.5, r'$\delta_r = 2.0^o$', transform=axs[6].transAxes, fontsize=12, va='center', ha='right', rotation='vertical')
-axs[9].text(-0.01, 0.5, '4 weeks', transform=axs[9].transAxes, fontsize=12, va='center', ha='right', rotation='vertical')
+axs[9].text(-0.01, 0.5, r'$\delta_r = 0.1^o$', transform=axs[9].transAxes, fontsize=12, va='center', ha='right', rotation='vertical')
 
 for i in range(12, 15):
     axs[i].axis('off')
