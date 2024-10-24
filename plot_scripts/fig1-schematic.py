@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cartopy 
 
-
 #%%
 
 # Define the location, member, and delta_r values
@@ -40,6 +39,7 @@ mix_lats = np.zeros((N_particles, len(pset_space.obs)))
 
 # Loop over each particle
 for l, member in enumerate(range(1, N_particles+1)):
+        print(f"Member {member}")
         # Define the file path for the particle data
         file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/spatial_long/dr_{delta_r*100:03.0f}/{location}_dr{delta_r*100:03.0f}_m{member:03d}.zarr"
         
@@ -72,7 +72,7 @@ fig = plt.figure()
 ax = plt.axes(projection=cartopy.crs.PlateCarree())
 
 # Set the extent of the map
-ax.set_extent([-77, -68, 31, 39], crs=cartopy.crs.PlateCarree())
+ax.set_extent([-77, -68, 31.5, 39.5], crs=cartopy.crs.PlateCarree())
 
 # Add land feature to the map
 ax.add_feature(cartopy.feature.LAND, zorder=0, edgecolor='black')
@@ -131,5 +131,5 @@ ax.legend(handles, labels, shadow=True, fontsize='small')
 
 # Save the figure
 plt.savefig(f'../figs/Fig1_schematic.png', dpi=300)
-    
+
 #%%
