@@ -79,14 +79,14 @@ def setup_subplot(ax, extent, gridlines=True, left_labels=True, right_labels=Fal
 import matplotlib.colors as mcolors
 
 # Define discrete colormaps
-probability_cmap = mcolors.ListedColormap(plt.cm.plasma(np.linspace(0, 1, 10)))
+probability_cmap = mcolors.ListedColormap(plt.cm.plasma(np.linspace(0, 1, 9)))
 information_cmap = mcolors.ListedColormap(plt.cm.viridis(np.linspace(0, 1, 10)))
 
 # Plot mixture probability
 setup_subplot(axs[0], extent)
 mixture = np.where(P_AX['probability'][:, t].values > 0, P_AX['probability'][:, t].values, np.finfo(float).eps)
 single = np.where(P_m['probability'][:, t].values > 0, P_m['probability'][:, t].values, np.finfo(float).eps)
-max_value = np.max(mixture)
+max_value = 0.09 #np.max(mixture)
 
 im = hexbin_grid.pcolorhex(mixture, ax=axs[0], cmap=probability_cmap, draw_edges=True, maxnorm=max_value)
 
@@ -98,8 +98,8 @@ hexbin_grid.pcolorhex(single, ax=axs[1], cmap=probability_cmap, draw_edges=True,
 setup_subplot(axs[2], extent, left_labels=False)
 rel_inf = relative_information(single, mixture)
 rel_inf_r = relative_information(mixture, single)
-max_rel_inf = np.max(rel_inf_r)
-min_rel_inf = min(np.min(rel_inf), np.min(rel_inf_r))
+max_rel_inf = 1.35 # np.max(rel_inf_r)
+min_rel_inf = -0.151 # min(np.min(rel_inf), np.min(rel_inf_r))
 
 im2 = hexbin_grid.pcolorhex(rel_inf, ax=axs[2], cmap=information_cmap, draw_edges=True, maxnorm=max_rel_inf, minnorm=min_rel_inf,
                             negative=False)
@@ -126,6 +126,7 @@ cbar = fig.colorbar(im, cax=bar_ax, orientation='horizontal', label='Probability
 
 bar_ax2 = fig.add_axes([0.55, 0.3, 0.35, 0.05])
 cbar2 = fig.colorbar(im2, cax=bar_ax2, orientation='horizontal', label='Information Loss (bits)', extend='max')
+cbar2.set_ticks([0, 0.3, 0.6, 0.9, 1.2])
 # Add titles to each subplot
 axs[0].set_title(r'$P_{mix}(X| \delta_r = 0.1^o)$', fontsize=10)
 axs[1].set_title(r'$P_{m}(X| \delta_r = 0.1^o)$', fontsize=10)
