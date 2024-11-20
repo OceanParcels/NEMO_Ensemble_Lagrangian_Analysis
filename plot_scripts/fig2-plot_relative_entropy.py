@@ -64,7 +64,9 @@ extent = [-85, -65, 30, 40]
 # Function to set up each subplot
 def setup_subplot(ax, extent, gridlines=True, left_labels=True, right_labels=False, bottom_labels=True):
     ax.set_extent(extent, crs=cartopy.crs.PlateCarree())
-    ax.add_feature(cartopy.feature.LAND, zorder=0, color='gray')
+    # ax.add_feature(cartopy.feature.LAND, zorder=0, color='gray')
+    # ax.add_feature(cartopy.feature.COASTLINE, zorder=1, linewidth=0.5)
+    ax.set_facecolor('gray')
     if gridlines:
         gl = ax.gridlines(crs=cartopy.crs.PlateCarree(), draw_labels=True,
                           linewidth=0.5, color='gray', alpha=0.)
@@ -74,16 +76,23 @@ def setup_subplot(ax, extent, gridlines=True, left_labels=True, right_labels=Fal
         gl.bottom_labels = bottom_labels
 
 # Plot mixture probability
+import matplotlib.colors as mcolors
+
+# Define discrete colormaps
+probability_cmap = mcolors.ListedColormap(plt.cm.plasma(np.linspace(0, 1, 10)))
+information_cmap = mcolors.ListedColormap(plt.cm.viridis(np.linspace(0, 1, 10)))
+
+# Plot mixture probability
 setup_subplot(axs[0], extent)
 mixture = np.where(P_AX['probability'][:, t].values > 0, P_AX['probability'][:, t].values, np.finfo(float).eps)
 single = np.where(P_m['probability'][:, t].values > 0, P_m['probability'][:, t].values, np.finfo(float).eps)
 max_value = np.max(mixture)
 
-im = hexbin_grid.pcolorhex(mixture, ax=axs[0], cmap='plasma', draw_edges=True, maxnorm=max_value)
+im = hexbin_grid.pcolorhex(mixture, ax=axs[0], cmap=probability_cmap, draw_edges=True, maxnorm=max_value)
 
 # Plot single probability
 setup_subplot(axs[1], extent, left_labels=False)
-hexbin_grid.pcolorhex(single, ax=axs[1], cmap='plasma', draw_edges=True, maxnorm=max_value)
+hexbin_grid.pcolorhex(single, ax=axs[1], cmap=probability_cmap, draw_edges=True, maxnorm=max_value)
 
 # Plot relative information
 setup_subplot(axs[2], extent, left_labels=False)
@@ -92,13 +101,13 @@ rel_inf_r = relative_information(mixture, single)
 max_rel_inf = np.max(rel_inf_r)
 min_rel_inf = min(np.min(rel_inf), np.min(rel_inf_r))
 
-im2 = hexbin_grid.pcolorhex(rel_inf, ax=axs[2], cmap='viridis', draw_edges=True, maxnorm=max_rel_inf, minnorm=min_rel_inf,
+im2 = hexbin_grid.pcolorhex(rel_inf, ax=axs[2], cmap=information_cmap, draw_edges=True, maxnorm=max_rel_inf, minnorm=min_rel_inf,
                             negative=False)
 
 # Plot relative information of P_AX, P_m
 setup_subplot(axs[3], extent, left_labels=False, right_labels=True)
 
-hexbin_grid.pcolorhex(rel_inf_r, ax=axs[3], cmap='viridis', draw_edges=True, maxnorm=max_rel_inf, minnorm=min_rel_inf)
+hexbin_grid.pcolorhex(rel_inf_r, ax=axs[3], cmap=information_cmap, draw_edges=True, maxnorm=max_rel_inf, minnorm=min_rel_inf)
 
 # Turn off unused subplots
 for i in range(4, 8):

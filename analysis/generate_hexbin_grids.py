@@ -9,15 +9,15 @@ import pickle
 from argparse import ArgumentParser
 
 import sys
-# sys.path.append('../functions')
-# import hexbin_functions as hexfunc
+sys.path.append('../functions')
+import hexbin_functions as hexfunc
 #%%
-p = ArgumentParser()
-p.add_argument('-hr', '--hex_res', type=int, default=3, help='hexagon resolution')
+# p = ArgumentParser()
+# p.add_argument('-hr', '--hex_res', type=int, default=3, help='hexagon resolution')
 
-args = p.parse_args()
+# args = p.parse_args()
 
-hex_res = args.hex_res
+hex_res = 3 # args.hex_res
 
 
 def get_coastal_nodes(landmask):
@@ -111,4 +111,8 @@ grid_no_coast = [hex_ for hex_, coast in zip(grid_no_land, coastal_val_hexgrid) 
 hexgrid_no_coast_centres = np.array([h3.h3_to_geo(hex_) for hex_ in grid_no_coast])
 
 with open(f'../data/hexgrid_no_coast_h{hex_res}.pkl', 'wb') as f:
-    pickle.dump(set(grid_no_coast), f)
+  pickle.dump(set(grid_no_coast), f)
+
+with open(f'../data/hexgrid_land_h{hex_res}.pkl', 'wb') as f:
+  pickle.dump(grid_land, f)
+#%%
