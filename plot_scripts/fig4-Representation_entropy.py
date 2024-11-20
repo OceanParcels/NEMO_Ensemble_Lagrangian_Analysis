@@ -112,15 +112,24 @@ for delta_r in [0.1, 1., 2.]:
 ax.plot(time_range, mixture_entropy_space[0.1], ls='-', color='black', label=r'Mixture: $\delta_r = 0.1^o$')
 ax.plot(time_range, mixture_entropy_space[2], ls=(0, (3, 1, 1, 1)), color='black', label=r'Mixture: $\delta_r = 2.0^o$')
 
+# ax.semilogx(time_range[:10],  time_range[:10]**(3/8) + 3, ls='-', color='red')
+ax.plot(time_range[10:1000],  1*np.log(time_range[10:1000]), ls='-', color='red')
+ax.plot(time_range[1:1000],  2*np.log(time_range[1:1000]), ls='-', color='red')
+ax.plot(time_range[10:1000],  (time_range[10:1000])**1, ls='-', color='green')
 ax.set_xlim(1, 2189)
 ax.set_ylim(0., 10.5)
-ax.semilogx()
+ax.semilogx(base=10)
 ax.legend(shadow=True)
 ax.set_ylabel('Marginal Entropy (bits)')
 ax.set_xlabel('Particle Age (days)')
 ax.grid()
 # plt.savefig('../figs/Fig3-Spatial-Representation_entropy.png', dpi=300)
 
+#%%
+plt.plot(time_range[:1000],  time_range[:1000]**(3/8), ls='-', label='3/8')
+plt.plot(time_range[:1000],  time_range[:1000]**(5/16), ls='-', label='5/16')
+plt.plot(time_range[:1000],  time_range[:1000]**(1/2), ls='-', label='1.2')
+plt.legend()
 
 # %%%%%%%%%%%%%%%%%%%%%%%%% Temporal plot of the mean entropy %%%%%%%%%%%%%%%%%%%%%%%%%
 
