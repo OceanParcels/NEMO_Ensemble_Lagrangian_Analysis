@@ -85,37 +85,36 @@ gl.ylabels_right = False
 # Scatter plot for varying space particles
 ax.scatter(pset_space.lon[indexes_space, 0], pset_space.lat[indexes_space, 0],
                    s=30, color='blueviolet', alpha=1, label='Varying Space', 
-                   zorder=10, edgecolor='black')
+                   zorder=12, edgecolor='black')
 
 # Scatter plot for varying time particle
 ax.scatter(pset_temp.lon[0, 0], pset_temp.lat[0, 0],
-                   s=50, color='orangered', alpha=1, marker='s', 
-                   label='Varying Time', zorder=10, edgecolor='black')
+                   s=50, color='gold', alpha=1, marker='s', 
+                   label='Varying Time', zorder=12, edgecolor='black')
 
 # Plot trajectories for varying space particles
 ax.plot(pset_space.lon[indexes_space, :t].T, pset_space.lat[indexes_space, :t].T, c='blueviolet', 
-                ls='-', alpha=0.5)
+                ls='-', alpha=0.5, zorder=10)
 
 # Plot trajectories for varying time particle
 ax.plot(pset_temp.lon[indexes, :t].T, pset_temp.lat[indexes, :t].T, c='orangered',
-                ls='-', alpha=0.5)
+                ls='-', alpha=0.5, zorder=11)
 
 # Plot trajectories for varying members particles
 ax.plot(mix_lons[:, :t].T, mix_lats[:, :t].T, c='k',
-                ls='-', alpha=0.5, label='Varying Members', zorder=0)
+                ls='-', alpha=0.5, label='Varying Members', zorder=9)
 
 for i in range(N_particles):
         ax.annotate('', xy=(mix_lons[i, t], mix_lats[i, t]), 
                 xytext=(mix_lons[i, t-1], mix_lats[i, t-1]),
                 arrowprops=dict(arrowstyle="-|>", color='black', lw=1.5, alpha=0.5), 
-                zorder=10) 
+                zorder=9) 
 
 for i in indexes:
         ax.annotate('', xy=(pset_temp.lon[i, t], pset_temp.lat[i, t]), 
                 xytext=(pset_temp.lon[i, t-1], pset_temp.lat[i, t-1]),
                 arrowprops=dict(arrowstyle="-|>", color='orangered', lw=1.5, alpha=0.5), 
-                zorder=10)
-        
+                zorder=11)
         
 for i in indexes_space:
         ax.annotate('', xy=(pset_space.lon[i, t], pset_space.lat[i, t]), 
@@ -125,11 +124,42 @@ for i in indexes_space:
 
 # Add legend
 handles, labels = ax.get_legend_handles_labels()
-handles = [handles[0], handles[1], handles[-1]]
-labels = [labels[0], labels[1], labels[-1]]
+handles = [handles[-1], handles[0], handles[1]]
+labels = [labels[-1], labels[0], labels[1]]
 ax.legend(handles, labels, shadow=True, fontsize='small')
 
 # Save the figure
 plt.savefig(f'../figs/Fig1_schematic.png', dpi=300)
 
-#%%
+#%% plot one trajectory 
+
+plt.scatter(0, 0, s=20, color='blueviolet', alpha=1, 
+                   zorder=10, edgecolor='black')
+plt.plot([0, 0.005], [0,0], c='blueviolet', 
+                ls='-', alpha=1)
+plt.annotate('', xy=(0.01, 0), 
+                xytext=(0.005, 0),
+                arrowprops=dict(arrowstyle="-|>", color='blueviolet', lw=1.5, alpha=1))
+
+plt.scatter(0, 0.025, s=20, color='gold', alpha=1, marker='s',
+                   zorder=10, edgecolor='black')
+plt.plot([0, 0.005], [0.025,0.025], c='orangered', 
+                ls='-', alpha=1)
+plt.annotate('', xy=(0.01, 0.025), 
+                xytext=(0.005, 0.025),
+                arrowprops=dict(arrowstyle="-|>", color='orangered', lw=1.5, alpha=1))
+
+plt.scatter(0, 0.05, s=20, color='gold', alpha=1, marker='s',
+                   zorder=10, edgecolor='black')
+plt.plot([0, 0.005], [0.05,0.05], c='black', 
+                ls='-', alpha=1)
+plt.annotate('', xy=(0.01, 0.05), 
+                xytext=(0.005, 0.05),
+                arrowprops=dict(arrowstyle="-|>", color='black', lw=1.5, alpha=1))
+
+plt.xlim(-0.1, 0.1)
+plt.ylim(-0.1, 0.1)
+
+plt.savefig(f'../figs/patch_for_Fig1_schematic.png', dpi=300)
+
+# %%
