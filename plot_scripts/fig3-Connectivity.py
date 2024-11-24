@@ -379,6 +379,88 @@ ax[3].grid(True)
 plt.tight_layout()
 # save the figure
 
+# plt.savefig("../figs/Fig3_ECDF_Comparisson" + criterium_string + ".png", dpi=300)
+
+#%% ECDFs of the counts and mean and 99% confidence interval for temporal and spatial members
+# 
+fig, ax = plt.subplots(2, 2, figsize=(8, 6))
+ax = ax.flatten()
+# Plot CDFs for percentage of subpolar trajectories
+
+colors_space = ["midnightblue", "blueviolet", "teal"]
+ls_space = [(0, (1, 1)), '--', '-.']
+
+for j, delta_r in enumerate([0.1, 1., 2.]):
+    sns.ecdfplot(all_space[delta_r]["counts"], ax=ax[0], label=f"$\delta_r = {delta_r}^o$", 
+                 color=colors_space[j], linestyle=ls_space[j])
+    sns.ecdfplot(all_space[delta_r]["median_time"]/365, ax=ax[1], label=f"Spatial dr{delta_r}", 
+                 color=colors_space[j], linestyle=ls_space[j])
+
+for j, dr_ref in enumerate([0.1, 1., 2.]):
+    mean_counts = all_mix_space[dr_ref]["counts"].mean()
+    std_counts = 2.576 * all_mix_space[dr_ref]["counts"].std() / np.sqrt(len(all_mix_space[dr_ref]["counts"]))
+
+    ax[0].fill_betweenx([0, 1], mean_counts-std_counts, mean_counts+std_counts,
+                        color=colors_space[j], alpha=0.5, label=f"Mix. $\delta_r = {dr_ref}^o$",
+                        edgecolor='none')
+    ax[0].set_xlim(1000, 5100)
+    
+    mean_median_time = all_mix_space[dr_ref]["median_time"].mean()/365
+    std_median_time = 2.576 * all_mix_space[dr_ref]["median_time"].std()/365 / np.sqrt(len(all_mix_space[dr_ref]["median_time"]))
+
+    ax[1].fill_betweenx([0, 1], mean_median_time-std_median_time, mean_median_time+std_median_time,
+                        color=colors_space[j], alpha=0.5, label=f"Mix. $\delta_r = {dr_ref}^o$",
+                        edgecolor='none')
+    ax[1].set_xlim(2, 5)
+
+colors_temp = ["darkred", "orangered", "orange"]
+ls_time = [(0, (1, 1)), '--', '-.', (0, (3, 1, 1, 1, 1, 1))]
+
+for j, week in enumerate([4, 12, 20]):
+    sns.ecdfplot(all_temp[week]["counts"], ax=ax[2], label=f"{week} weeks", color=colors_temp[j], linestyle=ls_time[j])
+    sns.ecdfplot(all_temp[week]["median_time"]/365, ax=ax[3], label=f"Temporal W{week}", color=colors_temp[j], linestyle=ls_time[j])
+
+for j, dr_ref in enumerate([4, 12, 20]):
+    mean_counts = all_mix_temp[dr_ref]["counts"].mean()
+    std_counts = 2.576 * all_mix_temp[dr_ref]["counts"].std() / np.sqrt(len(all_mix_temp[dr_ref]["counts"]))
+
+    ax[2].fill_betweenx([0, 1], mean_counts-std_counts, mean_counts+std_counts,
+                        color=colors_temp[j], alpha=0.5, label=f"Mix. {dr_ref} weeks", edgecolor='none')
+    ax[2].set_xlim(1000, 5100)
+    
+    mean_median_time = all_mix_temp[dr_ref]["median_time"].mean()/365
+    std_median_time = 2.576 * all_mix_temp[dr_ref]["median_time"].std()/365 / np.sqrt(len(all_mix_temp[dr_ref]["median_time"]))
+
+    ax[3].fill_betweenx([0, 1], mean_median_time-std_median_time, mean_median_time+std_median_time,
+                        color=colors_temp[j], alpha=0.5, label=f"Mix. {dr_ref} weeks", edgecolor='none')
+    ax[3].set_xlim(2, 5)
+
+# Add labels 'A', 'B', 'C', 'D' for each subplot in the top left corner
+labels = ['A', 'B', 'C', 'D']
+for i, label in enumerate(labels):
+    ax[i].text(0.05, 0.95, label, transform=ax[i].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
+
+ax[0].set_xlabel("Counts")
+ax[0].set_ylabel("ECDF")
+ax[0].legend(fontsize=7)
+ax[0].grid(True, linestyle=':', alpha=0.8)
+
+ax[1].set_xlabel("Median Particle Age (years)")
+ax[1].set_ylabel("ECDF")
+ax[1].grid(True, linestyle=':', alpha=0.8)
+
+ax[2].set_xlabel("Counts")
+ax[2].set_ylabel("ECDF")
+ax[2].legend(fontsize=7, loc='lower right')
+ax[2].grid(True, linestyle=':', alpha=0.8)
+
+ax[3].set_xlabel("Median Particle Age (years)")
+ax[3].set_ylabel("ECDF")
+ax[3].grid(True, linestyle=':', alpha=0.8)
+
+plt.tight_layout()
+# save the figure
+
 plt.savefig("../figs/Fig3_ECDF_Comparisson" + criterium_string + ".png", dpi=300)
 
 #%% COMpute ECDF curver for all_temp and all_space with and ecdf function

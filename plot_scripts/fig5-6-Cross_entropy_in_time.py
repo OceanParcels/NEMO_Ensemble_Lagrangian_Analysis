@@ -58,8 +58,6 @@ else:
 #%% KLD
 N_members = 50
 
-
-
 KLD_ALL_mean = {}
 KLD_ALL_std = {}
 
@@ -189,8 +187,7 @@ axs[2].set_ylabel('Relative Entropy (bits)')
 
 plt.tight_layout()
 
-plt.savefig(f'../figs/Fig5_relative_entropy_subplots{patch}
-            .png', dpi=300)
+plt.savefig(f'../figs/Fig5_relative_entropy_subplots{patch}.png', dpi=300)
 # %%
 DF = {}
 
