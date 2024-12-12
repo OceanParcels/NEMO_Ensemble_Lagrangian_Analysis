@@ -11,16 +11,26 @@
 
 conda activate nemo-ensemble
 
-echo "MEMEMber 39 -- Delta r: 2.0"
-python ensemble_Member_spatial.py -m 39 -dr 2.0
-   
-
 for j in {1..50}
 do
-   echo "MEMEMber $j -- Delta r: 2.0"
-   python ensemble_Member_spatial.py -m $j -dr 2.0
-   
+   for i in 0.01 1.0 2.0
+   do
+      echo "MEMEMber $j -- Delta r: $i"
+      python ensemble_Member_spatial.py -m $j -dr $i
+   done
 done
+echo "Finished computation."
+
+# echo "MEMEMber 39 -- Delta r: 2.0"
+# python ensemble_Member_spatial.py -m 39 -dr 2.0
+   
+
+# for j in {1..50}
+# do
+#    echo "MEMEMber $j -- Delta r: 2.0"
+#    python ensemble_Member_spatial.py -m $j -dr 2.0
+   
+# done
 
 # for j in {26..50}
 # do
@@ -30,17 +40,3 @@ done
 #       python ensemble_Member_spatial.py -m $j -dr $i
 #    done
 # done
-
-# for j in {43..43}
-# do
-#    for i in $(seq 0.01 1.0 0.1)
-#    do
-#       # # Skip the iterations where i equals 0.05 or 0.15
-#       # if [ $(echo "$i == 0.01" | bc) -eq 1 ] || [ $(echo "$i == 0.1" | bc) -eq 1 ]; then
-#       #    continue
-#       # fi
-#       # echo "MEMEMber $j -- STD: $i"
-#       # python ensemble_Member_simulation.py -m $j -s $i
-#    done
-# done
-echo "Finished computation."
