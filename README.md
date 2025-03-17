@@ -20,10 +20,10 @@ To reproduce the results it is necessary to execute the scripts in the order the
 
 First execute the simulations scripts. The simulations scripts consist of two types, spatial and temporal releases. Each type has its own script. We submit the scripts with `.sh` files. 
 
-1. [`ensemble_Member_spatial.py`](simulation/ensemble_Member_spatial.py): Script for spatial release simualtions.
-2. [`ensemble_Member_temporal.py`](simulation/ensemble_Member_temporal.py): Script for temporal release simualtions.
-3. [`submit_spatial_jobs.sh`](submit_spatial_jobs.sh): submits the spatial simulations for the 50 members of the ensemble, for three cases: $0.1^\circ$, $1.0^\circ$, and $2.0^\circ$. It takes approx 8 hours per simulation, and there are 150 to be computed (be careful with the 120 hour limit).
-4. [`submit_temporal_jobs.sh`](submit_temporal_jobs.sh): submits the temporal simulations for the 50 members of the ensemble, for three cases: 4, 12, and 20 weeks. It takes approx 8 hours per simulation, and there are 150 to be computed (be careful with the 120 hour limit).
+1. [`ensemble_Member_spatial.py`](simulations/ensemble_Member_spatial.py): Script for spatial release simualtions.
+2. [`ensemble_Member_temporal.py`](simulations/ensemble_Member_temporal.py): Script for temporal release simualtions.
+3. [`submit_spatial_jobs.sh`](simulations/submit_spatial_jobs.sh): submits the spatial simulations for the 50 members of the ensemble, for three cases: $0.1^\circ$, $1.0^\circ$, and $2.0^\circ$. It takes approx 8 hours per simulation, and there are 150 to be computed (be careful with the 120 hour limit).
+4. [`submit_temporal_jobs.sh`](simulations/submit_temporal_jobs.sh): submits the temporal simulations for the 50 members of the ensemble, for three cases: 4, 12, and 20 weeks. It takes approx 8 hours per simulation, and there are 150 to be computed (be careful with the 120 hour limit).
 
 #### [Analysis](analysis/)
 
