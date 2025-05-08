@@ -242,12 +242,6 @@ for j, delta_r in enumerate([0.1, 1., 2.]):
     sns.ecdfplot(all_space[delta_r]["median_time"]/365, ax=ax[1], label=f"Spatial dr{delta_r}", 
                  color=colors_space[j], linestyle=ls_space[j])
 
-#diffusion
-sns.ecdfplot(all_diff["counts"], ax=ax[0], label=f"$K_h = 10 $",
-             color='black', linestyle='-')
-sns.ecdfplot(all_diff["median_time"]/365, ax=ax[1], label=f"Spatial dr{delta_r}", 
-                 color='black', linestyle='-')
-
 
 for j, dr_ref in enumerate([0.1, 1., 2.]):
     mean_counts = all_mix_space[dr_ref]["counts"].mean()
@@ -265,6 +259,13 @@ for j, dr_ref in enumerate([0.1, 1., 2.]):
                         color=colors_space[j], alpha=0.5, label=f"Mix. $\delta_r = {dr_ref}^o$",
                         edgecolor='none')
     ax[1].set_xlim(2, 5)
+
+
+#diffusion
+sns.ecdfplot(all_diff["counts"], ax=ax[0], label=f"$K_h = 10 \ m^2 s^{-1}$",
+             color='black', linestyle='-')
+sns.ecdfplot(all_diff["median_time"]/365, ax=ax[1], label=f"Spatial dr{delta_r}", 
+                 color='black', linestyle='-')
 
 colors_temp = ["darkred", "orangered", "orange"]
 ls_time = [(0, (1, 1)), '--', '-.', (0, (3, 1, 1, 1, 1, 1))]
@@ -316,32 +317,4 @@ plt.tight_layout()
 
 plt.savefig("../figs/Fig3_ECDF_Comparisson" + criterium_string + ".png", dpi=300)
 
-
-# then compute the entropy of the KDE. No plotting here
-    
-# Compute the entropy of the KDE
-from scipy.stats import entropy
-
-types = ["Spatial 0.1", "Spatial 1.0", "Spatial 2.0", "Temporal 4", "Temporal 12", "Temporal 20"]
-
-entropy_single = np.zeros(6)
-entropy_mixture = np.zeros(6)
-
-j = 0
-for delta_r in [0.1, 1., 2.]:
-    entropy_single[j] = entropy(kde_space[delta_r][1])
-    # entropy_mixture[j] = entropy(kde_mix_space[delta_r][1])
-    j += 1
-    
-for j, week in enumerate([4, 12, 20]):
-    entropy_single[j+3] = entropy(kde_temp[week][1])
-    # entropy_mixture[j+3] = entropy(kde_mix_temp[week][1])
-    j += 1
-
-# # Create the dataframe
-# entropy_df = pd.DataFrame({"Type": types, "Entropy": [entropy_space[0.1], entropy_space[1.], entropy_space[2.],
-#                                                             entropy_temp[4], entropy_temp[12], entropy_temp[20]]})
-
-# entropy_mix_df = pd.DataFrame({"Type": types, "Entropy": [entropy_mix_space[0.1], entropy_mix_space[1.], entropy_mix_space[2.],
-#                                                             entropy_mix_temp[4], entropy_mix_temp[12], entropy_mix_temp[20]]})
-
+# %%

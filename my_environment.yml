@@ -14,4 +14,5 @@ dependencies:
   - scipy=1.11.3
   - seaborn=0.12.2
   - pip=24.0
+  - h3-py=3.7.7
 prefix: /nethome/6525954/.conda/envs/nemo-ensemble
