@@ -36,7 +36,7 @@ location = 'Cape_Hatteras'
 delta_r = 0.1
 subset = 1
 
-base_path = "/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/"
+base_path = "/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/"
 
 file_path_AX = base_path + f"{location}_all_long/P_dr{delta_r*100:03.0f}_all_s{subset:03d}.nc"
 P_AX = xr.open_dataset(file_path_AX)
@@ -106,20 +106,20 @@ for delta_ref in [4, 12, 20]:
         KLDivergence_mean[set] = avg_KLD
         KLDivergence_std[set] = std_KLD
         
-    with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_{delta_ref}{patch}.pkl', 'wb') as f:
+    with open(f'/Volumes/Claudio SSD/Ensemble_article_data/analysis/KLD_time/KLD_time_{delta_ref}{patch}.pkl', 'wb') as f:
         pickle.dump(KLDivergence_mean, f)
     
-    with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_{delta_ref}_std{patch}.pkl', 'wb') as f:
+    with open(f'/Volumes/Claudio SSD/Ensemble_article_data/analysis/KLD_time/KLD_time_{delta_ref}_std{patch}.pkl', 'wb') as f:
         pickle.dump(KLDivergence_std, f)
 
     KLD_ALL_mean[delta_ref] = KLDivergence_mean
     KLD_ALL_std[delta_ref] = KLDivergence_std
 
 #%% # save KLDivergence_mean and KLDivergence_std to file
-# with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_ALL_mean{patch}.pkl', 'wb') as f:
+# with open(f'/Volumes/Claudio SSD/Ensemble_article_data/analysis/KLD_time/KLD_time_ALL_mean{patch}.pkl', 'wb') as f:
 #     pickle.dump(KLD_ALL_mean, f)
         
-# with open(f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_ALL_std{patch}.pkl', 'wb') as f:
+# with open(f'/Volumes/Claudio SSD/Ensemble_article_data/analysis/KLD_time/KLD_time_ALL_std{patch}.pkl', 'wb') as f:
 #     pickle.dump(KLD_ALL_std, f)
 
 #%% Open pickles and make KLD_mean and KLD_std
@@ -128,12 +128,12 @@ KLD_ALL_std = {}
 
 
 for delta_ref in [0.1, 1., 2., 4, 12, 20]:
-    path = f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_{delta_ref}{patch}.pkl'
+    path = f'/Volumes/Claudio SSD/Ensemble_article_data/analysis/KLD_time/KLD_time_{delta_ref}{patch}.pkl'
     
     with open(path, 'rb') as f:
         KLD_ALL_mean[delta_ref] = pickle.load(f)
         
-    path = f'/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/KLD_time/KLD_time_{delta_ref}_std{patch}.pkl'
+    path = f'/Volumes/Claudio SSD/Ensemble_article_data/analysis/KLD_time/KLD_time_{delta_ref}_std{patch}.pkl'
     
     with open(path, 'rb') as f:
         KLD_ALL_std[delta_ref] = pickle.load(f)
