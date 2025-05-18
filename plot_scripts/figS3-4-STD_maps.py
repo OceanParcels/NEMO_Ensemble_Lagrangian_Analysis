@@ -25,7 +25,7 @@ member = 1
 member_list = np.arange(1, 51)
 
 # Define the file path for the NetCDF file containing probability distributions
-file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_temporal_long/P_W{week:01d}_m{member:03d}.nc"
+file_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_temporal_long/P_W{week:01d}_m{member:03d}.nc"
 
 # Open the dataset and sort by 'hexint'
 P_m = xr.open_dataset(file_path)
@@ -47,7 +47,7 @@ for week in [4, 12, 20]:
 
     # Loop through each member to calculate the time_average probabilities
     for i, member in tqdm(enumerate(member_list)):
-        file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_temporal_long/P_W{week:01d}_m{member:03d}.nc"
+        file_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_temporal_long/P_W{week:01d}_m{member:03d}.nc"
         P_m = xr.open_dataset(file_path)
         P_m = P_m.sortby('hexint')
         likelihood = P_m['probability'][:, :].values
@@ -65,7 +65,7 @@ for delta_r in[0.1, 1., 2.]:
     
     # Loop through each member to calculate the time_average probabilities
     for i, member in tqdm(enumerate(member_list)):
-        file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_spatial_long/P_dr{delta_r*100:03.0f}_m{member:03d}.nc"
+        file_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_spatial_long/P_dr{delta_r*100:03.0f}_m{member:03d}.nc"
         P_m = xr.open_dataset(file_path)
         P_m = P_m.sortby('hexint')
         likelihood = P_m['probability'][:, :].values
@@ -170,7 +170,7 @@ subset = 1
 subset_list = np.arange(1, 29)
 
 # Define the file path for the NetCDF file containing probability distributions
-file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_long/P_W{week:02d}_all_s{subset:03d}.nc"
+file_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_all_long/P_W{week:02d}_all_s{subset:03d}.nc"
 
 # Open the dataset and sort by 'hexint'
 P_m = xr.open_dataset(file_path)
@@ -190,7 +190,7 @@ for week in [4, 12, 20]:
 
     # Loop through each subset to calculate the time_average probabilities
     for i, subset in tqdm(enumerate(subset_list)):
-        file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_long/P_W{week:02d}_all_s{subset:03d}.nc"
+        file_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_all_long/P_W{week:02d}_all_s{subset:03d}.nc"
         P_m = xr.open_dataset(file_path)
         P_m = P_m.sortby('hexint')
         likelihood = P_m['probability'][:, :].values
@@ -206,7 +206,7 @@ for delta_r in[0.1, 1., 2.]:
 
     # Loop through each subset to calculate the time_average probabilities
     for i, subset in tqdm(enumerate(subset_list)):
-        file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_all_long/P_dr{delta_r*100:03.0f}_all_s{subset:03d}.nc"
+        file_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_all_long/P_dr{delta_r*100:03.0f}_all_s{subset:03d}.nc"
         P_m = xr.open_dataset(file_path)
         P_m = P_m.sortby('hexint')
         likelihood = P_m['probability'][:, :].values
