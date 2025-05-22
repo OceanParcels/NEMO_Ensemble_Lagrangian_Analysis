@@ -168,4 +168,4 @@ colorbar = fig.colorbar(im, cax=colorbar_axis,
                         label=f'Probability', extend='max')
 
 plt.savefig(f'../figs/FigS9_maps_snapshots_m{member:03d}_s{subset:03d}.png', dpi=300)
- # %%
+# %%

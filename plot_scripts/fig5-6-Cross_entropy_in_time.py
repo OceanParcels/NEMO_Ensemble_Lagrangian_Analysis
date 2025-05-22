@@ -175,7 +175,7 @@ for i, key in enumerate([0.1, 2., 4, 20]):
     else:
         labeltt = f'Mixture $\delta_r = {key}^o$'
         
-    ax.text(0.05, 0.9, f'$\mathbf{{{labels[i]}}}$  Ref.: {labeltt}', fontsize=14, transform=ax.transAxes)
+    ax.text(0.05, 0.9, f'$\mathbf{{{labels[i]}}}$  '+r'$P_{mix}$ : '+f'{labeltt}', fontsize=14, transform=ax.transAxes)
 
     ax.semilogx()
     ax.legend(fontsize=8)
