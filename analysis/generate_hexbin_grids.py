@@ -75,7 +75,7 @@ analysis_domain = {"type": "Polygon",
 
 grid_raw = h3.polyfill(analysis_domain, hex_res)
 
-mask_file = '/storage/shared/oceanparcels/input_data/NEMO_Ensemble/GRID/NATL025-CJMenobs01_byte_mask.nc'
+mask_file = '/Volumes/Claudio SSD/Ensemble_article_data/NATL025-CJMenobs01_byte_mask.nc'
 mask = xr.open_dataset(mask_file, decode_times=False)
 
 # Extract the coordinates of the centers of the hexagons
