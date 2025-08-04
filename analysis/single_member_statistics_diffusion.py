@@ -127,8 +127,8 @@ location = 'Cape_Hatteras'
 member = 48  # memeber
 K_h = 1000  # Standard deviation od initial dispersion
 
-# path = f"/Volumes/Claudio SSD/Ensemble_article_data/simulations/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}.zarr"
-path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/diff_long/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}.zarr"
+path = f"/Volumes/Claudio SSD/Ensemble_article_data/simulations/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}_15000.zarr"
+# path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/diff_long/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}.zarr"
 pset = xr.open_zarr(path)
 
 obs_range = pset.obs.values  # Number of time steps in the observation period
@@ -139,8 +139,8 @@ with open('../data/hexgrid_no_coast_h3.pkl', 'rb') as f:
 
 hexbin_grid = hexfunc.hexGrid(hexbin_grid, h3_res=3)
 
-# mask_file = '/Volumes/Claudio SSD/Ensemble_article_data/NATL025-CJMenobs01_byte_mask.nc'
-mask_file = '/storage/shared/oceanparcels/input_data/NEMO_Ensemble/GRID/NATL025-CJMenobs01_byte_mask.nc'
+mask_file = '/Volumes/Claudio SSD/Ensemble_article_data/NATL025-CJMenobs01_byte_mask.nc'
+# mask_file = '/storage/shared/oceanparcels/input_data/NEMO_Ensemble/GRID/NATL025-CJMenobs01_byte_mask.nc'
 mask = xr.open_dataset(mask_file, decode_times=False)
 
 tmask = mask['tmask'][0,0].values
@@ -159,8 +159,8 @@ members = [48]  # np.arange(1, 51)
 for member in members:
     for K_h in K_h_ranges:
         print(f"\U0001F914 Member: {member:03d},  K_h: {K_h}")
-        # path = f"/Volumes/Claudio SSD/Ensemble_article_data/simulations/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}.zarr"
-        path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/diff_long/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}.zarr"
+        path = f"/Volumes/Claudio SSD/Ensemble_article_data/simulations/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}_15000.zarr"
+        # path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/diff_long/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}.zarr"
         pset = xr.open_zarr(path)
         # pset = xr.open_dataset(path)
 
@@ -211,16 +211,26 @@ for member in members:
 
         if keep_all_traj==False:
             # Subsample the trajectories
-            pset = pset.isel(trajectory=np.random.choice(
-                pset.sizes['trajectory'], subsample, replace=False)) # replace=False, no repeated trajectories
+            try :
+                pset = pset.isel(trajectory=np.random.choice(
+                    pset.sizes['trajectory'], subsample, replace=False))  # replace=False, no repeated trajectories
+            except ValueError as e:
+                print(f"Error: {e}. Subsampling {pset.sizes['trajectory']} trajectories, but requested {subsample} subsamples.")
+                print("Setting subsample to the number of available trajectories.")
+                subsample = pset.sizes['trajectory']
+                # Subsample the trajectories again with the correct number
+
+                pset = pset.isel(trajectory=np.random.choice(
+                    pset.sizes['trajectory'], subsample, replace=False)) # replace=False, no repeated trajectories
+                
             subsample_str = f"_subsample_{subsample:04d}"
 
         # Calculate the probability and entropy
         P_m, Ent_m, Np_m = calculate_probability_and_entropy(
             pset, hexbin_grid, entropy)
         DF_m = create_dataframe(P_m, Ent_m, Np_m, hexbin_grid.hexint, obs_range)
-        # save_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_diffusion_long/P_diff_Kh_{K_h:01d}_m{member:03d}{subsample_str}.nc"
-        save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_diffusion_long/P_diff_Kh_{K_h:01d}_m{member:03d}{subsample_str}.nc"
+        save_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_diffusion_long/P_diff_Kh_{K_h:01d}_m{member:03d}{subsample_str}_15000.nc"
+        # save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_diffusion_long/P_diff_Kh_{K_h:01d}_m{member:03d}{subsample_str}.nc"
         DF_m.to_netcdf(save_path)
 
 # %%
