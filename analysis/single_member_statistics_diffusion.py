@@ -152,7 +152,6 @@ K_h_ranges = [1000]  # np.linspace(0.1, 1, 10)
 
 keep_all_traj = False # If True, keep all trajectories, if False, subsample
 subsample = 7500 # Number of particles to subsample if keep_all_traj is False
-subsample_str = "" # If subsampling, add a string to the saved file name
 
 members = [48]  # np.arange(1, 51)
 
@@ -201,29 +200,22 @@ for member in members:
                 elif len(idx) == 0:
                     full_trajectories.append(p)  # Store the last index if all are inside the mask
 
-            if keep_all_traj:
-                pset['lon'] = (('trajectory', 'obs'), lon_arr)
-                pset['lat'] = (('trajectory', 'obs'), lat_arr)
+           
+            full_trajectories = np.array(full_trajectories)
+            pset = pset.isel(trajectory=full_trajectories)
 
-            elif not keep_all_traj:
-                full_trajectories = np.array(full_trajectories)
-                pset = pset.isel(trajectory=full_trajectories)
-
-        if keep_all_traj==False:
-            # Subsample the trajectories
+        
             try :
                 pset = pset.isel(trajectory=np.random.choice(
                     pset.sizes['trajectory'], subsample, replace=False))  # replace=False, no repeated trajectories
             except ValueError as e:
                 print(f"Error: {e}. Subsampling {pset.sizes['trajectory']} trajectories, but requested {subsample} subsamples.")
                 print("Setting subsample to the number of available trajectories.")
-                subsample = pset.sizes['trajectory']
                 # Subsample the trajectories again with the correct number
 
                 pset = pset.isel(trajectory=np.random.choice(
-                    pset.sizes['trajectory'], subsample, replace=False)) # replace=False, no repeated trajectories
+                    pset.sizes['trajectory'], pset.sizes['trajectory'], replace=False)) # replace=False, no repeated trajectories
                 
-            subsample_str = f"_subsample_{subsample:04d}"
 
         # Calculate the probability and entropy
         P_m, Ent_m, Np_m = calculate_probability_and_entropy(
