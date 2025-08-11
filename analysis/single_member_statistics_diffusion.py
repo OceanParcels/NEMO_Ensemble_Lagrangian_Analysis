@@ -179,15 +179,20 @@ for member in members:
                 lat_idx = np.digitize(
                     pset.lat[p, :].dropna(dim='obs'), mask_lats)
                 
+                print(lon_idx)
+
                 if tmask.shape[0] in lat_idx:
                     # if lat_idx == shape[0], then find where lat_idx is == shape[0]. Remove those values from lat_idx and lon_idx
                     _lat_idx = lat_idx[lat_idx < tmask.shape[0]]
                     lon_idx = lon_idx[lat_idx < tmask.shape[0]]
                     lat_idx = _lat_idx
-                elif tmask.shape[1] in lon_idx:
+                if tmask.shape[1] in lon_idx:
+                    print("AYE")
                     _lon_idx = lon_idx[lon_idx < tmask.shape[1]]
                     lat_idx = lat_idx[lon_idx < tmask.shape[1]]
                     lon_idx = _lon_idx
+
+                print(lon_idx)
 
                 tmask_values = tmask[lat_idx, lon_idx]
                 idx = np.where(tmask_values == 0)[0] # Number of time steps outside the mask
