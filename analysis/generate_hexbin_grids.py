@@ -113,6 +113,6 @@ hexgrid_no_coast_centres = np.array([h3.h3_to_geo(hex_) for hex_ in grid_no_coas
 with open(f'../data/hexgrid_no_coast_h{hex_res}.pkl', 'wb') as f:
   pickle.dump(set(grid_no_coast), f)
 
-with open(f'../data/hexgrid_land_h{hex_res}.pkl', 'wb') as f:
-  pickle.dump(grid_land, f)
+with open(f'../data/hexgrid_no_land_h{hex_res}.pkl', 'wb') as f:
+  pickle.dump(grid_no_land, f)
 #%%

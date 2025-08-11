@@ -29,62 +29,25 @@ subsample = 7500
 
 for member in [48]: #tqdm(range(1, total_members + 1)):
     print(f"Member: {member:03d},  K_h: {K_h}")
-    file_path = path + f"simulations/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}_15000.zarr"
+    file_path = path + f"simulations/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}.zarr"
     
     pset = xr.open_zarr(file_path)
 
-    if K_h == 1000:
-
-        full_trajectories = []
-
-        # remove particles othat go inland
-        lon_arr = pset['lon'].values
-        lat_arr = pset['lat'].values
-
-        for p in tqdm(range(pset.sizes['trajectory'])):
-
-            lon_idx = np.digitize(
-                pset.lon[p, :].dropna(dim='obs'), mask_lons)
-
-            lat_idx = np.digitize(
-                pset.lat[p, :].dropna(dim='obs'), mask_lats)
-            
-            if tmask.shape[0] in lat_idx:
-                # if lat_idx == shape[0], then find where lat_idx is == shape[0]. Remove those values from lat_idx and lon_idx
-                _lat_idx = lat_idx[lat_idx < tmask.shape[0]]
-                lon_idx = lon_idx[lat_idx < tmask.shape[0]]
-                lat_idx = _lat_idx
-            elif tmask.shape[1] in lon_idx:
-                _lon_idx = lon_idx[lon_idx < tmask.shape[1]]
-                lat_idx = lat_idx[lon_idx < tmask.shape[1]]
-                lon_idx = _lon_idx
-
-            tmask_values = tmask[lat_idx, lon_idx]
-            idx = np.where(tmask_values == 0)[0] # Number of time steps outside the mask
-            if len(idx) > 0:
-                cutoff = idx[0]  # First index outside the mask
-
-                lon_arr[p, cutoff:] = np.nan
-                lat_arr[p, cutoff:] = np.nan
-                
-            elif len(idx) == 0:
-                full_trajectories.append(p)  # Store the last index if all are inside the mask
-
         
-        full_trajectories = np.array(full_trajectories)
-        pset = pset.isel(trajectory=full_trajectories)
+    full_trajectories = np.load(f'../data/full_traj_K_h{K_h:01d}/full_trajectories_m{member:03d}_K_h{K_h:01d}.npz')['full_trajectories']
+    pset = pset.isel(trajectory=full_trajectories)
 
-        # Subsample the trajectories
-        try :
-            pset = pset.isel(trajectory=np.random.choice(
-                pset.sizes['trajectory'], subsample, replace=False))  # replace=False, no repeated trajectories
-        except ValueError as e:
-            print(f"Error: {e}. Subsampling {pset.sizes['trajectory']} trajectories, but requested {subsample} subsamples.")
-            print("Setting subsample to the number of available trajectories.")
-            # Subsample the trajectories again with the correct number
+    # Subsample the trajectories
+    try :
+        pset = pset.isel(trajectory=np.random.choice(
+            pset.sizes['trajectory'], subsample, replace=False))  # replace=False, no repeated trajectories
+    except ValueError as e:
+        print(f"Error: {e}. Subsampling {pset.sizes['trajectory']} trajectories, but requested {subsample} subsamples.")
+        print("Setting subsample to the number of available trajectories.")
+        # Subsample the trajectories again with the correct number
 
-            pset = pset.isel(trajectory=np.random.choice(
-                pset.sizes['trajectory'], pset.sizes['trajectory'], replace=False)) # replace=False, no repeated trajectories
+        pset = pset.isel(trajectory=np.random.choice(
+            pset.sizes['trajectory'], pset.sizes['trajectory'], replace=False)) # replace=False, no repeated trajectories
 
 
     N_particles = len(pset.trajectory)

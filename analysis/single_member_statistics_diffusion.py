@@ -124,10 +124,10 @@ def create_dataframe(probability_set, entropy_set, number_particles_set, hexints
 
 # %%
 location = 'Cape_Hatteras'
-member = 48  # memeber
+member = 1  # memeber
 K_h = 1000  # Standard deviation od initial dispersion
 
-path = f"/Volumes/Claudio SSD/Ensemble_article_data/simulations/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}_15000.zarr"
+path = f"/Volumes/Claudio SSD/Ensemble_article_data/simulations/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}.zarr"
 # path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/diff_long/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}.zarr"
 pset = xr.open_zarr(path)
 
@@ -153,12 +153,12 @@ K_h_ranges = [1000]  # np.linspace(0.1, 1, 10)
 keep_all_traj = False # If True, keep all trajectories, if False, subsample
 subsample = 7500 # Number of particles to subsample if keep_all_traj is False
 
-members = [48]  # np.arange(1, 51)
+members = [4]  # np.arange(1, 51)
 
 for member in members:
     for K_h in K_h_ranges:
         print(f"\U0001F914 Member: {member:03d},  K_h: {K_h}")
-        path = f"/Volumes/Claudio SSD/Ensemble_article_data/simulations/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}_15000.zarr"
+        path = f"/Volumes/Claudio SSD/Ensemble_article_data/simulations/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}.zarr"
         # path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/diff_long/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}.zarr"
         pset = xr.open_zarr(path)
         # pset = xr.open_dataset(path)
@@ -202,6 +202,9 @@ for member in members:
 
            
             full_trajectories = np.array(full_trajectories)
+            #save the full trajectories to npz
+            np.savez(f'../data/full_traj_K_h{K_h:01d}/full_trajectories_m{member:03d}_K_h{K_h:01d}.npz', full_trajectories=full_trajectories)
+
             pset = pset.isel(trajectory=full_trajectories)
 
         
@@ -221,7 +224,7 @@ for member in members:
         P_m, Ent_m, Np_m = calculate_probability_and_entropy(
             pset, hexbin_grid, entropy)
         DF_m = create_dataframe(P_m, Ent_m, Np_m, hexbin_grid.hexint, obs_range)
-        save_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_diffusion_long/P_diff_Kh_{K_h:01d}_m{member:03d}{subsample_str}_15000.nc"
+        save_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_diffusion_long/P_diff_Kh_{K_h:01d}_m{member:03d}.nc"
         # save_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_diffusion_long/P_diff_Kh_{K_h:01d}_m{member:03d}{subsample_str}.nc"
         DF_m.to_netcdf(save_path)
 
