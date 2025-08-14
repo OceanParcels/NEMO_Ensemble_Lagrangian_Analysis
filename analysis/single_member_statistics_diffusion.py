@@ -153,7 +153,7 @@ K_h_ranges = [1000]  # np.linspace(0.1, 1, 10)
 keep_all_traj = False # If True, keep all trajectories, if False, subsample
 subsample = 7500 # Number of particles to subsample if keep_all_traj is False
 
-members = [4]  # np.arange(1, 51)
+members = np.arange(10, 51)
 
 for member in members:
     for K_h in K_h_ranges:
@@ -178,8 +178,6 @@ for member in members:
 
                 lat_idx = np.digitize(
                     pset.lat[p, :].dropna(dim='obs'), mask_lats)
-                
-                print(lon_idx)
 
                 if tmask.shape[0] in lat_idx:
                     # if lat_idx == shape[0], then find where lat_idx is == shape[0]. Remove those values from lat_idx and lon_idx
@@ -187,12 +185,10 @@ for member in members:
                     lon_idx = lon_idx[lat_idx < tmask.shape[0]]
                     lat_idx = _lat_idx
                 if tmask.shape[1] in lon_idx:
-                    print("AYE")
                     _lon_idx = lon_idx[lon_idx < tmask.shape[1]]
                     lat_idx = lat_idx[lon_idx < tmask.shape[1]]
                     lon_idx = _lon_idx
 
-                print(lon_idx)
 
                 tmask_values = tmask[lat_idx, lon_idx]
                 idx = np.where(tmask_values == 0)[0] # Number of time steps outside the mask

@@ -27,7 +27,7 @@ total_members = 50
 K_h = 1000
 subsample = 7500
 
-for member in [48]: #tqdm(range(1, total_members + 1)):
+for member in tqdm(range(1, total_members + 1)):
     print(f"Member: {member:03d},  K_h: {K_h}")
     file_path = path + f"simulations/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}.zarr"
     
@@ -110,66 +110,66 @@ mean_depth = np.zeros(N_members)
 median_depth = np.zeros(N_members)
 std_depth = np.zeros(N_members)
 
-for K_h in [10]:
-    for member in range(1, N_members+1):
-        
-        if Latitude_limit is not None:
-            pkl_path = path + f"analysis/connectivity/Kh_{K_h:01d}_{Latitude_limit}N/Distributions_Kh_{K_h:01d}_m{member:03d}.pkl"
-        elif Longitude_limit is not None:    
-            pkl_path = path + f"analysis/connectivity/Kh_{K_h:01d}_{abs(Longitude_limit)}W/Distributions_Kh_{K_h:01d}_m{member:03d}.pkl"
-            
-        
-        if os.path.exists(pkl_path):
-            with open(pkl_path, "rb") as f:
-                distributions = pickle.load(f)
-            
-            drift_time = distributions["drift_time"]
-            depths = distributions["depths"]
-            trajectory = distributions["trajectory"]
-            
-            median_time[member - 1] = np.median(drift_time)
-            mean_time[member - 1] = np.mean(drift_time)
-            min_time[member - 1] = np.min(drift_time)
-            std_time[member - 1] = np.std(drift_time)
-            counts[member - 1] = len(drift_time)
-                        
-            mean_depth[member - 1] = np.mean(depths)
-            median_depth[member - 1] = np.median(depths)
-            std_depth[member - 1] = np.std(depths)
-        else:
-            print(f"File {pkl_path} does not exist. Skipping member {member}.")
-            
-            median_time[member - 1] = np.nan
-            mean_time[member - 1] = np.nan
-            min_time[member - 1] = np.nan
-            std_time[member - 1] = np.nan
-            counts[member - 1] = 0
-                        
-            mean_depth[member - 1] = np.nan
-            median_depth[member - 1] = np.nan
-            std_depth[member - 1] = np.nan
 
-    stats["subset"] = n_members
-    stats["counts"] = counts
-    stats["median_time"] = median_time
-    stats["mean_time"] = mean_time
-    stats["min_time"] = min_time
-    stats["std_time"] = std_time
-    stats["mean_depth"] = mean_depth
-    stats["median_depth"] = median_depth
-    stats["std_depth"] = std_depth
-
-    stats_df = pd.DataFrame(stats)
-
+for member in range(1, N_members+1):
+    
     if Latitude_limit is not None:
-        save_csv_path = path + f"analysis/connectivity/Stats/Stats_Kh_{K_h:01d}_{Latitude_limit}N.csv"
+        pkl_path = path + f"analysis/connectivity/Kh_{K_h:01d}_{Latitude_limit}N/Distributions_Kh_{K_h:01d}_m{member:03d}.pkl"
     elif Longitude_limit is not None:    
-        save_csv_path = path + f"analysis/connectivity/Stats/Stats_Kh_{K_h:01d}_{abs(Longitude_limit)}W.csv"
+        pkl_path = path + f"analysis/connectivity/Kh_{K_h:01d}_{abs(Longitude_limit)}W/Distributions_Kh_{K_h:01d}_m{member:03d}.pkl"
+        
+    
+    if os.path.exists(pkl_path):
+        with open(pkl_path, "rb") as f:
+            distributions = pickle.load(f)
+        
+        drift_time = distributions["drift_time"]
+        depths = distributions["depths"]
+        trajectory = distributions["trajectory"]
+        
+        median_time[member - 1] = np.median(drift_time)
+        mean_time[member - 1] = np.mean(drift_time)
+        min_time[member - 1] = np.min(drift_time)
+        std_time[member - 1] = np.std(drift_time)
+        counts[member - 1] = len(drift_time)
+                    
+        mean_depth[member - 1] = np.mean(depths)
+        median_depth[member - 1] = np.median(depths)
+        std_depth[member - 1] = np.std(depths)
+    else:
+        print(f"File {pkl_path} does not exist. Skipping member {member}.")
+        
+        median_time[member - 1] = np.nan
+        mean_time[member - 1] = np.nan
+        min_time[member - 1] = np.nan
+        std_time[member - 1] = np.nan
+        counts[member - 1] = 0
+                    
+        mean_depth[member - 1] = np.nan
+        median_depth[member - 1] = np.nan
+        std_depth[member - 1] = np.nan
 
-    # Create the directory if it does not exist
-    os.makedirs(os.path.dirname(save_csv_path), exist_ok=True)
+stats["subset"] = n_members
+stats["counts"] = counts
+stats["median_time"] = median_time
+stats["mean_time"] = mean_time
+stats["min_time"] = min_time
+stats["std_time"] = std_time
+stats["mean_depth"] = mean_depth
+stats["median_depth"] = median_depth
+stats["std_depth"] = std_depth
 
-    stats_df.to_csv(save_csv_path)
-    print(f"Saved {save_csv_path}")
+stats_df = pd.DataFrame(stats)
+
+if Latitude_limit is not None:
+    save_csv_path = path + f"analysis/connectivity/Stats/Stats_Kh_{K_h:01d}_{Latitude_limit}N.csv"
+elif Longitude_limit is not None:    
+    save_csv_path = path + f"analysis/connectivity/Stats/Stats_Kh_{K_h:01d}_{abs(Longitude_limit)}W.csv"
+
+# Create the directory if it does not exist
+os.makedirs(os.path.dirname(save_csv_path), exist_ok=True)
+
+stats_df.to_csv(save_csv_path)
+print(f"Saved {save_csv_path}")
     
 # %%
