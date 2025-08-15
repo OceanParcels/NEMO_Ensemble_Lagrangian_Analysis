@@ -36,6 +36,14 @@ print(path)
 pset_diff = xr.load_dataset(path)
 pset_diff.compute()
 
+member = 3
+path = f"/Volumes/Claudio SSD/Ensemble_article_data/simulations/diff_Kh_1000/Cape_Hatteras_diff_Kh_1000_m{member:03d}.zarr"
+print(path)
+# Open and compute the temporal dataset
+pset_diff2 = xr.open_zarr(path)
+pset_diff2.compute()
+
+
 #%% Mixture set of particles
 # Define the number of particles
 N_particles = 50
@@ -239,19 +247,29 @@ for i in indexes:
                         arrowprops=dict(arrowstyle="-|>", color='orangered', lw=1.5, alpha=0.5), 
                         zorder=11)
 # Plot diffusion
+t = 30
+axs[1, 1].plot(pset_diff2.lon[indexes, :t].T, pset_diff2.lat[indexes, :t].T, c='green',
+                ls='-', alpha=0.5, zorder=11)
+for i in indexes:
+        axs[1, 1].annotate('', xy=(pset_diff2.lon[i, t], pset_diff2.lat[i, t]), 
+                        xytext=(pset_diff2.lon[i, t-1], pset_diff2.lat[i, t-1]),
+                        arrowprops=dict(arrowstyle="-|>", color='darkgreen', lw=1.5, alpha=0.5), 
+                        zorder=11)
+
 
 t = 50
 axs[1, 1].scatter(pset_diff.lon[0, 0], pset_diff.lat[0, 0],
                    s=50, color='gold', alpha=1, marker='s', 
-                   label='Added Diffusion', zorder=12, edgecolor='black')
+                   label='Added Diffusion', zorder=25, edgecolor='black')
 
-axs[1, 1].plot(pset_diff.lon[indexes[:15], :t].T, pset_diff.lat[indexes[:15], :t].T, c='green',
-                ls='-', alpha=0.5, zorder=11)
+axs[1, 1].plot(pset_diff.lon[indexes[:15], :t].T, pset_diff.lat[indexes[:15], :t].T, c='limegreen',
+                ls='-', alpha=1, zorder=20)
 for i in indexes[:15]:
         axs[1, 1].annotate('', xy=(pset_diff.lon[i, t], pset_diff.lat[i, t]), 
                         xytext=(pset_diff.lon[i, t-1], pset_diff.lat[i, t-1]),
-                        arrowprops=dict(arrowstyle="-|>", color='green', lw=1.5, alpha=0.5), 
-                        zorder=11)
+                        arrowprops=dict(arrowstyle="-|>", color='limegreen', lw=1.5, alpha=0.5), 
+                        zorder=25)
+
 
 # Add legend
 axs[0, 0].legend(loc='upper left', shadow=True, fontsize='small')

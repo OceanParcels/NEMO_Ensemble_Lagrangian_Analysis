@@ -14,8 +14,8 @@ import deprecated_hexbin_functions as hexfunc
 # MIXTURE
 location = 'Cape_Hatteras'
 delta_r = 0.1
-subset = 4
-member = 17
+subset = 43
+member = 22
 
 # Define the file path for the NetCDF file containing probability distributions
 file_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_all_long/P_dr{delta_r*100:03.0f}_all_s{subset:03d}.nc"
@@ -44,7 +44,7 @@ for week in [20, 4]:
     all_ps[week] = P_m
 
 
-for K_h in [10]:
+for K_h in [10, 1000]:
     file_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_diffusion_long/P_diff_Kh_{K_h:01d}_m{member:03d}.nc"
     P_m = xr.open_dataset(file_path)
     P_m = P_m.sortby('hexint')
@@ -55,11 +55,11 @@ for K_h in [10]:
 Latitude_limit = 53
 extent = [-85, -50, 20, 45]
 ncol = 3
-nrow = 6
-fig, axs = plt.subplots(ncols=ncol, nrows=nrow, figsize=(8.6, 8.6),
+nrow = 7
+fig, axs = plt.subplots(ncols=ncol, nrows=nrow, figsize=(10.6, 8.9),
                         subplot_kw={'projection': cartopy.crs.PlateCarree()},
                         constrained_layout=True,
-                        gridspec_kw={'height_ratios': [1, 1, 1, 1, 1, 0.6]})
+                        gridspec_kw={'height_ratios': [1, 1, 1, 1, 1, 1, 0.6]})
 
 axs = axs.reshape(ncol * nrow)
 
@@ -85,17 +85,21 @@ hexbin_grid.pcolorhex(all_ps[10]['probability'][:, 10], ax=axs[12], cmap=colr_ma
 hexbin_grid.pcolorhex(all_ps[10]['probability'][:, 100], ax=axs[13], cmap=colr_mapa, draw_edges=False, maxnorm=0.1)
 hexbin_grid.pcolorhex(all_ps[10]['probability'][:, 1000], ax=axs[14], cmap=colr_mapa, draw_edges=False, maxnorm=0.1)
 
+hexbin_grid.pcolorhex(all_ps[1000]['probability'][:, 10], ax=axs[15], cmap=colr_mapa, draw_edges=False, maxnorm=0.1)
+hexbin_grid.pcolorhex(all_ps[1000]['probability'][:, 100], ax=axs[16], cmap=colr_mapa, draw_edges=False, maxnorm=0.1)
+hexbin_grid.pcolorhex(all_ps[1000]['probability'][:, 1000], ax=axs[17], cmap=colr_mapa, draw_edges=False, maxnorm=0.1)
+
 # formating
 
 for i in range(0, ncol * nrow - ncol):
 
-    if i in [0, 3, 6, 9, 12]:
+    if i in [0, 3, 6, 9, 12, 15]:
         axs[i].set_extent([-80, -65, 31.25, 38.75], crs=cartopy.crs.PlateCarree())
         gl = axs[i].gridlines(crs=cartopy.crs.PlateCarree(), draw_labels=True,
                           linewidth=0.5, color='gray', alpha=0.3,
                           xlocs=[-78,-74,-70,-66], ylocs=[32, 35, 38])
 
-    elif i in [2, 5, 8, 11, 14]:
+    elif i in [2, 5, 8, 11, 14, 17]:
         axs[i].set_extent([-90, -20, 10, 45], crs=cartopy.crs.PlateCarree())
         gl = axs[i].gridlines(crs=cartopy.crs.PlateCarree(), draw_labels=True,
                           linewidth=0.5, color='gray', alpha=0.3,
@@ -124,7 +128,7 @@ for i in range(0, ncol * nrow - ncol):
     # if i in [2, 5, 8, 11, 14]:
     #     gl.right_labels = True
 
-    if i in [12, 13, 14]:
+    if i in [15, 16, 17]:
         gl.bottom_labels = True
 
     
@@ -153,9 +157,11 @@ axs[0].text(-0.01, 0.5, r'Mixture $\delta_r = 0.1^o$', transform=axs[0].transAxe
 axs[3].text(-0.01, 0.5, '20 weeks', transform=axs[3].transAxes, fontsize=12, va='center', ha='right', rotation='vertical')
 axs[6].text(-0.01, 0.5, r'$\delta_r = 2.0^o$', transform=axs[6].transAxes, fontsize=12, va='center', ha='right', rotation='vertical')
 axs[9].text(-0.01, 0.5, r'$\delta_r = 0.1^o$', transform=axs[9].transAxes, fontsize=12, va='center', ha='right', rotation='vertical')
-axs[12].text(-0.01, 0.5, r'$K_h = 10 \ m^2 s^{-1}$', transform=axs[12].transAxes, fontsize=12, va='center', ha='right', rotation='vertical')
+axs[12].text(-0.01, 0.5, r'$K_h = 10 \ m^2 s^{-1}$', transform=axs[12].transAxes, fontsize=11, va='center', ha='right', rotation='vertical')
+axs[15].text(-0.01, 0.5, r'$K_h = 1,000 \ m^2 s^{-1}$', transform=axs[15].transAxes, fontsize=11, va='center', ha='right', rotation='vertical')
 
-for i in range(15, 18):
+
+for i in range(18, 21):
     axs[i].axis('off')
 
 axs[0].set_title(f'Particle Age 10 days')

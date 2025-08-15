@@ -62,17 +62,17 @@ N_members = 50
 KLD_ALL_mean = {}
 KLD_ALL_std = {}
 
-for delta_ref in [2., 4, 20]:
+for delta_ref in [0.1, 2., 4, 20]:
     
     KLDivergence_mean = {}
     KLDivergence_std = {}
     
-    for set in [0.1, 2., 4, 20, 'diff']:
+    for set in [0.1, 2., 4, 20, 10, 1000]:
         print(f'Processing set P: {delta_ref}, Q:{set}')
 
         _KLD = np.zeros((N_members**2, time_length))
 
-        for l, member in tqdm(enumerate(range(1, N_members+1))):
+        for l, member in enumerate(tqdm(range(1, N_members+1))):
             for subset_ref in range(1, N_members+1):
                 # Loading the Mixture reference distribution as subset_ref 
 
@@ -93,9 +93,9 @@ for delta_ref in [2., 4, 20]:
                 elif set in [4, 12, 20]:
                     # Temporal
                     file_path_Q = base_path + f"{location}_temporal_long/P_W{set:01d}_m{member:03d}.nc"
-                elif set == 'diff':
+                elif set in [10, 1000]:
                     # Diffusion
-                    file_path_Q = base_path + f"{location}_diffusion_long/P_diff_Kh_10_m{member:03d}.nc"
+                    file_path_Q = base_path + f"{location}_diffusion_long/P_diff_Kh_{set}_m{member:03d}.nc"
                 
                 P_Q = xr.open_dataset(file_path_Q)
                 P_Q = P_Q.sortby('hexint')
@@ -116,10 +116,10 @@ for delta_ref in [2., 4, 20]:
         KLDivergence_std[set] = std_KLD
 
 
-    with open(f'/Volumes/Claudio SSD/Ensemble_article_data/analysis/KLD_time/KLD_time_{delta_ref}{patch}.pkl', 'wb') as f:
+    with open(f'/Volumes/Claudio SSD/Ensemble_article_data/analysis/KLD_time/KLD_time_{delta_ref}{patch}_{set}.pkl', 'wb') as f:
         pickle.dump(KLDivergence_mean, f)
     
-    with open(f'/Volumes/Claudio SSD/Ensemble_article_data/analysis/KLD_time/KLD_time_{delta_ref}_std{patch}.pkl', 'wb') as f:
+    with open(f'/Volumes/Claudio SSD/Ensemble_article_data/analysis/KLD_time/KLD_time_{delta_ref}_std{patch}_{set}.pkl', 'wb') as f:
         pickle.dump(KLDivergence_std, f)
 
     KLD_ALL_mean[delta_ref] = KLDivergence_mean
@@ -142,6 +142,30 @@ for delta_ref in [0.1, 2., 4, 20]:
         KLD_ALL_std[delta_ref] = pickle.load(f)
 
 #%%
+KLD_ALL_mean_1000 = {}
+KLD_ALL_std_1000 = {}
+
+for delta_ref in [0.1, 2., 4, 20]:
+    path = f'/Volumes/Claudio SSD/Ensemble_article_data/analysis/KLD_time/KLD_time_{delta_ref}{patch}_1000.pkl'
+    
+    with open(path, 'rb') as f:
+        KLD_ALL_mean_1000[delta_ref] = pickle.load(f)
+        
+    path = f'/Volumes/Claudio SSD/Ensemble_article_data/analysis/KLD_time/KLD_time_{delta_ref}_std{patch}_1000.pkl'
+    
+    with open(path, 'rb') as f:
+        KLD_ALL_std_1000[delta_ref] = pickle.load(f)
+
+for delta_ref in [0.1, 2., 4, 20]:
+    KLD_ALL_mean[delta_ref][10] = KLD_ALL_mean[delta_ref].pop('diff')
+    KLD_ALL_mean[delta_ref][1000] = KLD_ALL_mean_1000[delta_ref][1000]
+
+    KLD_ALL_std[delta_ref][10] = KLD_ALL_std[delta_ref].pop('diff')
+    KLD_ALL_std[delta_ref][1000] = KLD_ALL_std_1000[delta_ref][1000]
+    
+
+
+#%%
 fig, axs = plt.subplots(2, 2, figsize=(9, 7), sharex=True, sharey=True)
 # fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
@@ -152,17 +176,17 @@ axs = axs.ravel()
 
 for i, key in enumerate([0.1, 2., 4, 20]):
     
-    lss = [(0, (1, 1)), '-.', '--',(0, (3, 1, 1, 1, 1, 1)), '-']
-    colors = ['mediumblue', 'teal', 'darkred', 'orange', 'black']
+    lss = [(0, (1, 1)), '-.', '--', (0, (3, 1, 1, 1, 1, 1)), '-', (0, (5, 5))]
+    colors = ['mediumblue', 'teal', 'darkred', 'orange', 'black', 'purple']
     
     ax = axs[i]
-    for k, set in enumerate([0.1, 2., 4, 20, 'diff']):
+    for k, set in enumerate([0.1, 2., 4, 20, 10, 1000]):
         if set in [4, 12, 20]:
             labelz = f'{set:01d} weeks'
         elif set in [0.1, 1., 2.]:
             labelz = f'$\delta_r = {set}^o$'
-        else:
-            labelz = r'$K_h = 10 \ m^2 s^{-1}$'
+        elif set in [10, 1000]:
+            labelz = rf'$K_h = {set:,} \ m^2 s^{-1}$'
         
         ax.fill_between(time_range, KLD_ALL_mean[key][set] - KLD_ALL_std[key][set], 
                         KLD_ALL_mean[key][set] + KLD_ALL_std[key][set], alpha=0.3, 
@@ -178,7 +202,7 @@ for i, key in enumerate([0.1, 2., 4, 20]):
     ax.text(0.05, 0.9, f'$\mathbf{{{labels[i]}}}$  '+r'$P_{mix}$ : '+f'{labeltt}', fontsize=14, transform=ax.transAxes)
 
     ax.semilogx()
-    ax.legend(fontsize=8)
+    ax.legend(fontsize=6.5)
     ax.grid()
     ax.set_xlim(0, time_length)
     ax.set_ylim(0, 8)
@@ -195,9 +219,9 @@ plt.savefig(f'../figs/Fig5_relative_entropy_subplots{patch}.png', dpi=300)
 DF = {}
 
 for i, key in enumerate(KLD_ALL_mean.keys()):
-    _kld = np.zeros(5)
+    _kld = np.zeros(6)
     
-    for k, set in enumerate([0.1, 2., 4, 20, 'diff']):
+    for k, set in enumerate([0.1, 2., 4, 20, 10, 1000]):
         
         _kld[k] = np.mean(KLD_ALL_mean[key][set])
         print(f'key: {key}, set: {set}, kld: {_kld[k]}', type(_kld[k]))
@@ -210,19 +234,19 @@ for i, key in enumerate(KLD_ALL_mean.keys()):
     DF[labeltt] = _kld
 
 DF = pd.DataFrame(DF)
-DF.set_index([[r'$\delta_r = 0.1^o$', r'$\delta_r = 2^o$', '4 weeks', '20 weeks', r'$K_h = 10 \ m^2 s^{-1}$']], inplace=True)
+DF.set_index([[r'$\delta_r = 0.1^o$', r'$\delta_r = 2^o$', '4 weeks', '20 weeks', r'$K_h = 10 \ m^2 s^{-1}$', r'$K_h = 1,000 \ m^2 s^{-1}$']], inplace=True)
 
 # %% Kullback-Leibler divergence plot 
-fig, ax = plt.subplots(figsize=(6, 5))
+fig, ax = plt.subplots(figsize=(6.5, 5))
 
 cmmap = "Greens_r"
 
-sns.heatmap(DF, annot=True, fmt=".3f", cmap=cmmap, ax=ax, cbar=True, vmin=0)
+sns.heatmap(DF, annot=True, fmt=".3f", cmap=cmmap, ax=ax, cbar=True, vmin=-0.14)
 
 # Rotate y tick labels 90 degrees
-ax.set_yticklabels(ax.get_yticklabels(), rotation=90, ha='center', fontsize=9)
+ax.set_yticklabels(ax.get_yticklabels(), rotation=80, ha='center', fontsize=7)
 # Rotate x tick labels 15 degrees
-ax.set_xticklabels(ax.get_xticklabels(), rotation=15, ha='center', fontsize=9)
+ax.set_xticklabels(ax.get_xticklabels(), rotation=15, ha='center', fontsize=7)
 
 # Add colorbar label
 cbar = ax.collections[0].colorbar

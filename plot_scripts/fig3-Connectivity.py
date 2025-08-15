@@ -9,8 +9,11 @@ import seaborn as sns
 
 all_mix_temp = {}
 all_mix_space = {}
+
 all_temp = {}
 all_space = {}
+
+all_diff = {}
 location = "Cape_Hatteras"
 base_path = "/Volumes/Claudio SSD/Ensemble_article_data/"
 
@@ -42,9 +45,12 @@ for delta_r in [0.1, 1., 2.]:
     _df = pd.read_csv(df_path)
     all_mix_space[delta_r] = _df
 
-K_h = 10
-df_path = base_path + f"analysis/connectivity/Stats/Stats_Kh_{K_h:01d}" + criterium_string + ".csv"
-all_diff = pd.read_csv(df_path)
+# K_h = 10
+
+for K_h in [10, 1000]:
+    df_path = base_path + f"analysis/connectivity/Stats/Stats_Kh_{K_h:01d}" + criterium_string + ".csv"
+    _df = pd.read_csv(df_path)
+    all_diff[K_h] = _df
 
 
 #%% Plot the percentage of subpolar trajectories for temporal and spatial members
@@ -69,13 +75,19 @@ for delta_r in [0.1, 1., 2.]:
                 fill=False, color=colors_space[j], linestyle=ls_space[j])
     j += 1
 
-#diffusion
-sns.kdeplot(all_diff["counts"], ax=ax[0], label=f"$K_h = 10 \ m^2 s^{-1}$",
-            clip=(0, 7500), fill=False, color='black')
-sns.kdeplot(all_diff["median_time"]/365, ax=ax[1], 
-            clip=(0, 6), fill=False, color='black')
-sns.kdeplot(all_diff["median_depth"], ax=ax[2], 
-            clip=(0, 1000), fill=False, color='black')
+# #diffusion
+colors_diff = ['limegreen', 'darkgreen']
+ls_diff = ["-", (0, (5, 1, 1, 4, 1, 1))]
+
+j = 0
+for k in [10, 1000]:
+    sns.kdeplot(all_diff[k]["counts"], ax=ax[0], label=f"$K_h = {k} \ m^2 s^{-1}$",
+                clip=(0, 7500), fill=False, color=colors_diff[j], linestyle=ls_diff[j])
+    sns.kdeplot(all_diff[k]["median_time"]/365, ax=ax[1], 
+                clip=(0, 6), fill=False, color=colors_diff[j], linestyle=ls_diff[j])
+    sns.kdeplot(all_diff[k]["median_depth"], ax=ax[2], 
+                clip=(0, 1000), fill=False, color=colors_diff[j], linestyle=ls_diff[j])
+    j += 1
 
 #temporal
 colors_temp = ["darkred", "orangered", "orange"]
@@ -229,7 +241,7 @@ plt.savefig("../figs/FigS6_Connect_MIX_tempNspace" + criterium_string + ".png", 
 
 #%% ECDFs of the counts and mean and 99% confidence interval for temporal and spatial members
 # 
-fig, ax = plt.subplots(2, 2, figsize=(8, 6))
+fig, ax = plt.subplots(3, 2, figsize=(8, 7))
 ax = ax.flatten()
 # Plot CDFs for percentage of subpolar trajectories
 
@@ -261,12 +273,6 @@ for j, dr_ref in enumerate([0.1, 1., 2.]):
     ax[1].set_xlim(2, 5)
 
 
-#diffusion
-sns.ecdfplot(all_diff["counts"], ax=ax[0], label=f"$K_h = 10 \ m^2 s^{-1}$",
-             color='black', linestyle='-')
-sns.ecdfplot(all_diff["median_time"]/365, ax=ax[1], label=f"Spatial dr{delta_r}", 
-                 color='black', linestyle='-')
-
 colors_temp = ["darkred", "orangered", "orange"]
 ls_time = [(0, (1, 1)), '--', '-.', (0, (3, 1, 1, 1, 1, 1))]
 
@@ -289,8 +295,17 @@ for j, dr_ref in enumerate([4, 12, 20]):
                         color=colors_temp[j], alpha=0.5, label=f"Mix. {dr_ref} weeks", edgecolor='none')
     ax[3].set_xlim(2, 5)
 
+#diffusion
+for j, k in enumerate([10, 1000]):
+
+    sns.ecdfplot(all_diff[k]["counts"], ax=ax[4], label=f"$K_h = {k:,} \ m^2 s^{-1}$",
+                color=colors_diff[j], linestyle=ls_diff[j])
+    sns.ecdfplot(all_diff[k]["median_time"]/365, ax=ax[5], label=f"$K_h = {k:,} \ m^2 s^{-1}$", 
+                    color=colors_diff[j], linestyle=ls_diff[j])
+
 # Add labels 'A', 'B', 'C', 'D' for each subplot in the top left corner
-labels = ['A', 'B', 'C', 'D']
+labels = ['A', 'B', 'C', 'D', 'E', 'F']
+
 for i, label in enumerate(labels):
     ax[i].text(0.05, 0.95, label, transform=ax[i].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
 
@@ -311,6 +326,15 @@ ax[2].grid(True, linestyle=':', alpha=0.8)
 ax[3].set_xlabel("Median Particle Age (years)")
 ax[3].set_ylabel("ECDF")
 ax[3].grid(True, linestyle=':', alpha=0.8)
+
+ax[4].set_xlabel("Counts")
+ax[4].set_ylabel("ECDF")
+ax[4].grid(True, linestyle=':', alpha=0.8)
+
+ax[5].set_xlabel("Median Particle Age (years)")
+ax[5].set_ylabel("ECDF")
+ax[5].grid(True, linestyle=':', alpha=0.8)
+ax[5].legend(fontsize=7, loc='lower right')
 
 plt.tight_layout()
 # save the figure

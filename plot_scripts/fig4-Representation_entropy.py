@@ -95,7 +95,7 @@ for week in week_range:
 
 # %%%%%%%%%%%%%%%%%%%%%% Diffusion Analysis %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ################################################################################
-K_h_range = [10]
+K_h_range = [10, 1000]
 
 entropies_diff_mean = {}
 entropies_diff_std = {}
@@ -116,7 +116,7 @@ for K_h in K_h_range:
 # %% Combined spatial and temporal plot of the mean entropy
 time_range = np.arange(0, 2189)
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4), sharey=True)
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(12, 4), sharey=True)
 
 # Spatial plot
 lss = [(0, (1, 1)), '--', '-.']
@@ -133,25 +133,6 @@ for delta_r in [0.1, 1., 2.]:
 
 ax1.plot(time_range, mixture_entropy_space[0.1], ls='-', color='black', label=r'Mixture: $\delta_r = 0.1^o$')
 ax1.plot(time_range, mixture_entropy_space[2], ls=(0, (3, 1, 1, 1)), color='black', label=r'Mixture: $\delta_r = 2.0^o$')
-
-# diffusion
-K_h = 10
-# Create logarithmically spaced indices
-n_samples = 100  # Choose the number of points you want
-log_indices = np.unique(np.geomspace(1, len(time_range)-1, n_samples).astype(int))
-
-# Use these indices to sample your data
-time_sampled = time_range[log_indices]
-y_sampled = entropies_diff_mean[K_h][log_indices]
-
-# ax.plot(time_range[:], entropies_diff_mean[K_h][:],  
-#         label=r'$K_h = 10 \ m^2 s^{-1}$', linestyle=(0, (2, 2, 10, 2)) , linewidth=2, color=color_diff)
-
-ax1.fill_between(time_range[:], entropies_diff_mean[K_h][:] - entropies_diff_std[K_h][:], 
-                entropies_diff_mean[K_h][:] + entropies_diff_std[K_h][:],
-                alpha=0.2, color='grey')
-ax1.scatter(time_sampled, y_sampled,
-        label=r'$K_h = 10 \ m^2 s^{-1}$', color='k', marker='^', s=10)
 
 ax1.set_xlim(1, 2189)
 ax1.set_ylim(0., 10.5)
@@ -177,7 +158,6 @@ for week in week_range:
     i += 1
 
 
-
 ax2.plot(time_range, mixture_entropy_space[0.1], ls='-', color='black', label=r'Mixture: $\delta_r = 0.1^o$')
 ax2.plot(time_range[:2189-4*7], mixture_entropy_time[4][:2189-4*7], ls=(0, (3, 1, 1, 3)), 
          color='black', label='Mixture: 4 weeks')
@@ -193,36 +173,14 @@ ax2.set_xlabel('Particle Age (days)')
 ax2.grid()
 ax2.text(0.95, 0.05, 'B', transform=ax2.transAxes, fontsize=16, fontweight='bold', va='bottom', ha='right')
 
-plt.tight_layout()
-plt.savefig('../figs/Fig4_Combined-Representation_entropy.png', dpi=300)
-
-# %% With diffusion
-
-fig, ax = plt.subplots()
-
-# Spatial plot
-delta_r = 2.0
-ax.plot(time_range, entropies_space_mean[delta_r],  
-            label=f'$\delta_r = {delta_r}^o$', linestyle='-.', linewidth=2, color='teal')
-ax.fill_between(time_range, entropies_space_mean[delta_r] - entropies_space_std[delta_r], 
-                    entropies_space_mean[delta_r] + entropies_space_std[delta_r], 
-                    alpha=0.2, color="teal")
-
-
-# time
-week = 20
-chop_time = len(P_m['time'].values) - week*7
-ax.plot(time_range[:chop_time], entropies_time_mean[week][:chop_time],  
-        label=f'{week} weeks release', linestyle=(0, (3, 1, 1, 1, 1, 1)), linewidth=2, color='orange')
-ax.fill_between(time_range[:chop_time], entropies_time_mean[week][:chop_time] - entropies_time_std[week][:chop_time], 
-                entropies_time_mean[week][:chop_time] + entropies_time_std[week][:chop_time],
-                alpha=0.2, color='orange')
-
 # diffusion
-K_h = 10
+
+colors_diff = ['limegreen', 'darkgreen']
+ls_diff = ["-", (0, (5, 1, 1, 4, 1, 1))]
+
+K_h = 1000
 # Create logarithmically spaced indices
-# This will sample more points at the beginning and fewer at the end
-n_samples = 150  # Choose the number of points you want
+n_samples = 100  # Choose the number of points you want
 log_indices = np.unique(np.geomspace(1, len(time_range)-1, n_samples).astype(int))
 
 # Use these indices to sample your data
@@ -232,22 +190,83 @@ y_sampled = entropies_diff_mean[K_h][log_indices]
 # ax.plot(time_range[:], entropies_diff_mean[K_h][:],  
 #         label=r'$K_h = 10 \ m^2 s^{-1}$', linestyle=(0, (2, 2, 10, 2)) , linewidth=2, color=color_diff)
 
-ax.fill_between(time_range[:], entropies_diff_mean[K_h][:] - entropies_diff_std[K_h][:], 
-                entropies_diff_mean[K_h][:] + entropies_diff_std[K_h][:],
-                alpha=0.5, color='grey')
-ax.scatter(time_sampled, y_sampled,
-        label=r'$K_h = 10 \ m^2 s^{-1}$', color='k', marker=',', s=1)
+for j, K_h in enumerate([10, 1000]):
+    ax3.fill_between(time_range[:], entropies_diff_mean[K_h][:] - entropies_diff_std[K_h][:], 
+                    entropies_diff_mean[K_h][:] + entropies_diff_std[K_h][:],
+                    alpha=0.2, color=colors_diff[j])
+    # ax3.scatter(time_sampled, y_sampled,
+    #         label=rf'$K_h = {K_h}\ m^2 s^{-1}$', color=colors_diff[j], marker='^', s=10)
+    ax3.plot(time_range, entropies_diff_mean[K_h][:], linestyle=ls_diff[j], color=colors_diff[j],
+             label=rf'$K_h = {K_h:,}\ m^2 s^{-1}$')
+
+#reference
+ax3.plot(time_range, mixture_entropy_space[0.1], ls='-', color='black', label=r'Mixture: $\delta_r = 0.1^o$')
+
+ax3.set_xlim(1, 2189)
+ax3.set_ylim(0., 10.5)
+ax3.semilogx()
+ax3.legend(shadow=True, fontsize=10, loc='upper left')
+ax3.set_xlabel('Particle Age (days)')
+ax3.grid()
+ax3.text(0.95, 0.05, 'C', transform=ax3.transAxes, fontsize=16, fontweight='bold', va='bottom', ha='right')
 
 
-ax.plot(time_range, mixture_entropy_space[0.1], ls='-', color='black', label=r'Mixture: $\delta_r = 0.1^o$')
 
-ax.set_xlim(1, 2189)
-ax.set_ylim(0., 10.5)
+plt.tight_layout()
+plt.savefig('../figs/Fig4_Combined-Representation_entropy.png', dpi=300)
 
-ax.semilogx()
-ax.legend(shadow=True)
-ax.set_ylabel('Marginal Entropy (bits)')
-ax.set_xlabel('Particle Age (days)')
-ax.grid()
-# plt.savefig('../figs/Fig4-Temporal-Represen
-# %%
+# %% With diffusion
+
+# fig, ax = plt.subplots()
+
+# # Spatial plot
+# delta_r = 2.0
+# ax.plot(time_range, entropies_space_mean[delta_r],  
+#             label=f'$\delta_r = {delta_r}^o$', linestyle='-.', linewidth=2, color='teal')
+# ax.fill_between(time_range, entropies_space_mean[delta_r] - entropies_space_std[delta_r], 
+#                     entropies_space_mean[delta_r] + entropies_space_std[delta_r], 
+#                     alpha=0.2, color="teal")
+
+
+# # time
+# week = 20
+# chop_time = len(P_m['time'].values) - week*7
+# ax.plot(time_range[:chop_time], entropies_time_mean[week][:chop_time],  
+#         label=f'{week} weeks release', linestyle=(0, (3, 1, 1, 1, 1, 1)), linewidth=2, color='orange')
+# ax.fill_between(time_range[:chop_time], entropies_time_mean[week][:chop_time] - entropies_time_std[week][:chop_time], 
+#                 entropies_time_mean[week][:chop_time] + entropies_time_std[week][:chop_time],
+#                 alpha=0.2, color='orange')
+
+# # diffusion
+# K_h = 10
+# # Create logarithmically spaced indices
+# # This will sample more points at the beginning and fewer at the end
+# n_samples = 150  # Choose the number of points you want
+# log_indices = np.unique(np.geomspace(1, len(time_range)-1, n_samples).astype(int))
+
+# # Use these indices to sample your data
+# time_sampled = time_range[log_indices]
+# y_sampled = entropies_diff_mean[K_h][log_indices]
+
+# # ax.plot(time_range[:], entropies_diff_mean[K_h][:],  
+# #         label=r'$K_h = 10 \ m^2 s^{-1}$', linestyle=(0, (2, 2, 10, 2)) , linewidth=2, color=color_diff)
+
+# ax.fill_between(time_range[:], entropies_diff_mean[K_h][:] - entropies_diff_std[K_h][:], 
+#                 entropies_diff_mean[K_h][:] + entropies_diff_std[K_h][:],
+#                 alpha=0.5, color='grey')
+# ax.scatter(time_sampled, y_sampled,
+#         label=r'$K_h = 10 \ m^2 s^{-1}$', color='k', marker=',', s=1)
+
+
+# ax.plot(time_range, mixture_entropy_space[0.1], ls='-', color='black', label=r'Mixture: $\delta_r = 0.1^o$')
+
+# ax.set_xlim(1, 2189)
+# ax.set_ylim(0., 10.5)
+
+# ax.semilogx()
+# ax.legend(shadow=True)
+# ax.set_ylabel('Marginal Entropy (bits)')
+# ax.set_xlabel('Particle Age (days)')
+# ax.grid()
+# # plt.savefig('../figs/Fig4-Temporal-Represen
+# # %%
