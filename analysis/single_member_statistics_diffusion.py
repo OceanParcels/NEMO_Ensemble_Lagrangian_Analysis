@@ -50,7 +50,7 @@ def calculate_probability_and_entropy(pset, hexbin_grid, entropy_function):
     for t in range(obs_length):
         _probability = hexbin_grid.count_2d(
             lons[:, t], lats[:, t], normalize=False)
-        probability_set[:, t] = _probability
+        probability_set[:, t] = _probability/np.nansum(_probability)
         entropy_set[t] = entropy_function(probability_set[:, t]/np.nansum(_probability))
         number_particles_binned[t] = np.nansum(_probability)
 
@@ -127,6 +127,8 @@ location = 'Cape_Hatteras'
 member = 1  # memeber
 K_h = 1000  # Standard deviation od initial dispersion
 
+compute_full_trajectories = False
+
 path = f"/Volumes/Claudio SSD/Ensemble_article_data/simulations/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}.zarr"
 # path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/{location}/diff_long/diff_Kh_{K_h:01d}/{location}_diff_Kh_{K_h:01d}_m{member:03d}.zarr"
 pset = xr.open_zarr(path)
@@ -153,7 +155,7 @@ K_h_ranges = [1000]  # np.linspace(0.1, 1, 10)
 keep_all_traj = False # If True, keep all trajectories, if False, subsample
 subsample = 7500 # Number of particles to subsample if keep_all_traj is False
 
-members = np.arange(10, 51)
+members = np.arange(1, 51)
 
 for member in members:
     for K_h in K_h_ranges:
@@ -163,48 +165,53 @@ for member in members:
         pset = xr.open_zarr(path)
         # pset = xr.open_dataset(path)
 
-        if K_h == 1000:
+        if compute_full_trajectories == True:
+            if K_h == 1000:
 
-            full_trajectories = []
+                full_trajectories = []
 
-            # remove particles othat go inland
-            lon_arr = pset['lon'].values
-            lat_arr = pset['lat'].values
+                # remove particles othat go inland
+                lon_arr = pset['lon'].values
+                lat_arr = pset['lat'].values
 
-            for p in tqdm(range(pset.sizes['trajectory'])):
+                for p in tqdm(range(pset.sizes['trajectory'])):
 
-                lon_idx = np.digitize(
-                    pset.lon[p, :].dropna(dim='obs'), mask_lons)
+                    lon_idx = np.digitize(
+                        pset.lon[p, :].dropna(dim='obs'), mask_lons)
 
-                lat_idx = np.digitize(
-                    pset.lat[p, :].dropna(dim='obs'), mask_lats)
+                    lat_idx = np.digitize(
+                        pset.lat[p, :].dropna(dim='obs'), mask_lats)
 
-                if tmask.shape[0] in lat_idx:
-                    # if lat_idx == shape[0], then find where lat_idx is == shape[0]. Remove those values from lat_idx and lon_idx
-                    _lat_idx = lat_idx[lat_idx < tmask.shape[0]]
-                    lon_idx = lon_idx[lat_idx < tmask.shape[0]]
-                    lat_idx = _lat_idx
-                if tmask.shape[1] in lon_idx:
-                    _lon_idx = lon_idx[lon_idx < tmask.shape[1]]
-                    lat_idx = lat_idx[lon_idx < tmask.shape[1]]
-                    lon_idx = _lon_idx
+                    if tmask.shape[0] in lat_idx:
+                        # if lat_idx == shape[0], then find where lat_idx is == shape[0]. Remove those values from lat_idx and lon_idx
+                        _lat_idx = lat_idx[lat_idx < tmask.shape[0]]
+                        lon_idx = lon_idx[lat_idx < tmask.shape[0]]
+                        lat_idx = _lat_idx
+                    if tmask.shape[1] in lon_idx:
+                        _lon_idx = lon_idx[lon_idx < tmask.shape[1]]
+                        lat_idx = lat_idx[lon_idx < tmask.shape[1]]
+                        lon_idx = _lon_idx
 
 
-                tmask_values = tmask[lat_idx, lon_idx]
-                idx = np.where(tmask_values == 0)[0] # Number of time steps outside the mask
-                if len(idx) > 0:
-                    cutoff = idx[0]  # First index outside the mask
-    
-                    lon_arr[p, cutoff:] = np.nan
-                    lat_arr[p, cutoff:] = np.nan
-                    
-                elif len(idx) == 0:
-                    full_trajectories.append(p)  # Store the last index if all are inside the mask
+                    tmask_values = tmask[lat_idx, lon_idx]
+                    idx = np.where(tmask_values == 0)[0] # Number of time steps outside the mask
+                    if len(idx) > 0:
+                        cutoff = idx[0]  # First index outside the mask
+        
+                        lon_arr[p, cutoff:] = np.nan
+                        lat_arr[p, cutoff:] = np.nan
+                        
+                    elif len(idx) == 0:
+                        full_trajectories.append(p)  # Store the last index if all are inside the mask
 
-           
-            full_trajectories = np.array(full_trajectories)
-            #save the full trajectories to npz
-            np.savez(f'../data/full_traj_K_h{K_h:01d}/full_trajectories_m{member:03d}_K_h{K_h:01d}.npz', full_trajectories=full_trajectories)
+            
+                full_trajectories = np.array(full_trajectories)
+                #save the full trajectories to npz
+                np.savez(f'../data/full_traj_K_h{K_h:01d}/full_trajectories_m{member:03d}_K_h{K_h:01d}.npz', full_trajectories=full_trajectories)
+
+            elif compute_full_trajectories == False:
+                full_trajectories = np.load(f'../data/full_traj_K_h{K_h:01d}/full_trajectories_m{member:03d}_K_h{K_h:01d}.npz')['full_trajectories']
+
 
             pset = pset.isel(trajectory=full_trajectories)
 

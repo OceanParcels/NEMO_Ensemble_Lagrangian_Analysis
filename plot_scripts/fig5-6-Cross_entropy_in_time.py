@@ -67,7 +67,7 @@ for delta_ref in [0.1, 2., 4, 20]:
     KLDivergence_mean = {}
     KLDivergence_std = {}
     
-    for set in [0.1, 2., 4, 20, 10, 1000]:
+    for set in [1000]: #[0.1, 2., 4, 20, 10, 1000]:
         print(f'Processing set P: {delta_ref}, Q:{set}')
 
         _KLD = np.zeros((N_members**2, time_length))
@@ -234,19 +234,19 @@ for i, key in enumerate(KLD_ALL_mean.keys()):
     DF[labeltt] = _kld
 
 DF = pd.DataFrame(DF)
-DF.set_index([[r'$\delta_r = 0.1^o$', r'$\delta_r = 2^o$', '4 weeks', '20 weeks', r'$K_h = 10 \ m^2 s^{-1}$', r'$K_h = 1,000 \ m^2 s^{-1}$']], inplace=True)
+DF.set_index([[r'$\delta_r = 0.1^o$', r'$\delta_r = 2^o$', '4 weeks', '20 weeks', r'$K_h = 10 \ m^2 s^{-1}$', r'$K_h = 1,000$' + ' ' + r'$m^2 s^{-1}$',]], inplace=True)
 
 # %% Kullback-Leibler divergence plot 
-fig, ax = plt.subplots(figsize=(6.5, 5))
+fig, ax = plt.subplots(figsize=(5, 5.4))
 
 cmmap = "Greens_r"
 
-sns.heatmap(DF, annot=True, fmt=".3f", cmap=cmmap, ax=ax, cbar=True, vmin=-0.14)
+sns.heatmap(DF, annot=True, fmt=".3f", cmap=cmmap, ax=ax, cbar=True, vmin=0)
 
 # Rotate y tick labels 90 degrees
-ax.set_yticklabels(ax.get_yticklabels(), rotation=80, ha='center', fontsize=7)
+ax.set_yticklabels(ax.get_yticklabels(), rotation=90, ha='center', fontsize=7)
 # Rotate x tick labels 15 degrees
-ax.set_xticklabels(ax.get_xticklabels(), rotation=15, ha='center', fontsize=7)
+ax.set_xticklabels(ax.get_xticklabels(), rotation=0, ha='center', fontsize=7)
 
 # Add colorbar label
 cbar = ax.collections[0].colorbar
