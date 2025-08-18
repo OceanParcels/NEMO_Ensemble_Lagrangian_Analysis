@@ -255,7 +255,7 @@ cbar.set_label('Time Averaged Relative Entropy, $D(P_{Mix}||P_i)$ (bits)')
 plt.tight_layout()
 # plt.show()
 
-# fig.savefig(f"../figs/Fig6_Time_Average_relentropy{patch}.png", dpi=300)
+fig.savefig(f"../figs/Fig6_Time_Average_relentropy{patch}.png", dpi=300)
 
 # %%
 
