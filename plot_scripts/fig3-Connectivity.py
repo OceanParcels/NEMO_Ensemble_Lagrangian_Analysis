@@ -54,7 +54,7 @@ for K_h in [10, 1000]:
 
 
 #%% Plot the percentage of subpolar trajectories for temporal and spatial members
-fig, ax = plt.subplots(2, 3, figsize=(10, 6))
+fig, ax = plt.subplots(3, 3, figsize=(10, 9))
 
 ax = ax.flatten()
 # Plot distributions for percentage of subpolar trajectories
@@ -75,20 +75,6 @@ for delta_r in [0.1, 1., 2.]:
                 fill=False, color=colors_space[j], linestyle=ls_space[j])
     j += 1
 
-# #diffusion
-colors_diff = ['limegreen', 'darkgreen']
-ls_diff = ["-", (0, (5, 1, 1, 4, 1, 1))]
-
-j = 0
-for k in [10, 1000]:
-    sns.kdeplot(all_diff[k]["counts"], ax=ax[0], label=f"$K_h = {k} \ m^2 s^{-1}$",
-                clip=(0, 7500), fill=False, color=colors_diff[j], linestyle=ls_diff[j])
-    sns.kdeplot(all_diff[k]["median_time"]/365, ax=ax[1], 
-                clip=(0, 6), fill=False, color=colors_diff[j], linestyle=ls_diff[j])
-    sns.kdeplot(all_diff[k]["median_depth"], ax=ax[2], 
-                clip=(0, 1000), fill=False, color=colors_diff[j], linestyle=ls_diff[j])
-    j += 1
-
 #temporal
 colors_temp = ["darkred", "orangered", "orange"]
 ls_time = [(0, (1, 1)), '--', '-.', (0, (3, 1, 1, 1, 1, 1))]
@@ -104,8 +90,23 @@ for week in [4, 12, 20]:
                 fill=False, color=colors_temp[j], linestyle=ls_time[j])
     j += 1
 
+# #diffusion
+colors_diff = ['limegreen', 'darkgreen']
+ls_diff = ["-", (0, (5, 1, 1, 4, 1, 1))]
+
+j = 0
+for k in [10, 1000]:
+    sns.kdeplot(all_diff[k]["counts"], ax=ax[6], label=f"$K_h = {k} \ m^2 s^{-1}$",
+                clip=(0, 7500), fill=False, color=colors_diff[j], linestyle=ls_diff[j])
+    sns.kdeplot(all_diff[k]["median_time"]/365, ax=ax[7], 
+                clip=(0, 6), fill=False, color=colors_diff[j], linestyle=ls_diff[j])
+    sns.kdeplot(all_diff[k]["median_depth"], ax=ax[8], 
+                clip=(0, 1000), fill=False, color=colors_diff[j], linestyle=ls_diff[j],
+                label=f"$K_h = {k} \ m^2 s^{-1}$")
+    j += 1
+
 # Add labels 'A', 'B', ... for each subplot in the top left corner
-labels = ['A', 'B', 'C', 'D', 'E', 'F']
+labels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
 for i, label in enumerate(labels):
     ax[i].text(0.05, 0.95, label, transform=ax[i].transAxes, fontsize=12, fontweight='bold', va='top', ha='left')
 
@@ -136,6 +137,15 @@ ax[4].set_ylabel("Density")
 ax[5].set_xlabel("Median Depth (m)")
 ax[5].set_ylabel("Density")
 
+ax[6].set_xlabel("Counts")
+ax[6].set_ylabel("Density")
+
+ax[7].set_xlabel("Median Particle Age (years)")
+ax[7].set_ylabel("Density")
+ax[8].set_xlabel("Median Depth (m)")
+ax[8].set_ylabel("Density")
+ax[8].legend(fontsize=7, shadow=False)
+
 # set a title
 if Latitude_limit is not None:
     plt.suptitle(f"Particles Crossing {Latitude_limit}°N", fontsize=14)
@@ -143,6 +153,7 @@ elif Longitude_limit is not None:
     plt.suptitle(f"Particles Crossing {abs(Longitude_limit)}°W", fontsize=14)
 plt.tight_layout()
 # save the figure
+
 plt.savefig("../figs/FigS5_Connect_tempNspace" + criterium_string + ".png", dpi=300)
 
 # %% Plot the percentage of subpolar trajectories for Mixture temporal and spatial members

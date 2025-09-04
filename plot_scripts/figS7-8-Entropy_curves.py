@@ -23,7 +23,7 @@ entropies_space_std = {}
 for i, delta_r in enumerate([0.1, 1, 2]):
     _entropy = np.zeros((50, time_length))
     for i, member in enumerate(range(1, 51)):
-        file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_spatial_long/P_dr{delta_r*100:03.0f}_m{member:03d}.nc"
+        file_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_spatial_long/P_dr{delta_r*100:03.0f}_m{member:03d}.nc"
         P_m = xr.open_dataset(file_path)
         
         _entropy[i, :] = P_m['entropy'].values
@@ -42,34 +42,48 @@ entropies_time_std = {}
 for week in week_range:
     _entropy = np.zeros((50, time_length))
     for i, member in enumerate(range(1, 51)):
-        file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_temporal_long/P_W{week:01d}_m{member:03d}.nc"
+        file_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_temporal_long/P_W{week:01d}_m{member:03d}.nc"
         P_m = xr.open_dataset(file_path)
         _entropy[i, :] = P_m['entropy'].values
         
     entropies_time_mean[week] = np.mean(_entropy, axis=0)
     entropies_time_std[week] = np.std(_entropy, axis=0)
 
+# %% Diffusion analysis
+K_h_range = [10, 1000]
+
+entropies_diffusion_mean = {}
+entropies_diffusion_std = {}
+for K_h in K_h_range:
+    _entropy = np.zeros((50, time_length))
+    for i, member in enumerate(range(1, 51)):
+        file_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_diffusion_long/P_diff_Kh_{K_h:01d}_m{member:03d}.nc"
+        P_m = xr.open_dataset(file_path)
+        _entropy[i, :] = P_m['entropy'].values[:2189]
+        
+    entropies_diffusion_mean[K_h] = np.mean(_entropy, axis=0)
+    entropies_diffusion_std[K_h] = np.std(_entropy, axis=0)
 #%% Combined Plots Spatial and Temporal entropy
 
 member_list = range(1, 51)
 ncol = 3
-nrow = 2
+nrow = 3
 fig, axs = plt.subplots(ncols=ncol, nrows=nrow, figsize=(10, 6),
-                        sharey=False, constrained_layout=True)
+                        sharey=True, sharex=True, constrained_layout=True)
 
 axs = axs.reshape(ncol*nrow)
 
 # Plot Spatial entropy
 for i, delta_r in enumerate([0.1, 1, 2]):
     for member in member_list:
-        file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_spatial_long/P_dr{delta_r*100:03.0f}_m{member:03d}.nc"
+        file_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_spatial_long/P_dr{delta_r*100:03.0f}_m{member:03d}.nc"
         P_m = xr.open_dataset(file_path)
         axs[i].plot(t_range_space, P_m['entropy'])
     
     axs[i].plot(t_range_space, entropies_space_mean[delta_r], ls='--', color='black', label='Mean')
     axs[i].grid()
     axs[i].set_title(f'$\delta r$ = {delta_r}$^o$')
-    axs[i].set_xlabel('Time (days)')
+    # axs[i].set_xlabel('Time (days)')
     axs[i].set_xlim(0, 2189)
     axs[i].set_ylim(0, 11)
     
@@ -79,7 +93,7 @@ axs[0].legend()
 # Plot Temporal entropy
 for i, week in enumerate(week_range):
     for member in member_list:
-        file_path = f"/storage/shared/oceanparcels/output_data/data_Claudio/NEMO_Ensemble/analysis/prob_distribution/{location}_temporal_long/P_W{week:01d}_m{member:03d}.nc"
+        file_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_temporal_long/P_W{week:01d}_m{member:03d}.nc"
         P_m = xr.open_dataset(file_path)
         chop_time = len(P_m['time'].values) - week*7
         axs[i + 3].plot(P_m['entropy'][:chop_time])
@@ -88,12 +102,29 @@ for i, week in enumerate(week_range):
     axs[i + 3].grid()
     axs[i + 3].set_title(f'Release span {week} weeks')
     axs[i + 3].set_xlim(0, chop_time)
+
+# Plot Diffusion entropy
+for i, K_h in enumerate(K_h_range):
+    for member in member_list:
+        print(f"Plotting K_h = {K_h}, member {member}")
+        file_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_diffusion_long/P_diff_Kh_{K_h:01d}_m{member:03d}.nc"
+        P_m = xr.open_dataset(file_path)
+        axs[i + 6].plot(t_range_space, P_m['entropy'][:2189])
+    
+    axs[i + 6].plot(t_range_space, entropies_diffusion_mean[K_h], ls='--', color='black', label='Mean')
+    axs[i + 6].grid()
+    axs[i + 6].set_title(f'Diffusion $K_h$ = {K_h} $m^2s^{{-1}}$')
+    axs[i + 6].set_xlabel('Particle Age (days)')
+    axs[i + 6].set_xlim(0, 2189)
+    axs[i + 6].set_ylim(0, 11)
+
     
 axs[3].set_ylabel('Marginal Entropy (bits)')
 axs[4].set_xlabel('Particle Age (days)')
 axs[5].set_xlabel('Particle Age (days)')
 axs[3].set_xlabel('Particle Age (days)')
 axs[3].legend()
+
 
 plt.savefig('../figs/FigS7-Combined-Representation_entropy_all.png', dpi=300)
 

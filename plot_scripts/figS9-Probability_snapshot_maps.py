@@ -14,8 +14,8 @@ import deprecated_hexbin_functions as hexfunc
 # MIXTURE
 location = 'Cape_Hatteras'
 delta_r = 0.1
-subset = 43
-member = 22
+subset = 4
+member = 17
 
 # Define the file path for the NetCDF file containing probability distributions
 file_path = f"/Volumes/Claudio SSD/Ensemble_article_data/analysis/prob_distribution/{location}_all_long/P_dr{delta_r*100:03.0f}_all_s{subset:03d}.nc"
@@ -56,7 +56,7 @@ Latitude_limit = 53
 extent = [-85, -50, 20, 45]
 ncol = 3
 nrow = 7
-fig, axs = plt.subplots(ncols=ncol, nrows=nrow, figsize=(10.6, 8.9),
+fig, axs = plt.subplots(ncols=ncol, nrows=nrow, figsize=(8.9, 8.9),
                         subplot_kw={'projection': cartopy.crs.PlateCarree()},
                         constrained_layout=True,
                         gridspec_kw={'height_ratios': [1, 1, 1, 1, 1, 1, 0.6]})
